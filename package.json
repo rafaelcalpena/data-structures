@@ -17,10 +17,12 @@
     "karma-jasmine": "^1.1.2",
     "karma-typescript": "^3.0.12",
     "karma-typescript-es6-transform": "^1.0.4",
+    "typedoc": "^0.11.1",
     "typescript": "^2.9.1"
   },
   "scripts": {
-    "test": "./node_modules/karma/bin/karma start"
+    "test": "./node_modules/karma/bin/karma start",
+    "typedoc": "./node_modules/typedoc/bin/typedoc --out docs/ --module commonjs"
   },
   "author": "",
   "license": "ISC"
