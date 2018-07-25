@@ -1,12 +1,12 @@
 import _ = require('lodash');
 import { PluginDeclarationProperties, SSetStatePropsPlugins } from './sset.d';
 
-export function updatePlugins(
+export const updatePlugins = (
   action: 'onAdd' | 'onRemove',
   item: any,
   hash: string,
   internalState: SSetStatePropsPlugins,
-): SSetStatePropsPlugins {
+): SSetStatePropsPlugins => {
   const {plugins, state, props} = internalState;
   return _.reduce(Object.keys(plugins), (acc, pluginName) => {
     const listener: (
@@ -27,4 +27,4 @@ export function updatePlugins(
     }
     return acc;
   }, internalState);
-}
+};

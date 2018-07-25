@@ -1,6 +1,6 @@
 import { PointerMap } from '../pointer-map/pointer-map';
 
-const addFactory = (outerMap, errorMsg) => function(k1, k2) {
+const addFactory = (outerMap, errorMsg) => (k1, k2) => {
   if (typeof k1 === 'undefined') {
     return outerMap;
   }
