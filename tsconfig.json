@@ -17,10 +17,10 @@
       "es2017",
       "dom"
     ],
-    "downlevelIteration": true    
+    "downlevelIteration": true
   },
   "files": [
-    "ui/app.ts"
+    "src/index.ts"
   ],
   "paths": {
     "@angular/*": [

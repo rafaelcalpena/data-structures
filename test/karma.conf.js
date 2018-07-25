@@ -23,7 +23,7 @@ module.exports = function (config) {
             reports: ['html', 'lcovonly', 'text-summary'],
 
             // base output directory. If you include %browser% in the path it will be replaced with the karma browser name
-            dir: join('test', 'ui', 'coverage'),
+            dir: join('test', 'src', 'coverage'),
 
             // Combines coverage information from multiple browsers into one report rather than outputting a report
             // for each browser.
@@ -77,7 +77,7 @@ module.exports = function (config) {
                         exclude: '/node_modules'
                     },
                     {
-                        test: /ui\/.+(\.ts|\.js)$/,
+                        test: /src\/.+(\.ts|\.js)$/,
                         exclude: /(node_modules|spec\.ts$|spec.js$)/,
                         loader: 'istanbul-instrumenter-loader',
                         enforce: 'post',
