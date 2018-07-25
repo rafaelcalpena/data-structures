@@ -1,6 +1,6 @@
-import {SSet} from '../sset/sset';
-import { PointerMap } from '../pointer-map/pointer-map';
 import { MultiMap } from '../multi-map/multi-map';
+import { PointerMap } from '../pointer-map/pointer-map';
+import {SSet} from '../sset/sset';
 
 const addPairIfValid = (acc, [key, value]) => {
   const keyHash = SSet.hashOf(key);
@@ -32,11 +32,11 @@ const shouldCollectValue = (hash, keyHashes, inverseHashes) => {
 };
 
 type keyValuePair = [any, any];
-type pairsArrayType = Array<keyValuePair>;
+type pairsArrayType = keyValuePair[];
 
 export class SMap {
 
-  static fromPairs(pairsArray: pairsArrayType) {
+  public static fromPairs(pairsArray: pairsArrayType) {
     /* create hashMap for storing key-value correspondence data */
     const hashMap = PointerMap.fromObject({});
     /* create inverseMap for inverse lookup */
@@ -47,7 +47,7 @@ export class SMap {
     const result = pairsArray.reduce(addPairIfValid, {
       hashMap,
       items,
-      inverseMap
+      inverseMap,
     });
     return new SMap(result);
   }
@@ -55,10 +55,10 @@ export class SMap {
   constructor(private internalState = {
     hashMap: null,
     items: null,
-    inverseMap: null
+    inverseMap: null,
   }) {}
 
-  get(key) {
+  public get(key) {
     const {hashMap} = this.internalState;
     const keyHash = SSet.hashOf(key);
     if (!this.hasHash(keyHash)) {
@@ -67,17 +67,17 @@ export class SMap {
     return hashMap[keyHash];
   }
 
-  has(key) {
+  public has(key) {
     const keyHash = SSet.hashOf(key);
     return this.hasHash(keyHash);
   }
 
-  hasHash(hash) {
+  public hasHash(hash) {
     const {hashMap} = this.internalState;
     return hash in hashMap;
   }
 
-  remove(key) {
+  public remove(key) {
 
     const {items, inverseMap, hashMap} = this.internalState;
 
@@ -113,16 +113,15 @@ export class SMap {
       }
     }
 
-
     return new SMap({
       hashMap: newHashMap,
       items: newItems,
-      inverseMap: newInverseMap
+      inverseMap: newInverseMap,
     });
 
   }
 
-  add(key, value) {
+  public add(key, value) {
     const {hashMap, items} = this.internalState;
 
     if (hashMap.has(SSet.hashOf(key))) {
@@ -132,17 +131,17 @@ export class SMap {
     return this.set(key, value);
   }
 
-  toPairs() {
+  public toPairs() {
     const {hashMap, items} = this.internalState;
     return hashMap.toPairs().map(
       ([keyHash, valueHash]) => [
         items.getByHash(keyHash),
-        items.getByHash(valueHash)
-      ]
+        items.getByHash(valueHash),
+      ],
     );
   }
 
-  set(key, value) {
+  public set(key, value) {
     const {hashMap, items, inverseMap} = this.internalState;
     let newHashMap, newItems, newInverseMap;
 
@@ -180,7 +179,7 @@ export class SMap {
     return new SMap({
       items: newItems,
       hashMap: newHashMap,
-      inverseMap: newInverseMap
+      inverseMap: newInverseMap,
     });
 
   }

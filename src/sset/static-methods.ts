@@ -1,8 +1,8 @@
-import { SSet } from './sset';
-import { SSetPlugins, SSetStaticProps } from './sset.d';
-import { initializePlugins } from './initialize-plugins';
 import _ = require('lodash');
 import * as objectHash from 'object-hash';
+import { initializePlugins } from './initialize-plugins';
+import { SSet } from './sset';
+import { SSetPlugins, SSetStaticProps } from './sset.d';
 
 export const SSetStaticMethods = (curryPlugins?: SSetPlugins) =>  ({
   /** Given an array, create a SSet from it */
@@ -14,13 +14,13 @@ export const SSetStaticMethods = (curryPlugins?: SSetPlugins) =>  ({
       state: array.reduce((acc, value) => {
         return {
           ...acc,
-          [this.hashOf(value)]: value
+          [this.hashOf(value)]: value,
         };
       }, {}),
       props: props ? props : {
-          size: array.length
+          size: array.length,
       },
-      plugins: curryPlugins ? curryPlugins : {}
+      plugins: curryPlugins ? curryPlugins : {},
     };
 
     const pluginNames = Object.keys(curryPlugins || {});
@@ -50,7 +50,7 @@ export const SSetStaticMethods = (curryPlugins?: SSetPlugins) =>  ({
   addPlugins(plugins: SSetPlugins): SSetStaticProps {
     return SSetStaticMethods({
       ...curryPlugins,
-      ...plugins
+      ...plugins,
     });
   },
 
@@ -60,10 +60,10 @@ export const SSetStaticMethods = (curryPlugins?: SSetPlugins) =>  ({
 
   onlyUsePlugins(plugins: SSetPlugins): SSetStaticProps {
     return SSetStaticMethods({
-      ...plugins
+      ...plugins,
     });
   },
 
-  getActivePlugins: () => curryPlugins
+  getActivePlugins: () => curryPlugins,
 
 });

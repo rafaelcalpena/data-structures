@@ -13,14 +13,14 @@ export const initializePlugins = (internalState: SSetStatePropsPlugins, pluginNa
       ...acc,
       [pluginName]: plugins[pluginName].onInit(
           state,
-          props[pluginName]
-        )
+          props[pluginName],
+        ),
       };
 
     return r;
   }, {...props});
   return {
     ...internalState,
-    props: updatedProps
+    props: updatedProps,
   };
 };

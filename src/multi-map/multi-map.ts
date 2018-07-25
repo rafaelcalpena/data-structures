@@ -1,6 +1,6 @@
 import { PointerMap } from '../pointer-map/pointer-map';
 
-const addFactory = (outerMap, errorMsg) => function (k1, k2) {
+const addFactory = (outerMap, errorMsg) => function(k1, k2) {
   if (typeof k1 === 'undefined') {
     return outerMap;
   }
@@ -22,15 +22,15 @@ const addFactory = (outerMap, errorMsg) => function (k1, k2) {
 /** A MultiMap consists of a pointerMap with keys that point to
 other pointerMaps. This allows one-to-many relationships */
 export class MultiMap {
-  static fromPairs(arrayPairs) {
+  public static fromPairs(arrayPairs) {
     const outerMap = PointerMap.fromObject({});
     const state = arrayPairs.reduce((outer, pair) =>
       addFactory(outer,
       (k1, k2) => `Could not create MultiMap: Pairs contain duplicate path '${k1}' -> '${k2}'`)
-      (pair[0], pair[1]), outerMap
+      (pair[0], pair[1]), outerMap,
     );
     return new MultiMap({
-      state
+      state,
     });
   }
 
@@ -40,22 +40,22 @@ export class MultiMap {
 
   }
 
-  add(k1, k2) {
+  public add(k1, k2) {
     return new MultiMap({
       state: addFactory(this.internal.state, (p1, p2) =>
       `Could not add to MultiMap: Path '${p1}' -> '${p2}' already exists`)(
-        k1, k2
-      )
+        k1, k2,
+      ),
     });
   }
 
-  has(k1, k2?) {
+  public has(k1, k2?) {
     return this.internal.state.has(k1) && (
       typeof k2 !== 'undefined' ? this.internal.state.get(k1).has(k2) : true
     );
   }
 
-  from(k1) {
+  public from(k1) {
     const {state: outerMap} = this.internal;
     if (!outerMap.has(k1)) {
       throw new Error(`Could not read from MultiMap: key '${k1}' does not exist`);
@@ -63,14 +63,14 @@ export class MultiMap {
     return outerMap.get(k1);
   }
 
-  remove(k1, k2?) {
+  public remove(k1, k2?) {
     const {state: outerMap} = this.internal;
     if (!outerMap.has(k1)) {
       throw new Error(`Could not remove from MultiMap: key '${k1}' does not exist`);
     }
     if (typeof k2 === 'undefined') {
       return new MultiMap({
-        state: outerMap.remove(k1)
+        state: outerMap.remove(k1),
       });
     }
     const innerMap = outerMap.get(k1);
@@ -85,17 +85,17 @@ export class MultiMap {
       newOuterMap = outerMap.set(k1, newInnerMap);
     }
     return new MultiMap({
-      state: newOuterMap
+      state: newOuterMap,
     });
 
   }
 
-  toObject() {
+  public toObject() {
     const outerMap = this.internal.state.toObject();
     return Object.keys(outerMap).reduce((result, key) => {
       return {
         ...result,
-        [key]: outerMap[key].toObject()
+        [key]: outerMap[key].toObject(),
       };
     }, {});
   }
