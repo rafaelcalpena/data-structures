@@ -210,4 +210,24 @@ describe('PointerMap', () => {
     })
   })
 
+  describe('toPairs', () => {
+    it('should convert to pairs', () => {
+      const initialObj : [string, string][] = [
+        ['a', 'b'],
+        ['c', 'd']
+      ]
+      let pointerMap, result;
+      pointerMap = PointerMap.fromPairs(initialObj)
+      expect(() => {
+        result = pointerMap.toPairs()
+      }).not.toThrow();
+      expect(result).toEqual(initialObj)
+      pointerMap = pointerMap.remove('c');
+      expect(() => {
+        result = pointerMap.toPairs()
+      }).not.toThrow();
+      expect(result).toEqual([['a', 'b']])
+    })
+  })
+
 })

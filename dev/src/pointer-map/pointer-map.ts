@@ -97,4 +97,12 @@ export class PointerMap {
     return {...this.internal.state};
   }
 
+  toPairs() {
+    const {state, items} = this.internal;
+    const keys = Object.keys(state);
+    return keys.map((key) => {
+      return [key, state[key]]
+    })
+  }
+
 }
