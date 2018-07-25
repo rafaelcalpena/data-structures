@@ -11,16 +11,16 @@ export const SSetStaticMethods = (curryPlugins?: SSetPlugins) =>  ({
     array = JSON.parse(JSON.stringify(array));
 
     const internalState = {
+      plugins: curryPlugins ? curryPlugins : {},
+      props: props ? props : {
+          size: array.length,
+      },
       state: array.reduce((acc, value) => {
         return {
           ...acc,
           [this.hashOf(value)]: value,
         };
       }, {}),
-      props: props ? props : {
-          size: array.length,
-      },
-      plugins: curryPlugins ? curryPlugins : {},
     };
 
     const pluginNames = Object.keys(curryPlugins || {});
@@ -30,9 +30,10 @@ export const SSetStaticMethods = (curryPlugins?: SSetPlugins) =>  ({
     return new SSet(newInternalState);
   },
   /** Static method for obtaining default key for a given element and ensuring
-  their uniqueness. By default, uses object-hash sha1 algorithm.
-  If customized, needs to take into account possible collision scenarios and
-  deep-equality checking. */
+   * their uniqueness. By default, uses object-hash sha1 algorithm.
+   * If customized, needs to take into account possible collision scenarios and
+   * deep-equality checking.
+   */
   hashOf(value: any): any {
     /* Use respectType: false to avoid passing prototype, __proto__ and
     constructor properties. */
@@ -46,7 +47,8 @@ export const SSetStaticMethods = (curryPlugins?: SSetPlugins) =>  ({
   },
 
   /** Add a new plugin to the SSet constructor. All sets created with this
-  constructor will contain the provided plugins. */
+   * constructor will contain the provided plugins.
+   */
   addPlugins(plugins: SSetPlugins): SSetStaticProps {
     return SSetStaticMethods({
       ...curryPlugins,

@@ -423,7 +423,7 @@ describe('SSet from array', () => {
         return acc += value;
       }, 0);
       expect(sum).toBe(21);
-      let multiplication = sset.reduce((acc, value) => {
+      let multiplication = sset.reduce((acc, value: number) => {
         return acc * value;
       }, 1);
       expect(multiplication).toBe(720);

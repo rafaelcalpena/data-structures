@@ -17,12 +17,12 @@ export function updatePlugins(
     ) => any = plugins[pluginName][action];
     if (listener) {
       return {
-        state,
+        plugins,
         props: {
           ...acc.props,
           [pluginName]: listener(item, hash, props[pluginName], state),
         },
-        plugins,
+        state,
       };
     }
     return acc;
