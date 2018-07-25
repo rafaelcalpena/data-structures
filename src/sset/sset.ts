@@ -13,34 +13,40 @@ import {
 import { SSetStaticMethods } from './static-methods';
 import { updatePlugins } from './update-plugins';
 
-const getLargestAndSmallestSets = (set1: SSet, set2: SSet): [SSet, SSet] => set1.size() < set2.size() ? [set1, set2] : [set2, set1];
+type largestAndSmallestSets = (a: SSet, b: SSet) => [SSet, SSet];
+const getLargestAndSmallestSets: largestAndSmallestSets = (set1, set2)  => (
+  set1.size() < set2.size() ? [set1, set2] : [set2, set1]
+);
+
 const getOperationReducers = (set1: SSet, set2: SSet, largest: SSet, smallest: SSet) => {
 
-  const lsDifference: [SSet, (SSet, any, boolean) => SSet] =
+  type argsType = (a: SSet, b: any, c: boolean) => SSet;
+  const lsDifference: [SSet, argsType] =
   [ largest,
     (acc: SSet, item: any, largestHasIt: boolean): SSet => largestHasIt ?
     acc.remove(item) : acc,
   ];
-  const slDifference: [SSet, (SSet, any, boolean) => SSet] =
+  const slDifference: [SSet, argsType] =
   [ smallest,
     (acc: SSet, item: any, largestHasIt: boolean): SSet => largestHasIt ?
     acc.remove(item) : acc,
   ];
 
+  type reducer = (acc: SSet, item: any, c: boolean) => SSet;
   const reducers: {
-    union: [SSet, (acc: SSet, item: any, boolean) => SSet],
-    difference: [SSet, (acc: SSet, item: any, boolean) => SSet],
-    oppositeDifference: [SSet, (acc: SSet, item: any, boolean) => SSet],
-    intersection: [SSet, (acc: SSet, item: any, boolean) => SSet],
+    union: [SSet, reducer],
+    difference: [SSet, reducer],
+    oppositeDifference: [SSet, reducer],
+    intersection: [SSet, reducer],
   } = {
-    union: [largest, (acc, item, largestHasIt): SSet => acc.merge(item)],
     /* Difference and oppositeDifference are being calculated respectively as
     largest - smallest and smallest - largest. */
     /* Since order for differences is important,
     swap them if set1 is not largest */
     difference: (set1 === largest) ? lsDifference : slDifference,
-    oppositeDifference: set1 === largest ? slDifference : lsDifference,
     intersection: [smallest, (acc, item, largestHasIt): SSet => largestHasIt ? acc : acc.remove(item)],
+    oppositeDifference: set1 === largest ? slDifference : lsDifference,
+    union: [largest, (acc, item, largestHasIt): SSet => acc.merge(item)],
   };
 
   return reducers;

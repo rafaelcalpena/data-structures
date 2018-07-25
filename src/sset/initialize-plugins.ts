@@ -1,6 +1,7 @@
 import { SSetStatePropsPlugins } from './sset.d';
 
-export const initializePlugins = (internalState: SSetStatePropsPlugins, pluginNames: string[]): SSetStatePropsPlugins => {
+type initializePluginsType = ( a: SSetStatePropsPlugins, b: string[]) => SSetStatePropsPlugins;
+export const initializePlugins: initializePluginsType = (internalState, pluginNames) => {
   /* The following combinations are possible:
   State + plugins
   State + properties

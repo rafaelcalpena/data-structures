@@ -46,16 +46,16 @@ export class SMap {
     /* only add pairs if there are no collisions */
     const result = pairsArray.reduce(addPairIfValid, {
       hashMap,
-      items,
       inverseMap,
+      items,
     });
     return new SMap(result);
   }
 
   constructor(private internalState = {
     hashMap: null,
-    items: null,
     inverseMap: null,
+    items: null,
   }) {}
 
   public get(key) {
@@ -115,8 +115,8 @@ export class SMap {
 
     return new SMap({
       hashMap: newHashMap,
-      items: newItems,
       inverseMap: newInverseMap,
+      items: newItems,
     });
 
   }
@@ -177,9 +177,9 @@ export class SMap {
     }
 
     return new SMap({
-      items: newItems,
       hashMap: newHashMap,
       inverseMap: newInverseMap,
+      items: newItems,
     });
 
   }
