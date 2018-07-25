@@ -118,7 +118,8 @@ export class SSet {
     /* Remove any unsupported values for JSON */
     value = JSON.parse(JSON.stringify(value));
 
-    const hash = SSet.hashOf(value), isNewItem = !(hash in this.statePropsPlugins.state);
+    const hash = SSet.hashOf(value);
+    const isNewItem = !(hash in this.statePropsPlugins.state);
 
     let newInternalState: SSetStatePropsPlugins = {
       plugins: this.statePropsPlugins.plugins,

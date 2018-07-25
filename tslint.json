@@ -5,7 +5,6 @@
     "rules": {
       "quotemark": [
         "single"
-      ],
-      "one-variable-per-declaration": false
+      ]
     }
 }

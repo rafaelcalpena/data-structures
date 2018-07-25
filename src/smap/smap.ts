@@ -88,7 +88,9 @@ export class SMap {
     }
 
     const valueHash = hashMap.get(keyHash);
-    let newItems, newHashMap, newInverseMap;
+    let newItems;
+    let newHashMap;
+    let newInverseMap;
     newItems = items;
 
     /* Removing the key and value hashes from hashMap is straightforward */
@@ -143,7 +145,9 @@ export class SMap {
 
   public set(key, value) {
     const {hashMap, items, inverseMap} = this.internalState;
-    let newHashMap, newItems, newInverseMap;
+    let newHashMap;
+    let newItems;
+    let newInverseMap;
 
     const keyHash = SSet.hashOf(key);
     const valueHash = SSet.hashOf(value);
