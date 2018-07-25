@@ -1,10 +1,9 @@
 {
-  "name": "data-structures",
+  "name": "@labshare/data-structures",
   "namespace": "",
   "main": "./ui/app.ts",
   "version": "0.0.1",
   "description": "",
-  "private": true,
   "contributors": "https://github.com/LabShare/data-structures/graphs/contributors",
   "repository": {
     "type": "git",
