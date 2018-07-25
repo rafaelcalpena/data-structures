@@ -1,6 +1,5 @@
 {
   "name": "@labshare/data-structures",
-  "namespace": "",
   "main": "./ui/app.ts",
   "version": "0.0.1",
   "description": "",
