@@ -9,7 +9,7 @@ const addPairIfValid = (acc, [key, value]) => {
 
   /* Check if keyHash is already taken (collision) */
   if (acc.hashMap.has(keyHash)) {
-    throw new Error(`2 pairs have the same keys: "${key}"`)
+    throw new Error(`2 pairs have the same keys: "${key}"`);
   }
 
   acc.hashMap = acc.hashMap.add(keyHash, valueHash);
@@ -17,20 +17,20 @@ const addPairIfValid = (acc, [key, value]) => {
   acc.items = acc.items.merge(key);
   acc.items = acc.items.merge(value);
   return acc;
-}
+};
 
 const shouldCollectKey = (hash, inverseHashes) => {
   /* Since the key is unique, it can only still be present in the
   inverseHashes, as a value */
   return !(inverseHashes.has(hash));
-}
+};
 const shouldCollectValue = (hash, keyHashes, inverseHashes) => {
   /* The value hash can be present either in the keyHashes or valueHashes */
   return !(
     keyHashes.has(hash) ||
     inverseHashes.has(hash)
-  )
-}
+  );
+};
 
 type keyValuePair = [any, any];
 type pairsArray = Array<keyValuePair>;
@@ -39,17 +39,17 @@ export class SMap {
 
   static fromPairs(pairsArray: pairsArray) {
     /* create hashMap for storing key-value correspondence data */
-    let hashMap = PointerMap.fromObject({});
+    const hashMap = PointerMap.fromObject({});
     /* create inverseMap for inverse lookup */
-    let inverseMap = MultiMap.fromPairs([[]])
+    const inverseMap = MultiMap.fromPairs([[]]);
     /* create SSet to retrieve key and value actual data */
-    let items = SSet.fromArray([]);
+    const items = SSet.fromArray([]);
     /* only add pairs if there are no collisions */
-    let result = pairsArray.reduce(addPairIfValid, {
+    const result = pairsArray.reduce(addPairIfValid, {
       hashMap,
       items,
       inverseMap
-    })
+    });
     return new SMap(result);
   }
 
@@ -61,8 +61,8 @@ export class SMap {
 
   get(key) {
     const {hashMap} = this.internalState;
-    const keyHash = SSet.hashOf(key)
-    if(!this.hasHash(keyHash)) {
+    const keyHash = SSet.hashOf(key);
+    if (!this.hasHash(keyHash)) {
       throw new Error('Item does not exist in SMap');
     }
     return hashMap[keyHash];
@@ -85,7 +85,7 @@ export class SMap {
     const keyHash = SSet.hashOf(key);
 
     if (!hashMap.has(keyHash)) {
-      throw new Error(`Could not remove from SMap: key '${key}' does not exist`)
+      throw new Error(`Could not remove from SMap: key '${key}' does not exist`);
     }
 
     const valueHash = hashMap.get(keyHash);
@@ -101,14 +101,14 @@ export class SMap {
     /* Last, check if removed key and value are being used elsewhere
     Both hashMap and inverseMap have to be checked */
     if (newItems.hasHash(keyHash)) {
-      let keyItem = newItems.getByHash(keyHash);
+      const keyItem = newItems.getByHash(keyHash);
       if (shouldCollectKey(keyHash, newInverseMap) && newItems.has(keyItem)) {
         newItems = newItems.remove(keyItem);
       }
     }
 
     if (newItems.hasHash(valueHash)) {
-      let valueItem = newItems.getByHash(valueHash)
+      const valueItem = newItems.getByHash(valueHash);
       if (shouldCollectValue(valueHash, newHashMap, newInverseMap) && newItems.has(valueItem)) {
         newItems = newItems.remove(valueItem);
       }
@@ -119,7 +119,7 @@ export class SMap {
       hashMap: newHashMap,
       items: newItems,
       inverseMap: newInverseMap
-    })
+    });
 
   }
 
@@ -127,8 +127,8 @@ export class SMap {
     const {hashMap, items} = this.internalState;
 
     if (hashMap.has(SSet.hashOf(key))) {
-      throw new Error(`Could not add to SMap: key '${key}' already exists`)
-    };
+      throw new Error(`Could not add to SMap: key '${key}' already exists`);
+    }
 
     return this.set(key, value);
   }
@@ -140,11 +140,11 @@ export class SMap {
         items.getByHash(keyHash),
         items.getByHash(valueHash)
       ]
-    )
+    );
   }
 
   set(key, value) {
-    let {hashMap, items, inverseMap} = this.internalState;
+    const {hashMap, items, inverseMap} = this.internalState;
     let newHashMap, newItems, newInverseMap;
 
     const keyHash = SSet.hashOf(key);
@@ -155,14 +155,14 @@ export class SMap {
 
     if (alreadyHasKey) {
       previousValueHash = hashMap.get(keyHash);
-      if(valueHash === previousValueHash) {
+      if (valueHash === previousValueHash) {
         return this;
       }
     }
 
     newItems = items.merge(value).merge(key);
     newHashMap = hashMap.set(keyHash, valueHash);
-    newInverseMap = inverseMap.add(valueHash, keyHash)
+    newInverseMap = inverseMap.add(valueHash, keyHash);
     /* if there was a previous value for such key, we must remove that too */
     newInverseMap = (previousValueHash) ?
       newInverseMap.remove(previousValueHash, keyHash) :
@@ -175,14 +175,14 @@ export class SMap {
       (!newInverseMap.has(previousValueHash))
     ) {
       /* TODO: implement removeByHash in SSet */
-      newItems = newItems.remove(items.getByHash(previousValueHash))
+      newItems = newItems.remove(items.getByHash(previousValueHash));
     }
 
     return new SMap({
       items: newItems,
       hashMap: newHashMap,
       inverseMap: newInverseMap
-    })
+    });
 
   }
 

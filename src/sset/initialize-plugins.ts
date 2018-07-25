@@ -1,6 +1,6 @@
-import { SSetStatePropsPlugins } from "./sset.d";
+import { SSetStatePropsPlugins } from './sset.d';
 
-export const initializePlugins = (internalState: SSetStatePropsPlugins, pluginNames: string[]) : SSetStatePropsPlugins => {
+export const initializePlugins = (internalState: SSetStatePropsPlugins, pluginNames: string[]): SSetStatePropsPlugins => {
   /* The following combinations are possible:
   State + plugins
   State + properties
@@ -9,18 +9,18 @@ export const initializePlugins = (internalState: SSetStatePropsPlugins, pluginNa
   provided properties or not. */
   const {plugins, state, props} = internalState;
   const updatedProps = pluginNames.reduce((acc, pluginName) => {
-    let r = {
+    const r = {
       ...acc,
       [pluginName]: plugins[pluginName].onInit(
           state,
           props[pluginName]
         )
-      }
+      };
 
     return r;
   }, {...props});
   return {
     ...internalState,
     props: updatedProps
-  }
-}
+  };
+};

@@ -1,21 +1,21 @@
-import { SSet } from "./sset";
-import { SSetPlugins, SSetStaticProps } from "./sset.d";
-import { initializePlugins } from "./initialize-plugins";
-import _ = require("lodash");
+import { SSet } from './sset';
+import { SSetPlugins, SSetStaticProps } from './sset.d';
+import { initializePlugins } from './initialize-plugins';
+import _ = require('lodash');
 import * as objectHash from 'object-hash';
 
 export const SSetStaticMethods = (curryPlugins?: SSetPlugins) =>  ({
   /** Given an array, create a SSet from it */
-  fromArray(array: any[], props?: any) : SSet {
+  fromArray(array: any[], props?: any): SSet {
     /* Remove any unsupported values for JSON */
     array = JSON.parse(JSON.stringify(array));
 
-    let internalState = {
+    const internalState = {
       state: array.reduce((acc, value) => {
         return {
           ...acc,
           [this.hashOf(value)]: value
-        }
+        };
       }, {}),
       props: props ? props : {
           size: array.length
@@ -25,7 +25,7 @@ export const SSetStaticMethods = (curryPlugins?: SSetPlugins) =>  ({
 
     const pluginNames = Object.keys(curryPlugins || {});
 
-    let newInternalState = initializePlugins(internalState, pluginNames);
+    const newInternalState = initializePlugins(internalState, pluginNames);
 
     return new SSet(newInternalState);
   },
@@ -40,25 +40,25 @@ export const SSetStaticMethods = (curryPlugins?: SSetPlugins) =>  ({
   },
 
   /** Used for recreating a stringified SSet */
-  fromJSON(JSONString: string) : SSet {
+  fromJSON(JSONString: string): SSet {
     const jsonData = JSON.parse(JSONString);
     return SSet.addPlugins(curryPlugins).fromArray(jsonData.state, jsonData.props);
   },
 
   /** Add a new plugin to the SSet constructor. All sets created with this
   constructor will contain the provided plugins. */
-  addPlugins(plugins: SSetPlugins) : SSetStaticProps {
+  addPlugins(plugins: SSetPlugins): SSetStaticProps {
     return SSetStaticMethods({
       ...curryPlugins,
       ...plugins
     });
   },
 
-  removePlugins(plugins: string[]) : SSetStaticProps {
+  removePlugins(plugins: string[]): SSetStaticProps {
     return SSetStaticMethods(_.omit(curryPlugins, plugins));
   },
 
-  onlyUsePlugins(plugins: SSetPlugins) : SSetStaticProps {
+  onlyUsePlugins(plugins: SSetPlugins): SSetStaticProps {
     return SSetStaticMethods({
       ...plugins
     });
@@ -66,4 +66,4 @@ export const SSetStaticMethods = (curryPlugins?: SSetPlugins) =>  ({
 
   getActivePlugins: () => curryPlugins
 
-})
+});

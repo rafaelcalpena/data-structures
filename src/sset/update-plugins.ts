@@ -1,21 +1,21 @@
-import { SSetStatePropsPlugins, PluginDeclarationProperties } from "./sset.d";
-import _ = require("lodash");
+import { SSetStatePropsPlugins, PluginDeclarationProperties } from './sset.d';
+import _ = require('lodash');
 
 export function updatePlugins (
   action: 'onAdd' | 'onRemove',
   item: any,
   hash: string,
   internalState: SSetStatePropsPlugins
-) : SSetStatePropsPlugins {
+): SSetStatePropsPlugins {
   const {plugins, state, props} = internalState;
   return _.reduce(Object.keys(plugins), (acc, pluginName) => {
-    const listener : (
+    const listener: (
       item: any,
       hash: string,
       props: PluginDeclarationProperties,
       state: any
     ) => any = plugins[pluginName][action];
-    if(listener) {
+    if (listener) {
       return {
         state,
         props: {
@@ -23,7 +23,7 @@ export function updatePlugins (
           [pluginName]: listener(item, hash, props[pluginName], state)
         },
         plugins
-      }
+      };
     }
     return acc;
   }, internalState);

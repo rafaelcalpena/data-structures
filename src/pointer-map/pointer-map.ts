@@ -1,7 +1,7 @@
-import _ = require("lodash");
+import _ = require('lodash');
 
-type HashMadeMap = {
-  [s: string] : string
+interface HashMadeMap {
+  [s: string]: string;
 }
 type keyValuePair = [string, string];
 type pairsArray = Array<keyValuePair>;
@@ -19,20 +19,20 @@ export class PointerMap {
 
   static fromPairs(pairs: pairsArray) {
     let size = 0;
-    let state = pairs.reduce((acc, pair) => {
+    const state = pairs.reduce((acc, pair) => {
       size += 1;
-      if (pair[0] in acc){
-        throw new Error(`Could not create PointerMap: Pairs contain duplicate key '${pair[0]}'`)
+      if (pair[0] in acc) {
+        throw new Error(`Could not create PointerMap: Pairs contain duplicate key '${pair[0]}'`);
       }
       acc[pair[0]] = pair[1];
       return acc;
-    }, {})
+    }, {});
     return new PointerMap({
       state,
       props: {
         size
       }
-    })
+    });
   }
 
   constructor(private internal) { }
@@ -48,7 +48,7 @@ export class PointerMap {
 
   add(key, value) {
     if (this.has(key)) {
-      throw new Error(`Could not add to PointerMap: key '${key}' already exists`)
+      throw new Error(`Could not add to PointerMap: key '${key}' already exists`);
     }
     return new PointerMap({
       state: {
@@ -58,7 +58,7 @@ export class PointerMap {
       props: {
         size: this.internal.props.size + 1
       }
-    })
+    });
   }
 
   set(key, value) {
@@ -71,24 +71,24 @@ export class PointerMap {
       props: {
         size: this.internal.props.size + (isOverwrite ? 0 : 1)
       }
-    })
+    });
   }
 
   remove(key) {
     if (!this.has(key)) {
-      throw new Error(`Could not remove from PointerMap: key '${key}' does not exist`)
+      throw new Error(`Could not remove from PointerMap: key '${key}' does not exist`);
     }
     return new PointerMap({
       state: _.omit(this.internal.state, [key]),
       props: {
         size: this.internal.props.size - 1
       }
-    })
+    });
   }
 
   get(key) {
     if (!this.has(key)) {
-      throw new Error(`Could not get from PointerMap: key '${key}' does not exist`)
+      throw new Error(`Could not get from PointerMap: key '${key}' does not exist`);
     }
     return this.internal.state[key];
   }
@@ -101,8 +101,8 @@ export class PointerMap {
     const {state, items} = this.internal;
     const keys = Object.keys(state);
     return keys.map((key) => {
-      return [key, state[key]]
-    })
+      return [key, state[key]];
+    });
   }
 
 }
