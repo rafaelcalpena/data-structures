@@ -1,18 +1,18 @@
 import _ = require('lodash');
 
-interface HashMadeMap {
+interface IHashMadeMap {
   [s: string]: string;
 }
 type keyValuePair = [string, string];
 type pairsArray = keyValuePair[];
 
 export class PointerMap {
-  public static fromObject(obj: HashMadeMap) {
+  public static fromObject(obj: IHashMadeMap) {
     return new PointerMap({
-      state: obj,
       props: {
         size: Object.keys(obj).length,
       },
+      state: obj,
     });
   }
 
@@ -27,10 +27,10 @@ export class PointerMap {
       return acc;
     }, {});
     return new PointerMap({
-      state,
       props: {
         size,
       },
+      state,
     });
   }
 
@@ -50,12 +50,12 @@ export class PointerMap {
       throw new Error(`Could not add to PointerMap: key '${key}' already exists`);
     }
     return new PointerMap({
+      props: {
+        size: this.internal.props.size + 1,
+      },
       state: {
         ...this.internal.state,
         [key]: (typeof value !== 'undefined') ? value : true,
-      },
-      props: {
-        size: this.internal.props.size + 1,
       },
     });
   }
@@ -63,12 +63,12 @@ export class PointerMap {
   public set(key, value) {
     const isOverwrite = this.has(key);
     return new PointerMap({
+      props: {
+        size: this.internal.props.size + (isOverwrite ? 0 : 1),
+      },
       state: {
         ...this.internal.state,
         [key]: value,
-      },
-      props: {
-        size: this.internal.props.size + (isOverwrite ? 0 : 1),
       },
     });
   }
@@ -78,10 +78,10 @@ export class PointerMap {
       throw new Error(`Could not remove from PointerMap: key '${key}' does not exist`);
     }
     return new PointerMap({
-      state: _.omit(this.internal.state, [key]),
       props: {
         size: this.internal.props.size - 1,
       },
+      state: _.omit(this.internal.state, [key]),
     });
   }
 

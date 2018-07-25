@@ -19,8 +19,10 @@ const addFactory = (outerMap, errorMsg) => function(k1, k2) {
   return outerMap;
 };
 
-/** A MultiMap consists of a pointerMap with keys that point to
-other pointerMaps. This allows one-to-many relationships */
+/**
+ * A MultiMap consists of a pointerMap with keys that point to
+ * other pointerMaps. This allows one-to-many relationships
+ */
 export class MultiMap {
   public static fromPairs(arrayPairs) {
     const outerMap = PointerMap.fromObject({});
