@@ -459,6 +459,24 @@ export class SSet {
     return this.intersection(set).isEmpty();
   }
 
+  /** Gets the item for a given hash */
+  getByHash(hash) {
+    let {state} = this.statePropsPlugins
+    if (hash in state){
+      return state[hash];
+    }
+    throw new Error(`No item in the set corresponds to hash '${hash}'`);
+  }
+
+  /**  */
+  hasHash(hash) {
+    let {state} = this.statePropsPlugins
+    if (hash in state) {
+      return true;
+    }
+    return false;
+  }
+
   /* TODO: static fromObjectKeys and fromObjectValues */
 
   /* TODO: add Transfer to and from sets */
@@ -467,5 +485,4 @@ export class SSet {
 
   /* TODO: Compute difference between remote sets */
 
-  /* TODO: Create hasHash method */
 }
