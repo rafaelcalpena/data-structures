@@ -18,7 +18,6 @@
     "test": "karma start ./test/karma.conf.js",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "lint:fix": "tslint --fix -p tsconfig.json -c tslint.json",
-    "coverage": "cross-env NODE_OPTIONS=--max_old_space_size=4096 karma start ./test/karma.conf.js",
     "build": "tsc",
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "semantic-release": "semantic-release",
