@@ -26,7 +26,7 @@ __karma__.loaded = function () {
 };
 
 // Then we find all the tests.
-const context = require.context('../ui', true, /spec$/i);
+const context = require.context('../src', true, /spec$/i);
 // And load the modules.
 context.keys().map(context);
 // Finally, start Karma to run the tests.
