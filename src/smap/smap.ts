@@ -1,5 +1,4 @@
 import {SSet} from '../sset/sset';
-import _ = require('lodash');
 import { PointerMap } from '../pointer-map/pointer-map';
 import { MultiMap } from '../multi-map/multi-map';
 
@@ -33,11 +32,11 @@ const shouldCollectValue = (hash, keyHashes, inverseHashes) => {
 };
 
 type keyValuePair = [any, any];
-type pairsArray = Array<keyValuePair>;
+type pairsArrayType = Array<keyValuePair>;
 
 export class SMap {
 
-  static fromPairs(pairsArray: pairsArray) {
+  static fromPairs(pairsArray: pairsArrayType) {
     /* create hashMap for storing key-value correspondence data */
     const hashMap = PointerMap.fromObject({});
     /* create inverseMap for inverse lookup */

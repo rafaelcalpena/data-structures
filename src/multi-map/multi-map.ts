@@ -24,8 +24,8 @@ other pointerMaps. This allows one-to-many relationships */
 export class MultiMap {
   static fromPairs(arrayPairs) {
     const outerMap = PointerMap.fromObject({});
-    const state = arrayPairs.reduce((outerMap, pair) =>
-      addFactory(outerMap,
+    const state = arrayPairs.reduce((outer, pair) =>
+      addFactory(outer,
       (k1, k2) => `Could not create MultiMap: Pairs contain duplicate path '${k1}' -> '${k2}'`)
       (pair[0], pair[1]), outerMap
     );
@@ -77,7 +77,8 @@ export class MultiMap {
     if (!innerMap.has(k2)) {
       throw new Error(`Could not remove from MultiMap: path '${k1}' -> '${k2}' does not exist`);
     }
-    let newOuterMap, newInnerMap = outerMap.get(k1).remove(k2);
+    const newInnerMap = outerMap.get(k1).remove(k2);
+    let newOuterMap;
     if (newInnerMap.size() === 0) {
       newOuterMap = outerMap.remove(k1);
     } else {

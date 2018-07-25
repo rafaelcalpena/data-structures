@@ -1,5 +1,14 @@
 import _ = require('lodash');
-import { SSetStatePropsPlugins, SSetPlugins, SSetStaticProps, JSONCapable, SSetIterator, SSetDiff, SSetChanges, SSetStatePropsPluginsJSON } from './sset.d';
+import {
+  SSetStatePropsPlugins,
+  SSetPlugins,
+  SSetStaticProps,
+  JSONCapable,
+  SSetIterator,
+  SSetDiff,
+  SSetChanges,
+  SSetStatePropsPluginsJSON
+} from './sset.d';
 import { initializePlugins } from './initialize-plugins';
 import { SSetStaticMethods } from './static-methods';
 import { updatePlugins } from './update-plugins';
@@ -7,8 +16,16 @@ import { updatePlugins } from './update-plugins';
 const getLargestAndSmallestSets = (set1: SSet, set2: SSet): [SSet, SSet] => set1.size() < set2.size() ? [set1, set2] : [set2, set1];
 const getOperationReducers = (set1: SSet, set2: SSet, largest: SSet, smallest: SSet) => {
 
-  const lsDifference: [SSet, (SSet, any, boolean) => SSet] = [largest, (acc: SSet, item: any, largestHasIt: boolean): SSet => largestHasIt ? acc.remove(item) : acc];
-  const slDifference: [SSet, (SSet, any, boolean) => SSet] = [smallest, (acc: SSet, item: any, largestHasIt: boolean): SSet => largestHasIt ? acc.remove(item) : acc];
+  const lsDifference: [SSet, (SSet, any, boolean) => SSet] =
+  [ largest,
+    (acc: SSet, item: any, largestHasIt: boolean): SSet => largestHasIt ?
+    acc.remove(item) : acc
+  ];
+  const slDifference: [SSet, (SSet, any, boolean) => SSet] =
+  [ smallest,
+    (acc: SSet, item: any, largestHasIt: boolean): SSet => largestHasIt ?
+    acc.remove(item) : acc
+  ];
 
   const reducers: {
     union: [SSet, (acc: SSet, item: any, boolean) => SSet],
@@ -382,8 +399,8 @@ export class SSet {
   /** Find first item in the SSet that satisfies such function.
   Returns undefined if no items are a match. */
   find(fn: (JSONCapable) => boolean): any {
-    let result,
-    found = false;
+    let result;
+    const found = false;
     this.forEach((item) => {
       if (!found && fn(item) === true) {
         result = item;
