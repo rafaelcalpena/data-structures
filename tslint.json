@@ -5,6 +5,7 @@
     "rules": {
       "quotemark": [
         "single"
-      ]
+      ],
+      "only-arrow-functions": false
     }
 }
