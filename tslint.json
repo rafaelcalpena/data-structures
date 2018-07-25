@@ -1,5 +1,10 @@
 {
     "extends": [
-        "tslint-angular"
-    ]
+        "tslint:recommended"
+    ],
+    "rules": {
+      "quotemark": [
+        "single"
+      ]
+    }
 }
