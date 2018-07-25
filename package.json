@@ -1,29 +1,55 @@
 {
-  "name": "data-structures",
+  "name": "@labshare/data-structures",
+  "main": "./ui/app.ts",
   "version": "0.0.1",
-  "description": "Data structures",
-  "main": "index.js",
+  "description": "",
+  "contributors": "https://github.com/LabShare/data-structures/graphs/contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LabShare/data-structures.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LabShare/data-structures/issues"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "karma start ./test/karma.conf.js",
+    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "lint:fix": "tslint --fix -p tsconfig.json -c tslint.json",
+    "build": "tsc",
+    "commitmsg": "commitlint -e $GIT_PARAMS",
+    "semantic-release": "semantic-release",
+    "typedoc": "./node_modules/typedoc/bin/typedoc --out docs/ --module commonjs"
+  },
   "dependencies": {
-    "@types/lodash": "^4.14.109",
-    "decimal.js": "^10.0.1",
     "lodash": "^4.17.10",
     "object-hash": "^1.3.0"
   },
   "devDependencies": {
-    "@types/jasmine": "^2.8.8",
+    "@commitlint/cli": "^6.2.0",
+    "@commitlint/config-conventional": "^6.1.3",
+    "@labshare/semantic-release-config": "^1.0.0",
+    "@types/jasmine": "^2.5.54",
+    "@types/lodash": "^4.14.109",
+    "hard-source-webpack-plugin": "^0.10.1",
+    "husky": "^0.14.3",
+    "istanbul-instrumenter-loader": "^3.0.1",
     "jasmine-core": "^3.1.0",
     "karma": "^2.0.2",
     "karma-chrome-launcher": "^2.2.0",
-    "karma-jasmine": "^1.1.2",
-    "karma-typescript": "^3.0.12",
-    "karma-typescript-es6-transform": "^1.0.4",
+    "karma-coverage": "^1.1.1",
+    "karma-coverage-istanbul-reporter": "^2.0.0",
+    "karma-jasmine": "^1.1.0",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-typescript": "^3.0.8",
+    "karma-webpack": "^4.0.0-beta.0",
+    "null-loader": "^0.1.1",
+    "semantic-release": "^15.5.0",
+    "ts-loader": "^4.3.0",
+    "typescript": "^2.7.2",
+    "webpack": "4.10.1",
     "typedoc": "^0.11.1",
-    "typescript": "^2.9.1"
-  },
-  "scripts": {
-    "test": "./node_modules/karma/bin/karma start",
-    "typedoc": "./node_modules/typedoc/bin/typedoc --out docs/ --module commonjs"
-  },
-  "author": "",
-  "license": "ISC"
+    "tslint": "^5.9.1"
+  }
 }

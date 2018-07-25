@@ -1,6 +1,6 @@
 import {SSet} from './sset';
 
-describe('SSet hashing algorithm', () => {
+describe('SSet SHA1 algorithm', () => {
   it ('should use object-hash passthrough algorithm', () => {
     /* string:13:Washington DC => sha1 */
     expect(SSet.hashOf('Washington DC')).toBe('581095ffcf20b97094875fceca31850bf96dfb61');
@@ -423,7 +423,7 @@ describe('SSet from array', () => {
         return acc += value;
       }, 0);
       expect(sum).toBe(21);
-      let multiplication = sset.reduce((acc, value) => {
+      let multiplication = sset.reduce((acc, value: number) => {
         return acc * value;
       }, 1);
       expect(multiplication).toBe(720);
@@ -587,7 +587,7 @@ describe('SSet from array', () => {
   })
 
   describe('plugins', () => {
-    fit('should update plugin properties after adding new value to set', () => {
+    it('should update plugin properties after adding new value to set', () => {
       let plugins = {
         isSizeEven: {
           onInit(state, props) {
@@ -637,7 +637,7 @@ describe('SSet from array', () => {
           }
         }
       };
-      const onRemoveSpy = spyOn(plugins.isSizeEvenV2, 'onRemove');
+      const onRemoveSpy = spyOn(plugins.isSizeEvenV2, 'onRemove').and.callThrough();
 
       let sset = SSet.addPlugins(plugins).fromArray(['a', 'b', 'c', 'd', 'e'])
       expect(sset.$('isSizeEvenV2')).toBeFalsy();
@@ -645,19 +645,19 @@ describe('SSet from array', () => {
       expect(() => sset = sset.remove('e')).not.toThrow();
       expect(plugins.isSizeEvenV2.onRemove).toHaveBeenCalled();
       expect(onRemoveSpy.calls.count()).toBe(1);
-      expect(sset.$('isSizeEven')).toBeTruthy();
+      expect(sset.$('isSizeEvenV2')).toBeTruthy();
 
       expect(() => sset = sset.merge('e')).not.toThrow();
       expect(onRemoveSpy.calls.count()).toBe(1);
-      expect(sset.$('isSizeEven')).toBeFalsy();
+      expect(sset.$('isSizeEvenV2')).toBeFalsy();
 
       expect(() => sset = sset.remove('d')).not.toThrow();
       expect(onRemoveSpy.calls.count()).toBe(2);
-      expect(sset.$('isSizeEven')).toBeTruthy();
+      expect(sset.$('isSizeEvenV2')).toBeTruthy();
 
       expect(() => sset = sset.remove('c')).not.toThrow();
       expect(onRemoveSpy.calls.count()).toBe(3);
-      expect(sset.$('isSizeEven')).toBeFalsy();
+      expect(sset.$('isSizeEvenV2')).toBeFalsy();
     })
 
   })
@@ -778,5 +778,28 @@ describe('SSet from array', () => {
       )).toThrowError('There is no value [object Object] in the set.');
       expect(sset.size()).toEqual(0);
     })
+  })
+
+  it('should contain getByHash method', () => {
+    let sset = SSet.fromArray([
+      'abc'
+    ]);
+    let hashItem;
+    expect(() => hashItem = sset.getByHash(SSet.hashOf('abc'))).not.toThrow();
+    expect(hashItem).toEqual('abc')
+
+    expect(() => sset.getByHash('inexistentHash')).toThrowError(`No item in the set corresponds to hash 'inexistentHash'`)
+  })
+
+  it('contains hasHash method', () => {
+    let sset = SSet.fromArray([
+      'abc'
+    ]);
+    let hasHash;
+    expect(() => hasHash = sset.hasHash(SSet.hashOf('abc'))).not.toThrow();
+    expect(hasHash).toEqual(true)
+    expect(() => hasHash = sset.hasHash('inexistentHash')).not.toThrow();
+    expect(hasHash).toEqual(false);
+
   })
 })
