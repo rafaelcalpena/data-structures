@@ -350,4 +350,45 @@ describe('SMap', () => {
 
   })
 
+  describe('has hash', () => {
+    it('should check whether map has hash', () => {
+      let hash = SSet.hashOf('a');
+      let smap = SMap.fromPairs([['a', 'b'], ['c','d'] ]);
+      let result;
+      expect(() => result = smap.hasHash(hash)).not.toThrow();
+      expect(result).toBeTruthy();
+
+      hash = SSet.hashOf('b');
+      expect(() => result = smap.hasHash(hash)).not.toThrow();
+      expect(result).toBeFalsy();
+
+    })
+  })
+
+  describe('has', () => {
+    it('should check whether map has key', () => {
+      let smap = SMap.fromPairs([['a', 'b'], ['c','d'] ]);
+      let result;
+      expect(() => result = smap.has('a')).not.toThrow();
+      expect(result).toBeTruthy();
+
+      expect(() => result = smap.has('b')).not.toThrow();
+      expect(result).toBeFalsy();
+    })
+  })
+
+  describe('get', () => {
+    it('should get value', () => {
+      let smap, result;
+        smap = SMap.fromPairs([['a', 'b'], ['c','d'] ]);
+      expect(() => result = smap.get('inexistent')).toThrowError(
+        `Could not get from SMap: key 'inexistent' does not exist`
+      )
+      expect(() => result = smap.get('a')).not.toThrow();
+      expect(result).toEqual('b');
+    })
+  })
+
+
+
 });
