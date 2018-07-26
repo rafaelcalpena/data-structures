@@ -52,19 +52,15 @@ export class SMap {
     return new SMap(result);
   }
 
-  constructor(private internalState = {
-    hashMap: null,
-    inverseMap: null,
-    items: null,
-  }) {}
+  constructor(private internalState) {}
 
   public get(key) {
-    const {hashMap} = this.internalState;
+    const {hashMap, items} = this.internalState;
     const keyHash = SSet.hashOf(key);
     if (!this.hasHash(keyHash)) {
-      throw new Error('Item does not exist in SMap');
+      throw new Error(`Could not get from SMap: key '${key}' does not exist`);
     }
-    return hashMap[keyHash];
+    return items.getByHash(hashMap.get(keyHash));
   }
 
   public has(key) {
@@ -74,7 +70,7 @@ export class SMap {
 
   public hasHash(hash) {
     const {hashMap} = this.internalState;
-    return hash in hashMap;
+    return hashMap.has(hash);
   }
 
   public remove(key) {
@@ -101,11 +97,9 @@ export class SMap {
 
     /* Last, check if removed key and value are being used elsewhere
     Both hashMap and inverseMap have to be checked */
-    if (newItems.hasHash(keyHash)) {
-      const keyItem = newItems.getByHash(keyHash);
-      if (shouldCollectKey(keyHash, newInverseMap) && newItems.has(keyItem)) {
-        newItems = newItems.remove(keyItem);
-      }
+    const keyItem = newItems.getByHash(keyHash);
+    if (shouldCollectKey(keyHash, newInverseMap) && newItems.has(keyItem)) {
+      newItems = newItems.remove(keyItem);
     }
 
     if (newItems.hasHash(valueHash)) {
