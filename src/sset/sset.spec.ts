@@ -1,7 +1,7 @@
 import {SSet} from './sset';
 
 describe('SSet SHA1 algorithm', () => {
-  it ('should use object-hash passthrough algorithm', () => {
+  it ('should use object-hash sha1 algorithm', () => {
     /* string:13:Washington DC => sha1 */
     expect(SSet.hashOf('Washington DC')).toBe('581095ffcf20b97094875fceca31850bf96dfb61');
     /* TODO: Remove prototype, __proto and constructor from options */
@@ -583,6 +583,13 @@ describe('SSet from array', () => {
 
       expect(sset.$('a')).toEqual(31);
       expect(sset.$('b')).toBe(5);
+
+      expect(() => sset = sset.addPlugins({
+        a: plugins.a
+      })).toThrowError(`Could not add plugin to SSet: Plugin 'a' is already active`);
+
+      expect(() => sset = sset.addPlugins(plugins)).toThrowError(`Could not add plugins to SSet: Plugins 'a, b' are already active`);
+
     })
   })
 

@@ -271,8 +271,10 @@ export class SSet {
     /* Check whether a plugin is already added to SSet */
     if (!currentPluginsSet.isDisjoint(pluginsSet)) {
       const intersection = pluginsSet.intersection(currentPluginsSet);
-      throw new Error (`Plugin${intersection.size() > 1 ? 's' : ''}
-      ${intersection.toArray().toString()} ${intersection.size() > 1 ? 'are' : 'is'} already active `);
+      let ps = intersection.size() > 1 ? 's' : '';
+      let isAre = intersection.size() > 1 ? 'are' : 'is';
+      throw new Error (`Could not add plugin${ps} to SSet: Plugin${ps}` +
+      ` '${intersection.toArray().join(', ')}' ${isAre} already active`);
     }
 
     /* Merge new plugins into existing */
