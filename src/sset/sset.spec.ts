@@ -16,208 +16,379 @@ describe('SSet', () => {
       )).toBe('8507fcb5f59d94ed76b6c3a571bfac26654d541b')
     })
   })
-})
 
+  describe('from array', () => {
+    it ('should create from array', () => {
+      let sset;
+      expect(() => {
+        sset = SSet.fromArray([]);
+      }).not.toThrow();
+      expect(
+        sset.size()
+      ).toBe(0);
+      expect(() => {
+        sset = SSet.fromArray([
+          'test'
+        ]);
+      }).not.toThrow();
+      expect(
+        sset.size()
+      ).toBe(1);
+      expect(
+        sset.has('test')
+      ).toBeTruthy();
+      expect(
+        sset.has('unset value')
+      ).toBeFalsy();
+    })
 
+    describe('should stringify before creating', () => {
+      const circularObj = {
+        a: { }
+      }
+      circularObj.a = circularObj;
+      it('should not allow circular objects', () => {
+        expect(() => {
+          SSet.fromArray([circularObj]);
+        }).toThrow();
+      })
 
-describe('from array', () => {
-  it ('should allow creation from array', () => {
-    let sset;
-    expect(() => {
-      sset = SSet.fromArray([]);
-    }).not.toThrow();
-    expect(
-      sset.size()
-    ).toBe(0);
-    expect(() => {
-      sset = SSet.fromArray([
-        'test'
-      ]);
-    }).not.toThrow();
-    expect(
-      sset.size()
-    ).toBe(1);
-    expect(
-      sset.has('test')
-    ).toBeTruthy();
-    expect(
-      sset.has('unset value')
-    ).toBeFalsy();
+    })    
+  })
+
+  describe('merge', () => {
+    it('should merge an existing item', () => {
+      let sset = SSet.fromArray([]);
+      sset = sset.add('abc');
+      expect(() => sset = sset.add('abc')).toThrowError();
+      expect(() => sset = sset.merge('abc')).not.toThrowError();
+      expect(sset.size()).toBe(1);
+      sset = sset.merge('def');
+      sset = sset.merge('fgh');
+      expect(sset.size()).toBe(3);
+      sset = sset.merge('fgh');
+      expect(sset.size()).toBe(3);
+    })
+
+    it('should allow merging an array of values', () => {
+      let sset = SSet.fromArray([0, 1, 2]);
+      sset = sset.mergeArray([3, 4, 5]);
+      expect(sset.size()).toEqual(6);
+      expect(sset.has(0)).toBeTruthy();
+      expect(sset.has(1)).toBeTruthy();
+      expect(sset.has(2)).toBeTruthy();
+      expect(sset.has(3)).toBeTruthy();
+      expect(sset.has(4)).toBeTruthy();
+      expect(sset.has(5)).toBeTruthy();
+    })
+
+    it('should allow merging another set', () => {
+      let sset = SSet.fromArray([0, 1, 2]);
+      let sset2 = SSet.fromArray([2, 4, 5]);
+      let sset3;
+      expect(() => sset3 = sset.union(sset2)).not.toThrow();
+      expect(sset3.size()).toEqual(5);
+      expect(sset3.has(5)).toBeTruthy();
+      expect(sset3.has(4)).toBeTruthy();
+      expect(sset3.has(2)).toBeTruthy();
+      expect(sset3.has(0)).toBeTruthy();
+      expect(sset3.has(1)).toBeTruthy();
+    })
+
+    it('should avoid input type set on merge method', () => {
+      let sset = SSet.fromArray([5, 7, 8, 9, 12]),
+      sset2 = SSet.fromArray([1, 2, 3, 4]),
+      sset3;
+      expect(() => sset3 = sset.merge(sset2)).toThrowError('Please use union for merging two sets');
+    })
+  })
+
+  describe('difference', () => {
+
+    it('should allow difference from another set', () => {
+      let sset = SSet.fromArray([5, 7, 8, 9, 12]),
+      sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
+      sset3;
+      expect(() => sset3 = sset.difference(sset2)).not.toThrow();
+      expect(sset3.size()).toBe(3);
+      expect(sset3.has(7)).toBeFalsy();
+      expect(sset3.has(9)).toBeFalsy();
+      expect(sset3.has(5)).toBeTruthy();
+      expect(sset3.has(8)).toBeTruthy();
+      expect(sset3.has(12)).toBeTruthy();
+    })
+
+  })
+
+  describe('isEmpty', () => {
+    it('should contain isEmpty method', () => {
+      let sset = SSet.fromArray([]),
+      isEmpty;
+      expect(() => isEmpty = sset.isEmpty()).not.toThrow();
+      expect(isEmpty).toBeTruthy();
+      expect(() => sset = sset.add(1)).not.toThrow();
+      expect(() => isEmpty = sset.isEmpty()).not.toThrow();
+      expect(isEmpty).toBeFalsy();
+
+      let sset2 = SSet.fromArray([1,2]);
+      expect(() => sset2 = sset2.remove(1)).not.toThrow();
+      expect(() => isEmpty = sset2.isEmpty()).not.toThrow();
+      expect(isEmpty).toBeFalsy();
+      expect(() => sset2 = sset2.remove(2)).not.toThrow();
+      expect(() => isEmpty = sset2.isEmpty()).not.toThrow();
+      expect(isEmpty).toBeTruthy();
+    })
+  })
+
+  describe('isSubset', () => {
+    it('should contain isSubset method', () => {
+      let sset = SSet.fromArray([1, 2, 3, 4]),
+      sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
+      sset3 = SSet.fromArray([36, 89, 94]),
+      isSubset;
+      expect(() => isSubset = sset.isSubset(sset2)).not.toThrow();
+      expect(isSubset).toBeTruthy();
+      expect(() => isSubset = sset2.isSubset(sset)).not.toThrow();
+      expect(isSubset).toBeFalsy();
+      expect(() => isSubset = sset2.isSubset(sset3)).not.toThrow();
+      expect(isSubset).toBeFalsy();
+      expect(() => isSubset = sset.isSubset(sset3)).not.toThrow();
+      expect(isSubset).toBeFalsy();
+      expect(() => isSubset = sset3.isSubset(sset)).not.toThrow();
+      expect(isSubset).toBeFalsy();
+      expect(() => isSubset = sset3.isSubset(sset2)).not.toThrow();
+      expect(isSubset).toBeFalsy();
+    })
+  })
+
+  describe('inSet', () => {
+    it('should contain inSet method alias', () => {
+      let sset = SSet.fromArray([1, 2, 3, 4]),
+      sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
+      sset3 = SSet.fromArray([36, 89, 94]),
+      isSubset;
+      expect(() => isSubset = sset.inSet(sset2)).not.toThrow();
+      expect(isSubset).toBeTruthy();
+      expect(() => isSubset = sset2.inSet(sset)).not.toThrow();
+      expect(isSubset).toBeFalsy();
+      expect(() => isSubset = sset2.inSet(sset3)).not.toThrow();
+      expect(isSubset).toBeFalsy();
+      expect(() => isSubset = sset.inSet(sset3)).not.toThrow();
+      expect(isSubset).toBeFalsy();
+      expect(() => isSubset = sset3.inSet(sset)).not.toThrow();
+      expect(isSubset).toBeFalsy();
+      expect(() => isSubset = sset3.inSet(sset2)).not.toThrow();
+      expect(isSubset).toBeFalsy();
+    })
+  })
+
+  describe('isSuperset', () => {
+    it('should contain isSuperset method', () => {
+      let sset = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
+      sset2 = SSet.fromArray([1, 2, 3, 4]),
+      sset3 = SSet.fromArray([9,6]),
+      sset4 = SSet.fromArray([9, 87]),
+      isSuperset;
+      expect(() => isSuperset = sset.isSuperset(sset2)).not.toThrow();
+      expect(isSuperset).toBeTruthy();
+      expect(() => isSuperset = sset.isSuperset(sset3)).not.toThrow();
+      expect(isSuperset).toBeTruthy();
+      expect(() => isSuperset = sset.isSuperset(sset4)).not.toThrow();
+      expect(isSuperset).toBeFalsy();
+    })
+  })
+
+  describe('hasSet', () => {
+    it('should contain hasSet method alias', () => {
+      let sset = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
+      sset2 = SSet.fromArray([1, 2, 3, 4]),
+      sset3 = SSet.fromArray([9,6]),
+      sset4 = SSet.fromArray([9, 87]),
+      isSuperset;
+      expect(() => isSuperset = sset.hasSet(sset2)).not.toThrow();
+      expect(isSuperset).toBeTruthy();
+      expect(() => isSuperset = sset.hasSet(sset3)).not.toThrow();
+      expect(isSuperset).toBeTruthy();
+      expect(() => isSuperset = sset.hasSet(sset4)).not.toThrow();
+      expect(isSuperset).toBeFalsy();
+    })
+  })
+
+  describe('loops, iterators and iterables', () => {
+    it('should contain forEach method', () => {
+      const arr = [
+        'abc',
+        'def',
+        'ghi',
+        'jkl'
+      ];
+      let sset = SSet.fromArray(arr);
+      sset.forEach(item => {
+        expect(sset.has(item)).toBeTruthy()
+        expect(arr.find((i) => i === item)).toEqual(item);
+        arr.splice(arr.indexOf(item), 1);
+      })
+      expect(arr.length).toBe(0);
+    })
+
+    it('should contain map method', () => {
+      const arr = [1, 2, 3, 4];
+      let sset = SSet.fromArray(arr);
+      const sset2 = sset.map(item => item * 3);
+      expect(sset.size()).toBe(4);
+      expect(sset2.size()).toBe(4);
+
+      expect(sset2.has(1)).toBeFalsy();
+      expect(sset2.has(2)).toBeFalsy();
+      expect(sset2.has(4)).toBeFalsy();
+      expect(sset2.has(3)).toBeTruthy();
+      expect(sset2.has(6)).toBeTruthy();
+      expect(sset2.has(9)).toBeTruthy();
+      expect(sset2.has(12)).toBeTruthy();
+    })
+
+    it('should contain filter method', () => {
+      const arr = ['Walked', 'Talked', 'Faked', 'Made', 'Did'];
+      let sset = SSet.fromArray(arr);
+      let sset2 = sset.filter(word => {
+        return word.match(/ed$/)
+      });
+      expect(sset2.has('Walked')).toBeTruthy();
+      expect(sset2.has('Talked')).toBeTruthy();
+      expect(sset2.has('Faked')).toBeTruthy();
+      expect(sset2.has('Made')).toBeFalsy();
+      expect(sset2.has('Did')).toBeFalsy();
+    })
+
+    it('should contain reduce method', () => {
+      const arr = [1, 2, 3, 4, 5, 6];
+      let sset = SSet.fromArray(arr);
+      let sum = sset.reduce((acc, value) => {
+        return acc += value;
+      }, 0);
+      expect(sum).toBe(21);
+      let multiplication = sset.reduce((acc, value: number) => {
+        return acc * value;
+      }, 1);
+      expect(multiplication).toBe(720);
+    })
+
+    it('should contain every method', () => {
+      const arr = [1, 2, 3, 4];
+      let sset = SSet.fromArray(arr);
+      let isTruthy = sset.every(n => n <= 4);
+      expect(isTruthy).toBeTruthy();
+      let isFalsy = sset.every(n => n >= 8);
+      expect(isFalsy).toBeFalsy();
+
+    })
+
+    it('should contain some method', () => {
+      const arr = [1, 2, 3, 4];
+      let sset = SSet.fromArray(arr);
+      let isTruthy = sset.some(n => n % 3 === 0);
+      expect(isTruthy).toBeTruthy();
+      let isFalsy = sset.some(n => n % 5 === 0);
+      expect(isFalsy).toBeFalsy();
+    })
+
+    it('should contain find method', () => {
+      const arr = [1, 2, 3, 4];
+      let sset = SSet.fromArray(arr);
+      let isThree = sset.find(n => n % 3 === 0);
+      expect(isThree).toBe(3);
+      let isUndefined = sset.find(n => n % 5 === 0);
+      expect(isUndefined).toBeUndefined();
+    });
+
+    it('should contain iterator for "for ... of" loops', () => {
+      let sset = SSet.fromArray([1, 2, 3, 4]);
+      let str = "";
+      for (let item of sset) {
+        str += `${item};`;
+      }
+      expect(str).toBe('2;1;3;4;')
+    })
+  })
+
+  describe('two-set operations', () => {
+
+    describe('equals', () => {
+      it('should contain equals method', () => {
+        let sset = SSet.fromArray([1, 2, 3, 4]),
+        sset2 = SSet.fromArray([5, 6, 7, 8]),
+        equals;
+        expect(() => equals = sset.equals(sset2)).not.toThrow();
+        expect(equals).toBeFalsy();
+        expect(() => equals = sset2.equals(sset)).not.toThrow();
+        expect(equals).toBeFalsy();
+
+        sset2 = SSet.fromArray([1, 2, 3, 4]);
+        expect(() => equals = sset.equals(sset2)).not.toThrow();
+        expect(equals).toBeTruthy();
+        expect(() => equals = sset2.equals(sset)).not.toThrow();
+        expect(equals).toBeTruthy();
+      })
+    })
+
+    it('should allow symmetric difference from another set', () => {
+      let sset = SSet.fromArray([5, 7, 8, 9, 12]),
+      sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
+      sset3;
+      expect(() => sset3 = sset.symmetricDifference(sset2)).not.toThrow();
+      expect(sset3.has(1)).toBeTruthy();
+      expect(sset3.has(2)).toBeTruthy();
+      expect(sset3.has(3)).toBeTruthy();
+      expect(sset3.has(4)).toBeTruthy();
+      expect(sset3.has(5)).toBeTruthy();
+      expect(sset3.has(6)).toBeTruthy();
+      expect(sset3.has(7)).toBeFalsy();
+      expect(sset3.has(8)).toBeTruthy();
+      expect(sset3.has(9)).toBeFalsy();
+      expect(sset3.has(12)).toBeTruthy();
+      expect(sset3.size()).toBe(8);
+    })
+
+    it('should allow intersection with another set', () => {
+      let sset = SSet.fromArray([5, 7, 8, 9, 12]),
+      sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
+      sset3;
+      expect(() => sset3 = sset.intersection(sset2)).not.toThrow();
+      expect(sset3.size()).toBe(2);
+      expect(sset3.has(7)).toBeTruthy();
+      expect(sset3.has(9)).toBeTruthy();
+      expect(sset3.has(5)).toBeFalsy();
+      expect(sset3.has(8)).toBeFalsy();
+      expect(sset3.has(12)).toBeFalsy();
+    })
+
+    it('should contain isDisjoint method', () => {
+      const arr = [1, 2, 3];
+      const arr2 = [4, 5, 6];
+      const arr3 = [3, 5, 6];
+      let sset = SSet.fromArray(arr), sset2 = SSet.fromArray(arr2),
+      isDisjoint;
+      expect(() => isDisjoint = sset.isDisjoint(sset2)).not.toThrow();
+      expect(isDisjoint).toBeTruthy();
+      sset2 = SSet.fromArray(arr3);
+      expect(() => isDisjoint = sset.isDisjoint(sset2)).not.toThrow();
+      expect(isDisjoint).toBeFalsy();
+    })
+  })
+
+  describe('conversions', () => {
+    it('should have toArray method', () => {
+      const sset = SSet.fromArray(['sunday', 'monday', 'tuesday']);
+      const arr = sset.toArray();
+      expect(arr.length).toBe(3);
+      expect(arr).toContain('sunday');
+      expect(arr).toContain('monday');
+      expect(arr).toContain('tuesday');
+    })
   })
 })
 
-describe('merge', () => {
-  it('should allow merging an existing item', () => {
-    let sset = SSet.fromArray([]);
-    sset = sset.add('abc');
-    expect(() => sset = sset.add('abc')).toThrowError();
-    expect(() => sset = sset.merge('abc')).not.toThrowError();
-    expect(sset.size()).toBe(1);
-    sset = sset.merge('def');
-    sset = sset.merge('fgh');
-    expect(sset.size()).toBe(3);
-    sset = sset.merge('fgh');
-    expect(sset.size()).toBe(3);
-  })
-
-  it('should allow merging an array of values', () => {
-    let sset = SSet.fromArray([0, 1, 2]);
-    sset = sset.mergeArray([3, 4, 5]);
-    expect(sset.size()).toEqual(6);
-    expect(sset.has(0)).toBeTruthy();
-    expect(sset.has(1)).toBeTruthy();
-    expect(sset.has(2)).toBeTruthy();
-    expect(sset.has(3)).toBeTruthy();
-    expect(sset.has(4)).toBeTruthy();
-    expect(sset.has(5)).toBeTruthy();
-  })
-
-  it('should allow merging another set', () => {
-    let sset = SSet.fromArray([0, 1, 2]);
-    let sset2 = SSet.fromArray([2, 4, 5]);
-    let sset3;
-    expect(() => sset3 = sset.union(sset2)).not.toThrow();
-    expect(sset3.size()).toEqual(5);
-    expect(sset3.has(5)).toBeTruthy();
-    expect(sset3.has(4)).toBeTruthy();
-    expect(sset3.has(2)).toBeTruthy();
-    expect(sset3.has(0)).toBeTruthy();
-    expect(sset3.has(1)).toBeTruthy();
-  })
-
-  it('should avoid input type set on merge method', () => {
-    let sset = SSet.fromArray([5, 7, 8, 9, 12]),
-    sset2 = SSet.fromArray([1, 2, 3, 4]),
-    sset3;
-    expect(() => sset3 = sset.merge(sset2)).toThrowError('Please use union for merging two sets');
-  })
-})
-describe('difference', () => {
-
-  it('should allow difference from another set', () => {
-    let sset = SSet.fromArray([5, 7, 8, 9, 12]),
-    sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
-    sset3;
-    expect(() => sset3 = sset.difference(sset2)).not.toThrow();
-    expect(sset3.size()).toBe(3);
-    expect(sset3.has(7)).toBeFalsy();
-    expect(sset3.has(9)).toBeFalsy();
-    expect(sset3.has(5)).toBeTruthy();
-    expect(sset3.has(8)).toBeTruthy();
-    expect(sset3.has(12)).toBeTruthy();
-  })
-
-})
-describe('isEmpty', () => {
-
-  it('should contain isEmpty method', () => {
-    let sset = SSet.fromArray([]),
-    isEmpty;
-    expect(() => isEmpty = sset.isEmpty()).not.toThrow();
-    expect(isEmpty).toBeTruthy();
-    expect(() => sset = sset.add(1)).not.toThrow();
-    expect(() => isEmpty = sset.isEmpty()).not.toThrow();
-    expect(isEmpty).toBeFalsy();
-
-    let sset2 = SSet.fromArray([1,2]);
-    expect(() => sset2 = sset2.remove(1)).not.toThrow();
-    expect(() => isEmpty = sset2.isEmpty()).not.toThrow();
-    expect(isEmpty).toBeFalsy();
-    expect(() => sset2 = sset2.remove(2)).not.toThrow();
-    expect(() => isEmpty = sset2.isEmpty()).not.toThrow();
-    expect(isEmpty).toBeTruthy();
-  })
-
-  it('should contain isSubset method', () => {
-    let sset = SSet.fromArray([1, 2, 3, 4]),
-    sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
-    sset3 = SSet.fromArray([36, 89, 94]),
-    isSubset;
-    expect(() => isSubset = sset.isSubset(sset2)).not.toThrow();
-    expect(isSubset).toBeTruthy();
-    expect(() => isSubset = sset2.isSubset(sset)).not.toThrow();
-    expect(isSubset).toBeFalsy();
-    expect(() => isSubset = sset2.isSubset(sset3)).not.toThrow();
-    expect(isSubset).toBeFalsy();
-    expect(() => isSubset = sset.isSubset(sset3)).not.toThrow();
-    expect(isSubset).toBeFalsy();
-    expect(() => isSubset = sset3.isSubset(sset)).not.toThrow();
-    expect(isSubset).toBeFalsy();
-    expect(() => isSubset = sset3.isSubset(sset2)).not.toThrow();
-    expect(isSubset).toBeFalsy();
-  })
-
-  it('should contain inSet method alias', () => {
-    let sset = SSet.fromArray([1, 2, 3, 4]),
-    sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
-    sset3 = SSet.fromArray([36, 89, 94]),
-    isSubset;
-    expect(() => isSubset = sset.inSet(sset2)).not.toThrow();
-    expect(isSubset).toBeTruthy();
-    expect(() => isSubset = sset2.inSet(sset)).not.toThrow();
-    expect(isSubset).toBeFalsy();
-    expect(() => isSubset = sset2.inSet(sset3)).not.toThrow();
-    expect(isSubset).toBeFalsy();
-    expect(() => isSubset = sset.inSet(sset3)).not.toThrow();
-    expect(isSubset).toBeFalsy();
-    expect(() => isSubset = sset3.inSet(sset)).not.toThrow();
-    expect(isSubset).toBeFalsy();
-    expect(() => isSubset = sset3.inSet(sset2)).not.toThrow();
-    expect(isSubset).toBeFalsy();
-  })
-
-  it('should contain isSuperset method', () => {
-    let sset = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
-    sset2 = SSet.fromArray([1, 2, 3, 4]),
-    sset3 = SSet.fromArray([9,6]),
-    sset4 = SSet.fromArray([9, 87]),
-    isSuperset;
-    expect(() => isSuperset = sset.isSuperset(sset2)).not.toThrow();
-    expect(isSuperset).toBeTruthy();
-    expect(() => isSuperset = sset.isSuperset(sset3)).not.toThrow();
-    expect(isSuperset).toBeTruthy();
-    expect(() => isSuperset = sset.isSuperset(sset4)).not.toThrow();
-    expect(isSuperset).toBeFalsy();
-  })
-
-  it('should contain hasSet method alias', () => {
-    let sset = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
-    sset2 = SSet.fromArray([1, 2, 3, 4]),
-    sset3 = SSet.fromArray([9,6]),
-    sset4 = SSet.fromArray([9, 87]),
-    isSuperset;
-    expect(() => isSuperset = sset.hasSet(sset2)).not.toThrow();
-    expect(isSuperset).toBeTruthy();
-    expect(() => isSuperset = sset.hasSet(sset3)).not.toThrow();
-    expect(isSuperset).toBeTruthy();
-    expect(() => isSuperset = sset.hasSet(sset4)).not.toThrow();
-    expect(isSuperset).toBeFalsy();
-  })
-
-  it('should contain iterator for "for ... of" loops', () => {
-    let sset = SSet.fromArray([1, 2, 3, 4]);
-    let str = "";
-    for (let item of sset) {
-      str += `${item};`;
-    }
-    expect(str).toBe('2;1;3;4;')
-  })
-
-  it('should contain equals method', () => {
-    let sset = SSet.fromArray([1, 2, 3, 4]),
-    sset2 = SSet.fromArray([5, 6, 7, 8]),
-    equals;
-    expect(() => equals = sset.equals(sset2)).not.toThrow();
-    expect(equals).toBeFalsy();
-    expect(() => equals = sset2.equals(sset)).not.toThrow();
-    expect(equals).toBeFalsy();
-
-    sset2 = SSet.fromArray([1, 2, 3, 4]);
-    expect(() => equals = sset.equals(sset2)).not.toThrow();
-    expect(equals).toBeTruthy();
-    expect(() => equals = sset2.equals(sset)).not.toThrow();
-    expect(equals).toBeTruthy();
-  })
+describe('diff', () => {
 
   it('should contain changesTo method', () => {
     let sset = SSet.fromArray([1, 2, 3, 4]),
@@ -306,179 +477,21 @@ describe('isEmpty', () => {
     expect(changes.changes.difference.toArray()).toEqual([2, 1, 5, 3, 4]);
   })
 
-  it('should allow symmetric difference from another set', () => {
-    let sset = SSet.fromArray([5, 7, 8, 9, 12]),
-    sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
-    sset3;
-    expect(() => sset3 = sset.symmetricDifference(sset2)).not.toThrow();
-    expect(sset3.has(1)).toBeTruthy();
-    expect(sset3.has(2)).toBeTruthy();
-    expect(sset3.has(3)).toBeTruthy();
-    expect(sset3.has(4)).toBeTruthy();
-    expect(sset3.has(5)).toBeTruthy();
-    expect(sset3.has(6)).toBeTruthy();
-    expect(sset3.has(7)).toBeFalsy();
-    expect(sset3.has(8)).toBeTruthy();
-    expect(sset3.has(9)).toBeFalsy();
-    expect(sset3.has(12)).toBeTruthy();
-    expect(sset3.size()).toBe(8);
-  })
+  it('should have applyChanges and revertChanges methods', () => {
+    let sset = SSet.fromArray([1, 2, 5]),
+    sset2 = SSet.fromArray([1, 2, 3, 4]),
+    sset3,
+    changes;
+    expect(() => changes = sset.changesTo(sset2)).not.toThrow();
+    expect(changes.changes.union.equals(SSet.fromArray([3, 4]))).toBeTruthy()
+    expect(changes.changes.difference.equals(SSet.fromArray([5]))).toBeTruthy()
+    expect(() => sset3 = sset.applyChanges(changes.changes)).not.toThrow();
+    expect(sset3.equals(sset2)).toBeTruthy();
 
-  it('should allow intersection with another set', () => {
-    let sset = SSet.fromArray([5, 7, 8, 9, 12]),
-    sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
-    sset3;
-    expect(() => sset3 = sset.intersection(sset2)).not.toThrow();
-    expect(sset3.size()).toBe(2);
-    expect(sset3.has(7)).toBeTruthy();
-    expect(sset3.has(9)).toBeTruthy();
-    expect(sset3.has(5)).toBeFalsy();
-    expect(sset3.has(8)).toBeFalsy();
-    expect(sset3.has(12)).toBeFalsy();
-  })
+    expect(() => sset3 = sset3.revertChanges(changes.changes)).not.toThrow();
+    expect(sset3.equals(sset)).toBeTruthy();
 
-
-  describe('should stringify before creating', () => {
-    const circularObj = {
-      a: { }
-    }
-    circularObj.a = circularObj;
-    it('should not allow circular objects', () => {
-      expect(() => {
-        SSet.fromArray([circularObj]);
-      }).toThrow();
-    })
-
-  })
-
-  describe('loops and iterators', () => {
-    it('should contain forEach method', () => {
-      const arr = [
-        'abc',
-        'def',
-        'ghi',
-        'jkl'
-      ];
-      let sset = SSet.fromArray(arr);
-      sset.forEach(item => {
-        expect(sset.has(item)).toBeTruthy()
-        expect(arr.find((i) => i === item)).toEqual(item);
-        arr.splice(arr.indexOf(item), 1);
-      })
-      expect(arr.length).toBe(0);
-    })
-
-    it('should contain map method', () => {
-      const arr = [1, 2, 3, 4];
-      let sset = SSet.fromArray(arr);
-      const sset2 = sset.map(item => item * 3);
-      expect(sset.size()).toBe(4);
-      expect(sset2.size()).toBe(4);
-
-      expect(sset2.has(1)).toBeFalsy();
-      expect(sset2.has(2)).toBeFalsy();
-      expect(sset2.has(4)).toBeFalsy();
-      expect(sset2.has(3)).toBeTruthy();
-      expect(sset2.has(6)).toBeTruthy();
-      expect(sset2.has(9)).toBeTruthy();
-      expect(sset2.has(12)).toBeTruthy();
-    })
-
-    it('should contain filter method', () => {
-      const arr = ['Walked', 'Talked', 'Faked', 'Made', 'Did'];
-      let sset = SSet.fromArray(arr);
-      let sset2 = sset.filter(word => {
-        return word.match(/ed$/)
-      });
-      expect(sset2.has('Walked')).toBeTruthy();
-      expect(sset2.has('Talked')).toBeTruthy();
-      expect(sset2.has('Faked')).toBeTruthy();
-      expect(sset2.has('Made')).toBeFalsy();
-      expect(sset2.has('Did')).toBeFalsy();
-    })
-
-    it('should have applyChanges and revertChanges methods', () => {
-      let sset = SSet.fromArray([1, 2, 5]),
-      sset2 = SSet.fromArray([1, 2, 3, 4]),
-      sset3,
-      changes;
-      expect(() => changes = sset.changesTo(sset2)).not.toThrow();
-      expect(changes.changes.union.equals(SSet.fromArray([3, 4]))).toBeTruthy()
-      expect(changes.changes.difference.equals(SSet.fromArray([5]))).toBeTruthy()
-      expect(() => sset3 = sset.applyChanges(changes.changes)).not.toThrow();
-      expect(sset3.equals(sset2)).toBeTruthy();
-
-      expect(() => sset3 = sset3.revertChanges(changes.changes)).not.toThrow();
-      expect(sset3.equals(sset)).toBeTruthy();
-
-      expect(() => sset3 = sset3.revertChanges(changes.changes)).not.toThrow();
-    })
-
-  })
-
-  describe('conversions', () => {
-    it('should have toArray method', () => {
-      const sset = SSet.fromArray(['sunday', 'monday', 'tuesday']);
-      const arr = sset.toArray();
-      expect(arr.length).toBe(3);
-      expect(arr).toContain('sunday');
-      expect(arr).toContain('monday');
-      expect(arr).toContain('tuesday');
-    })
-
-    it('should contain reduce method', () => {
-      const arr = [1, 2, 3, 4, 5, 6];
-      let sset = SSet.fromArray(arr);
-      let sum = sset.reduce((acc, value) => {
-        return acc += value;
-      }, 0);
-      expect(sum).toBe(21);
-      let multiplication = sset.reduce((acc, value: number) => {
-        return acc * value;
-      }, 1);
-      expect(multiplication).toBe(720);
-    })
-
-    it('should contain every method', () => {
-      const arr = [1, 2, 3, 4];
-      let sset = SSet.fromArray(arr);
-      let isTruthy = sset.every(n => n <= 4);
-      expect(isTruthy).toBeTruthy();
-      let isFalsy = sset.every(n => n >= 8);
-      expect(isFalsy).toBeFalsy();
-
-    })
-
-    it('should contain some method', () => {
-      const arr = [1, 2, 3, 4];
-      let sset = SSet.fromArray(arr);
-      let isTruthy = sset.some(n => n % 3 === 0);
-      expect(isTruthy).toBeTruthy();
-      let isFalsy = sset.some(n => n % 5 === 0);
-      expect(isFalsy).toBeFalsy();
-    })
-
-    it('should contain find method', () => {
-      const arr = [1, 2, 3, 4];
-      let sset = SSet.fromArray(arr);
-      let isThree = sset.find(n => n % 3 === 0);
-      expect(isThree).toBe(3);
-      let isUndefined = sset.find(n => n % 5 === 0);
-      expect(isUndefined).toBeUndefined();
-    });
-
-    it('should contain isDisjoint method', () => {
-      const arr = [1, 2, 3];
-      const arr2 = [4, 5, 6];
-      const arr3 = [3, 5, 6];
-      let sset = SSet.fromArray(arr), sset2 = SSet.fromArray(arr2),
-      isDisjoint;
-      expect(() => isDisjoint = sset.isDisjoint(sset2)).not.toThrow();
-      expect(isDisjoint).toBeTruthy();
-      sset2 = SSet.fromArray(arr3);
-      expect(() => isDisjoint = sset.isDisjoint(sset2)).not.toThrow();
-      expect(isDisjoint).toBeFalsy();
-    })
+    expect(() => sset3 = sset3.revertChanges(changes.changes)).not.toThrow();
   })
 
   describe('extensions', () => {
