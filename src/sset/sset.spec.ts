@@ -1,23 +1,26 @@
 import {SSet} from './sset';
 
-describe('SSet SHA1 algorithm', () => {
-  it ('should use object-hash sha1 algorithm', () => {
-    /* string:13:Washington DC => sha1 */
-    expect(SSet.hashOf('Washington DC')).toBe('581095ffcf20b97094875fceca31850bf96dfb61');
-    /* TODO: Remove prototype, __proto and constructor from options */
-    /* object:3:string:4:city:string:11:Santo Andre,string:7:country:string:6:Brazil,string:5:state:string:9:Sao Paulo, => sha1 */
-    expect(SSet.hashOf(
-      {
-        city: 'Santo Andre',
-        state: 'Sao Paulo',
-        country: 'Brazil'
-      }
-    )).toBe('8507fcb5f59d94ed76b6c3a571bfac26654d541b')
+describe('SSet', () => {
+  describe('SHA1 algorithm', () => {
+    it ('should use object-hash sha1 algorithm', () => {
+      /* string:13:Washington DC => sha1 */
+      expect(SSet.hashOf('Washington DC')).toBe('581095ffcf20b97094875fceca31850bf96dfb61');
+      /* TODO: Remove prototype, __proto and constructor from options */
+      /* object:3:string:4:city:string:11:Santo Andre,string:7:country:string:6:Brazil,string:5:state:string:9:Sao Paulo, => sha1 */
+      expect(SSet.hashOf(
+        {
+          city: 'Santo Andre',
+          state: 'Sao Paulo',
+          country: 'Brazil'
+        }
+      )).toBe('8507fcb5f59d94ed76b6c3a571bfac26654d541b')
+    })
   })
 })
 
 
-describe('SSet from array', () => {
+
+describe('from array', () => {
   it ('should allow creation from array', () => {
     let sset;
     expect(() => {
@@ -41,7 +44,9 @@ describe('SSet from array', () => {
       sset.has('unset value')
     ).toBeFalsy();
   })
+})
 
+describe('merge', () => {
   it('should allow merging an existing item', () => {
     let sset = SSet.fromArray([]);
     sset = sset.add('abc');
@@ -80,6 +85,15 @@ describe('SSet from array', () => {
     expect(sset3.has(1)).toBeTruthy();
   })
 
+  it('should avoid input type set on merge method', () => {
+    let sset = SSet.fromArray([5, 7, 8, 9, 12]),
+    sset2 = SSet.fromArray([1, 2, 3, 4]),
+    sset3;
+    expect(() => sset3 = sset.merge(sset2)).toThrowError('Please use union for merging two sets');
+  })
+})
+describe('difference', () => {
+
   it('should allow difference from another set', () => {
     let sset = SSet.fromArray([5, 7, 8, 9, 12]),
     sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
@@ -93,12 +107,8 @@ describe('SSet from array', () => {
     expect(sset3.has(12)).toBeTruthy();
   })
 
-  it('should avoid input type set on merge method', () => {
-    let sset = SSet.fromArray([5, 7, 8, 9, 12]),
-    sset2 = SSet.fromArray([1, 2, 3, 4]),
-    sset3;
-    expect(() => sset3 = sset.merge(sset2)).toThrowError('Please use union for merging two sets');
-  })
+})
+describe('isEmpty', () => {
 
   it('should contain isEmpty method', () => {
     let sset = SSet.fromArray([]),
