@@ -513,124 +513,127 @@ describe('SSet', () => {
   })
 
   describe('plugins/extensions', () => {
-    it('should allow extensions/plugins to be passed before instantiation', () => {
-      let ssetConstructor, activePlugins, sset;
-      const plugins = {
-        a: {
-          onAdd: (state, props) => {
-            return props + 3;
+    describe('before SSet creation', () => {
+      it('should allow creation', () => {
+        let ssetConstructor, activePlugins, sset;
+        const plugins = {
+          a: {
+            onAdd: (state, props) => {
+              return props + 3;
+            },
+            onInit: jasmine.createSpy('a.onInit').and.returnValue(15),
+            onDestroy: jasmine.createSpy('a.onDestroy'),
+            onRemove: jasmine.createSpy('a.onRemove'),
+            API: (state, props) => {
+              return props * 2 + 1;
+            }
           },
-          onInit: jasmine.createSpy('a.onInit').and.returnValue(15),
-          onDestroy: jasmine.createSpy('a.onDestroy'),
-          onRemove: jasmine.createSpy('a.onRemove'),
-          API: (state, props) => {
-            return props * 2 + 1;
+          b: {
+            onAdd: jasmine.createSpy('b.onAdd'),
+            onInit: jasmine.createSpy('b.onInit'),
+            onDestroy: jasmine.createSpy('b.onDestroy'),
+            onRemove: jasmine.createSpy('b.onRemove'),
+            API: (state, props) => {
+              return props;
+            }
           }
-        },
-        b: {
-          onAdd: jasmine.createSpy('b.onAdd'),
-          onInit: jasmine.createSpy('b.onInit'),
-          onDestroy: jasmine.createSpy('b.onDestroy'),
-          onRemove: jasmine.createSpy('b.onRemove'),
-          API: (state, props) => {
-            return props;
-          }
-        }
-      };
-      spyOn(plugins.a, 'onAdd');
+        };
+        spyOn(plugins.a, 'onAdd');
 
-      expect(() => ssetConstructor = SSet.addPlugins(plugins)).not.toThrow();
-      expect(() => activePlugins = ssetConstructor.getActivePlugins()).not.toThrow();
-      expect(activePlugins).toEqual(plugins);
+        expect(() => ssetConstructor = SSet.addPlugins(plugins)).not.toThrow();
+        expect(() => activePlugins = ssetConstructor.getActivePlugins()).not.toThrow();
+        expect(activePlugins).toEqual(plugins);
 
-      expect(plugins.a.onAdd).not.toHaveBeenCalled();
-      expect(plugins.a.onInit).not.toHaveBeenCalled();
-      expect(plugins.a.onDestroy).not.toHaveBeenCalled();
-      expect(plugins.a.onRemove).not.toHaveBeenCalled();
-      expect(plugins.b.onAdd).not.toHaveBeenCalled();
-      expect(plugins.b.onInit).not.toHaveBeenCalled();
-      expect(plugins.b.onDestroy).not.toHaveBeenCalled();
-      expect(plugins.b.onRemove).not.toHaveBeenCalled();
+        expect(plugins.a.onAdd).not.toHaveBeenCalled();
+        expect(plugins.a.onInit).not.toHaveBeenCalled();
+        expect(plugins.a.onDestroy).not.toHaveBeenCalled();
+        expect(plugins.a.onRemove).not.toHaveBeenCalled();
+        expect(plugins.b.onAdd).not.toHaveBeenCalled();
+        expect(plugins.b.onInit).not.toHaveBeenCalled();
+        expect(plugins.b.onDestroy).not.toHaveBeenCalled();
+        expect(plugins.b.onRemove).not.toHaveBeenCalled();
 
-      /* onInit tests */
-      expect(() => sset = ssetConstructor.fromArray([
-        'abc', 'def', 'ghi'
-      ], {b: 'computedBProperty'})).not.toThrow();
-      expect(plugins.a.onInit).toHaveBeenCalledWith({
-        '1c457260fe516c5ae59798a03f8382a9ba7657d4': 'abc',
-        'ee916c381d09bae42f91773535f9b0b52a929cde': 'def',
-        '83f89ad3d2cfac295ebbb8403ca9125c662193fc': 'ghi'
-      }, undefined);
-      expect(plugins.b.onInit).toHaveBeenCalledWith({
-        '1c457260fe516c5ae59798a03f8382a9ba7657d4': 'abc',
-        'ee916c381d09bae42f91773535f9b0b52a929cde': 'def',
-        '83f89ad3d2cfac295ebbb8403ca9125c662193fc': 'ghi'
-      }, 'computedBProperty');
+        /* onInit tests */
+        expect(() => sset = ssetConstructor.fromArray([
+          'abc', 'def', 'ghi'
+        ], {b: 'computedBProperty'})).not.toThrow();
+        expect(plugins.a.onInit).toHaveBeenCalledWith({
+          '1c457260fe516c5ae59798a03f8382a9ba7657d4': 'abc',
+          'ee916c381d09bae42f91773535f9b0b52a929cde': 'def',
+          '83f89ad3d2cfac295ebbb8403ca9125c662193fc': 'ghi'
+        }, undefined);
+        expect(plugins.b.onInit).toHaveBeenCalledWith({
+          '1c457260fe516c5ae59798a03f8382a9ba7657d4': 'abc',
+          'ee916c381d09bae42f91773535f9b0b52a929cde': 'def',
+          '83f89ad3d2cfac295ebbb8403ca9125c662193fc': 'ghi'
+        }, 'computedBProperty');
 
-      expect(sset.$('a')).toEqual(31);
-      expect(sset.$('b')).toBeUndefined();
+        expect(sset.$('a')).toEqual(31);
+        expect(sset.$('b')).toBeUndefined();
+      })
     })
+    describe('after SSet creation', () => {
+      it('should allow creation', () => {
+        let sset = SSet.fromArray([
+          'America',
+          'Europe',
+          'Asia',
+          'Africa',
+          'Oceania'
+        ], {
+          a: true
+        });
 
-    it('should allow extensions/plugins to be passed after instantiation', () => {
-      let sset = SSet.fromArray([
-        'America',
-        'Europe',
-        'Asia',
-        'Africa',
-        'Oceania'
-      ], {
-        a: true
-      });
-
-      const plugins = {
-        a: {
-          onAdd: (state, props) => {
-            return props + 3;
+        const plugins = {
+          a: {
+            onAdd: (state, props) => {
+              return props + 3;
+            },
+            onInit: jasmine.createSpy('a.onInit').and.returnValue(15),
+            onDestroy: jasmine.createSpy('a.onDestroy'),
+            onRemove: jasmine.createSpy('a.onRemove'),
+            API: (state, props) => {
+              return props * 2 + 1;
+            }
           },
-          onInit: jasmine.createSpy('a.onInit').and.returnValue(15),
-          onDestroy: jasmine.createSpy('a.onDestroy'),
-          onRemove: jasmine.createSpy('a.onRemove'),
-          API: (state, props) => {
-            return props * 2 + 1;
+          b: {
+            onAdd: jasmine.createSpy('b.onAdd'),
+            onInit: jasmine.createSpy('b.onInit'),
+            onDestroy: jasmine.createSpy('b.onDestroy'),
+            onRemove: jasmine.createSpy('b.onRemove'),
+            API: (state, props) => {
+              return Object.keys(state).length;
+            }
           }
-        },
-        b: {
-          onAdd: jasmine.createSpy('b.onAdd'),
-          onInit: jasmine.createSpy('b.onInit'),
-          onDestroy: jasmine.createSpy('b.onDestroy'),
-          onRemove: jasmine.createSpy('b.onRemove'),
-          API: (state, props) => {
-            return Object.keys(state).length;
-          }
-        }
-      };
+        };
 
-      expect(() => sset = sset.addPlugins(plugins)).not.toThrow();
+        expect(() => sset = sset.addPlugins(plugins)).not.toThrow();
 
-      expect(plugins.a.onInit).toHaveBeenCalledWith({
-        '28ba27e2192cf9ea56629ab6610392cc6941a36f': 'America',
-        'b9e3f2ce2a69c0c200a58effe7b23b4caa085e7a': 'Europe',
-        'dd3a8655b118b23c10df756af1b735df68715c41': 'Asia',
-        '78fe0947ceb136858278dd9f3298bdbdc3f98f59': 'Africa',
-        '6fa8cc138b46125ef27166d54afab767ad71e5c9': 'Oceania'
-      }, true);
-      expect(plugins.b.onInit).toHaveBeenCalledWith({
-        '28ba27e2192cf9ea56629ab6610392cc6941a36f': 'America',
-        'b9e3f2ce2a69c0c200a58effe7b23b4caa085e7a': 'Europe',
-        'dd3a8655b118b23c10df756af1b735df68715c41': 'Asia',
-        '78fe0947ceb136858278dd9f3298bdbdc3f98f59': 'Africa',
-        '6fa8cc138b46125ef27166d54afab767ad71e5c9': 'Oceania'
-      }, undefined);
+        expect(plugins.a.onInit).toHaveBeenCalledWith({
+          '28ba27e2192cf9ea56629ab6610392cc6941a36f': 'America',
+          'b9e3f2ce2a69c0c200a58effe7b23b4caa085e7a': 'Europe',
+          'dd3a8655b118b23c10df756af1b735df68715c41': 'Asia',
+          '78fe0947ceb136858278dd9f3298bdbdc3f98f59': 'Africa',
+          '6fa8cc138b46125ef27166d54afab767ad71e5c9': 'Oceania'
+        }, true);
+        expect(plugins.b.onInit).toHaveBeenCalledWith({
+          '28ba27e2192cf9ea56629ab6610392cc6941a36f': 'America',
+          'b9e3f2ce2a69c0c200a58effe7b23b4caa085e7a': 'Europe',
+          'dd3a8655b118b23c10df756af1b735df68715c41': 'Asia',
+          '78fe0947ceb136858278dd9f3298bdbdc3f98f59': 'Africa',
+          '6fa8cc138b46125ef27166d54afab767ad71e5c9': 'Oceania'
+        }, undefined);
 
-      expect(sset.$('a')).toEqual(31);
-      expect(sset.$('b')).toBe(5);
+        expect(sset.$('a')).toEqual(31);
+        expect(sset.$('b')).toBe(5);
 
-      expect(() => sset = sset.addPlugins({
-        a: plugins.a
-      })).toThrowError(`Could not add plugin to SSet: Plugin 'a' is already active`);
+        expect(() => sset = sset.addPlugins({
+          a: plugins.a
+        })).toThrowError(`Could not add plugin to SSet: Plugin 'a' is already active`);
 
-      expect(() => sset = sset.addPlugins(plugins)).toThrowError(`Could not add plugins to SSet: Plugins 'a, b' are already active`);
+        expect(() => sset = sset.addPlugins(plugins)).toThrowError(`Could not add plugins to SSet: Plugins 'a, b' are already active`);
 
+      })
     })
 
     it('should update plugin properties after adding new value to set', () => {
