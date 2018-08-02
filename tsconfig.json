@@ -17,7 +17,8 @@
       "es2017",
       "dom"
     ],
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "sourceMap": true
   },
   "files": [
     "src/index.ts"
