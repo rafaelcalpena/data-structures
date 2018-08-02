@@ -42,7 +42,7 @@ describe('SSet', () => {
       ).toBeFalsy();
     })
 
-    describe('should stringify before creating', () => {
+    describe('stringify before creating', () => {
       const circularObj = {
         a: { }
       }
