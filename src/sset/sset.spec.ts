@@ -56,23 +56,6 @@ describe('SSet', () => {
     })
   })
 
-  describe('difference', () => {
-
-    it('should allow difference from another set', () => {
-      let sset = SSet.fromArray([5, 7, 8, 9, 12]),
-      sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
-      sset3;
-      expect(() => sset3 = sset.difference(sset2)).not.toThrow();
-      expect(sset3.size()).toBe(3);
-      expect(sset3.has(7)).toBeFalsy();
-      expect(sset3.has(9)).toBeFalsy();
-      expect(sset3.has(5)).toBeTruthy();
-      expect(sset3.has(8)).toBeTruthy();
-      expect(sset3.has(12)).toBeTruthy();
-    })
-
-  })
-
   describe('isEmpty', () => {
     it('should contain isEmpty method', () => {
       let sset = SSet.fromArray([]),
@@ -427,6 +410,23 @@ describe('SSet', () => {
       })
     })
 
+    describe('difference', () => {
+
+      it('should allow difference from another set', () => {
+        let sset = SSet.fromArray([5, 7, 8, 9, 12]),
+        sset2 = SSet.fromArray([1, 2, 3, 4, 9, 6, 7]),
+        sset3;
+        expect(() => sset3 = sset.difference(sset2)).not.toThrow();
+        expect(sset3.size()).toBe(3);
+        expect(sset3.has(7)).toBeFalsy();
+        expect(sset3.has(9)).toBeFalsy();
+        expect(sset3.has(5)).toBeTruthy();
+        expect(sset3.has(8)).toBeTruthy();
+        expect(sset3.has(12)).toBeTruthy();
+      })
+
+    })
+
     describe('symmetricDifference', () => {
       it('should allow symmetric difference from another set', () => {
         let sset = SSet.fromArray([5, 7, 8, 9, 12]),
@@ -514,7 +514,7 @@ describe('SSet', () => {
 
   describe('plugins/extensions', () => {
     describe('before SSet creation', () => {
-      it('should allow creation', () => {
+      it('should allow plugin creation and removal', () => {
         let ssetConstructor, activePlugins, sset;
         const plugins = {
           a: {
@@ -542,7 +542,7 @@ describe('SSet', () => {
 
         expect(() => ssetConstructor = SSet.addPlugins(plugins)).not.toThrow();
         expect(() => activePlugins = ssetConstructor.getActivePlugins()).not.toThrow();
-        expect(activePlugins).toEqual(plugins);
+        expect(activePlugins).toEqual(['a', 'b']);
 
         expect(plugins.a.onAdd).not.toHaveBeenCalled();
         expect(plugins.a.onInit).not.toHaveBeenCalled();
@@ -570,6 +570,173 @@ describe('SSet', () => {
 
         expect(sset.$('a')).toEqual(31);
         expect(sset.$('b')).toBeUndefined();
+
+        /* Remove plugins 'a' and 'b'*/
+        expect(() => sset = sset.removePlugins(['a'])).not.toThrow();
+        expect(plugins.a.onDestroy).toHaveBeenCalled();
+        expect(plugins.b.onDestroy).not.toHaveBeenCalled();
+        expect(sset).toBeDefined();
+        expect(sset.getActivePlugins()).toEqual([
+          'b'
+        ])
+        expect(() => sset = sset.removePlugins(['a'])).toThrowError(
+          `Could not remove plugin from SSet: Plugin 'a' does not exist in this SSet`
+        );
+
+        expect(() => sset = sset.removePlugins(['b'])).not.toThrow();
+        expect(plugins.b.onDestroy).toHaveBeenCalled();
+        expect(sset).toBeDefined();
+        expect(sset.getActivePlugins()).toEqual([])
+
+
+      })
+
+      it('should remove plugin from SSet factory', () => {
+        const plugins = {
+          a: {
+            onAdd: jasmine.createSpy('a.onAdd'),
+            onInit: jasmine.createSpy('a.onInit').and.returnValue(15),
+            onDestroy: jasmine.createSpy('a.onDestroy'),
+            onRemove: jasmine.createSpy('a.onRemove'),
+            API: (state, props) => {
+              return props * 2 + 1;
+            }
+          },
+          b: {
+            onAdd: jasmine.createSpy('b.onAdd'),
+            onInit: jasmine.createSpy('b.onInit'),
+            onDestroy: jasmine.createSpy('b.onDestroy'),
+            onRemove: jasmine.createSpy('b.onRemove'),
+            API: (state, props) => {
+              return props;
+            }
+          },
+          c: {
+            onAdd: jasmine.createSpy('c.onAdd'),
+            onInit: jasmine.createSpy('c.onInit'),
+            onDestroy: jasmine.createSpy('c.onDestroy'),
+            onRemove: jasmine.createSpy('c.onRemove'),
+            API: (state, props) => {
+              return props;
+            }
+          }
+        };
+        let ssetConstructor, activePlugins, sset;
+        expect(() => ssetConstructor = SSet.addPlugins(plugins)).not.toThrow();
+        expect(() => activePlugins = ssetConstructor.getActivePlugins()).not.toThrow();
+        expect(activePlugins).toEqual(['a', 'b', 'c']);
+        expect(() => ssetConstructor = ssetConstructor.removePlugins(['a'])).not.toThrow();
+        expect(() => activePlugins = ssetConstructor.getActivePlugins()).not.toThrow();
+        expect(activePlugins).toEqual(['b', 'c']);
+        expect(() => sset = ssetConstructor.fromArray([
+          'm', 'n', 'o'
+        ])).not.toThrow();
+        expect(sset.size()).toEqual(3)
+        expect(plugins.a.onAdd).not.toHaveBeenCalled();
+        expect(plugins.b.onAdd).not.toHaveBeenCalled();
+        expect(plugins.c.onAdd).not.toHaveBeenCalled();
+        expect(plugins.a.onRemove).not.toHaveBeenCalled();
+        expect(plugins.b.onRemove).not.toHaveBeenCalled();
+        expect(plugins.c.onRemove).not.toHaveBeenCalled();
+        expect(plugins.a.onInit).not.toHaveBeenCalled();
+        expect(plugins.b.onInit).toHaveBeenCalled();
+        expect(plugins.c.onInit).toHaveBeenCalled();
+
+        plugins.a.onAdd.calls.reset();
+        plugins.a.onInit.calls.reset();
+        plugins.a.onRemove.calls.reset();
+        plugins.a.onDestroy.calls.reset();
+        plugins.b.onAdd.calls.reset();
+        plugins.b.onInit.calls.reset();
+        plugins.b.onRemove.calls.reset();
+        plugins.b.onDestroy.calls.reset();
+        plugins.c.onAdd.calls.reset();
+        plugins.c.onInit.calls.reset();
+        plugins.c.onRemove.calls.reset();
+        plugins.c.onDestroy.calls.reset();
+
+        expect(
+          () => ssetConstructor = ssetConstructor.filterPlugins(['b'])
+        ).not.toThrow();
+        expect(() => activePlugins = ssetConstructor.getActivePlugins()).not.toThrow();
+        expect(activePlugins).toEqual(['b']);
+        expect(
+          () => sset = ssetConstructor.fromArray([
+            'm', 'n', 'o'
+          ])
+        ).not.toThrow();
+        expect(sset.size()).toEqual(3)
+
+      })
+
+      it('should only use specified plugins', () => {
+        const plugins = {
+          a: {
+            onAdd: jasmine.createSpy('a.onAdd'),
+            onInit: jasmine.createSpy('a.onInit').and.returnValue(15),
+            onDestroy: jasmine.createSpy('a.onDestroy'),
+            onRemove: jasmine.createSpy('a.onRemove'),
+            API: (state, props) => {
+              return props * 2 + 1;
+            }
+          },
+          b: {
+            onAdd: jasmine.createSpy('b.onAdd'),
+            onInit: jasmine.createSpy('b.onInit'),
+            onDestroy: jasmine.createSpy('b.onDestroy'),
+            onRemove: jasmine.createSpy('b.onRemove'),
+            API: (state, props) => {
+              return props;
+            }
+          }
+        };
+        let sset;
+        expect(() => sset = SSet.addPlugins(plugins).fromArray([
+          'm', 'n', 'o'
+        ])).not.toThrow()
+        expect(() => sset = sset.add('p')).not.toThrow();
+        expect(plugins.a.onAdd).toHaveBeenCalled();
+        expect(plugins.b.onAdd).toHaveBeenCalled();
+        expect(plugins.a.onRemove).not.toHaveBeenCalled();
+        expect(plugins.b.onRemove).not.toHaveBeenCalled();
+        expect(() => sset = sset.remove('m')).not.toThrow();
+        expect(sset.size()).toBe(3)
+        expect(plugins.a.onRemove).toHaveBeenCalled();
+        expect(plugins.b.onRemove).toHaveBeenCalled();
+        expect(sset.getActivePlugins()).toEqual([
+          'a', 'b'
+        ])
+
+
+        plugins.a.onRemove.calls.reset();
+        plugins.b.onRemove.calls.reset();
+        plugins.a.onAdd.calls.reset();
+        plugins.b.onAdd.calls.reset();
+
+        expect(plugins.a.onRemove).not.toHaveBeenCalled();
+        expect(plugins.b.onRemove).not.toHaveBeenCalled();
+        expect(plugins.a.onAdd).not.toHaveBeenCalled();
+        expect(plugins.b.onAdd).not.toHaveBeenCalled();
+
+        expect(() => sset = sset.filterPlugins(['a'])).not.toThrow()
+        expect(sset).toBeDefined();
+        expect(sset.getActivePlugins()).toEqual([
+          'a'
+        ])
+
+        expect(plugins.a.onRemove).not.toHaveBeenCalled();
+        expect(plugins.b.onRemove).not.toHaveBeenCalled();
+        expect(plugins.a.onAdd).not.toHaveBeenCalled();
+        expect(plugins.b.onAdd).not.toHaveBeenCalled();
+        expect(sset.size()).toBe(3);
+
+        expect(() => sset = sset.remove('n')).not.toThrow()
+        expect(sset.size()).toBe(2);
+        expect(plugins.a.onRemove).toHaveBeenCalled();
+        expect(plugins.b.onRemove).not.toHaveBeenCalled();
+        expect(plugins.a.onAdd).not.toHaveBeenCalled();
+        expect(plugins.b.onAdd).not.toHaveBeenCalled();
+
       })
     })
     describe('after SSet creation', () => {

@@ -62,7 +62,8 @@ export type SSetStaticProps = {
   fromJSON,
   addPlugins,
   removePlugins,
-  onlyUsePlugins
+  filterPlugins,
+  getActivePlugins
 }
 
 export type SSetStaticMethods = () => SSetStaticProps
