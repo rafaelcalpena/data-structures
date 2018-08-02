@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "moduleResolution": "node",
+    "inlineSourceMap": true,
     "target": "es5",
     "module": "commonjs",
     "declaration": false,
@@ -16,8 +17,7 @@
       "es2017",
       "dom"
     ],
-    "downlevelIteration": true,
-    "sourceMap": true
+    "downlevelIteration": true
   },
   "files": [
     "src/index.ts"
