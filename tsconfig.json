@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "moduleResolution": "node",
-    "inlineSourceMap": true,
     "target": "es5",
     "module": "commonjs",
     "declaration": false,
