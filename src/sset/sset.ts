@@ -271,8 +271,8 @@ export class SSet {
     /* Check whether a plugin is already added to SSet */
     if (!currentPluginsSet.isDisjoint(pluginsSet)) {
       const intersection = pluginsSet.intersection(currentPluginsSet);
-      let ps = intersection.size() > 1 ? 's' : '';
-      let isAre = intersection.size() > 1 ? 'are' : 'is';
+      const ps = intersection.size() > 1 ? 's' : '';
+      const isAre = intersection.size() > 1 ? 'are' : 'is';
       throw new Error (`Could not add plugin${ps} to SSet: Plugin${ps}` +
       ` '${intersection.toArray().join(', ')}' ${isAre} already active`);
     }
@@ -297,19 +297,19 @@ export class SSet {
     const newPlugins = plugins.reduce((oldPlugins, p) => {
       if (!(p in this.statePropsPlugins.plugins)) {
         throw new Error(`Could not remove plugin from SSet:` +
-        ` Plugin '${p}' does not exist in this SSet`)
+        ` Plugin '${p}' does not exist in this SSet`);
       }
       const plugin = this.statePropsPlugins.plugins[p];
       plugin.onDestroy();
-      return _.omit(oldPlugins, [p])
+      return _.omit(oldPlugins, [p]);
     }, {...this.statePropsPlugins.plugins});
 
     return new SSet(
       {
         ...this.statePropsPlugins,
-        plugins: newPlugins
-      }
-    )
+        plugins: newPlugins,
+      },
+    );
   }
 
   /** Get current active plugins for given SSet instance */
@@ -321,8 +321,8 @@ export class SSet {
   public filterPlugins(plugins: string[]) {
     /* Perform diff in activePlugins, then remove unnecessary plugins */
     return this.removePlugins(
-      _.difference(this.getActivePlugins(), plugins)
-    )
+      _.difference(this.getActivePlugins(), plugins),
+    );
   }
 
   /** Checks whether current SSet is contained into another */

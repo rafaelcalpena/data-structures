@@ -4,7 +4,7 @@ import { initializePlugins } from './initialize-plugins';
 import { SSet } from './sset';
 import { SSetPlugins, SSetStaticProps } from './sset.d';
 
-export const SSetStaticMethods : (a? : SSetPlugins) => SSetStaticProps = (curryPlugins) =>  {
+export const SSetStaticMethods: (a?: SSetPlugins) => SSetStaticProps = (curryPlugins) =>  {
   return {
     /** Given an array, create a SSet from it */
     fromArray(array: any[], props?: any): SSet {
@@ -61,7 +61,7 @@ export const SSetStaticMethods : (a? : SSetPlugins) => SSetStaticProps = (curryP
     removePlugins(plugins: string[]): SSetStaticProps {
       const result = _.omit({...curryPlugins}, plugins);
       return SSetStaticMethods(
-        result
+        result,
       );
     },
 
@@ -71,12 +71,12 @@ export const SSetStaticMethods : (a? : SSetPlugins) => SSetStaticProps = (curryP
       }).removePlugins(
         _.difference(
           Object.keys(curryPlugins),
-          plugins
-        )
-      )
+          plugins,
+        ),
+      );
     },
 
-    getActivePlugins: () => Object.keys(curryPlugins)
+    getActivePlugins: () => Object.keys(curryPlugins),
 
-  }
+  };
 };
