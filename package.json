@@ -14,7 +14,8 @@
   "license": "MIT",
   "scripts": {
     "test": "karma start ./test/karma.conf.js",
-    "test:watch": "karma start ./test/karma.conf.js --single-run false",    
+    "coverage": "karma start ./test/karma.conf.js",
+    "test:watch": "karma start ./test/karma.conf.js --single-run false",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "lint:fix": "tslint --fix -p tsconfig.json -c tslint.json",
     "build": "tsc",
