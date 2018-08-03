@@ -14,7 +14,7 @@
   "license": "MIT",
   "scripts": {
     "test": "karma start ./test/karma.conf.js",
-    "coverage": "istanbul cover jasmine JASMINE_CONFIG_PATH=./test/jasmine.json",
+    "coverage": "karma start ./test/karma.conf.js",
     "test:watch": "karma start ./test/karma.conf.js --single-run false",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "lint:fix": "tslint --fix -p tsconfig.json -c tslint.json",
@@ -35,7 +35,6 @@
     "@types/lodash": "^4.14.109",
     "hard-source-webpack-plugin": "^0.10.1",
     "husky": "^0.14.3",
-    "istanbul": "^0.4.5",
     "istanbul-instrumenter-loader": "^3.0.1",
     "jasmine-core": "^3.1.0",
     "karma": "^2.0.2",
