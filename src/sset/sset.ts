@@ -68,13 +68,13 @@ type reducerFn = (a: any, b: JSONCapable) => any ;
  */
 export class SSet {
 
-  public static fromArray = SSetStaticMethods().fromArray;
-  public static hashOf = SSetStaticMethods().hashOf;
-  public static fromJSON = SSetStaticMethods().fromJSON;
-  public static addPlugins = SSetStaticMethods().addPlugins;
-  public static removePlugins = SSetStaticMethods().removePlugins;
-  public static getActivePlugins = SSetStaticMethods().getActivePlugins;
-  public static onlyUsePlugins = SSetStaticMethods().onlyUsePlugins;
+  public static fromArray = SSetStaticMethods({}).fromArray;
+  public static hashOf = SSetStaticMethods({}).hashOf;
+  public static fromJSON = SSetStaticMethods({}).fromJSON;
+  public static addPlugins = SSetStaticMethods({}).addPlugins;
+  public static removePlugins = SSetStaticMethods({}).removePlugins;
+  public static getActivePlugins = SSetStaticMethods({}).getActivePlugins;
+  public static filterPlugins = SSetStaticMethods({}).filterPlugins;
 
   /** The constructor should preferably be used by internal operations.
    * For bootstrapping a new SSet from scratch, static methods such as
@@ -92,7 +92,7 @@ export class SSet {
    * functions, or any unsupported JSON object type
    */
    /* TODO: Add onAdd plugin listener, protect triggerChanges param from public API */
-  public add(value: JSONCapable, triggerProps: boolean = true ): SSet {
+  public add(value: JSONCapable): SSet {
     /* Remove unsupported values for JSON */
     value = JSON.parse(JSON.stringify(value));
 
@@ -157,7 +157,7 @@ export class SSet {
    * If less than 50%, recreate props. Otherwise, remove from previous props
    */
   /* TODO: Add onRemove, plugin listener(s) */
-  public remove(value: JSONCapable, triggerProps: boolean = false): SSet {
+  public remove(value: JSONCapable): SSet {
     /* Remove any unsupported values for JSON */
     value = JSON.parse(JSON.stringify(value));
 
@@ -271,8 +271,10 @@ export class SSet {
     /* Check whether a plugin is already added to SSet */
     if (!currentPluginsSet.isDisjoint(pluginsSet)) {
       const intersection = pluginsSet.intersection(currentPluginsSet);
-      throw new Error (`Plugin${intersection.size() > 1 ? 's' : ''}
-      ${intersection.toArray().toString()} ${intersection.size() > 1 ? 'are' : 'is'} already active `);
+      const ps = intersection.size() > 1 ? 's' : '';
+      const isAre = intersection.size() > 1 ? 'are' : 'is';
+      throw new Error (`Could not add plugin${ps} to SSet: Plugin${ps}` +
+      ` '${intersection.toArray().join(', ')}' ${isAre} already active`);
     }
 
     /* Merge new plugins into existing */
@@ -290,16 +292,37 @@ export class SSet {
     return new SSet(newInternalState);
   }
 
-  public removePlugins() {
+  public removePlugins(plugins: string[]) {
     /* Call onDestroy method and remove from activePlugins list*/
+    const newPlugins = plugins.reduce((oldPlugins, p) => {
+      if (!(p in this.statePropsPlugins.plugins)) {
+        throw new Error(`Could not remove plugin from SSet:` +
+        ` Plugin '${p}' does not exist in this SSet`);
+      }
+      const plugin = this.statePropsPlugins.plugins[p];
+      plugin.onDestroy();
+      return _.omit(oldPlugins, [p]);
+    }, {...this.statePropsPlugins.plugins});
+
+    return new SSet(
+      {
+        ...this.statePropsPlugins,
+        plugins: newPlugins,
+      },
+    );
   }
 
   /** Get current active plugins for given SSet instance */
   public getActivePlugins = (): string[] => Object.keys(this.statePropsPlugins.plugins);
 
-  /* TODO */
-  public onlyUsePlugins() {
-    /* Perform diff in activePlugins, then remove and add necessary plugins */
+  /**
+   * Filter specific plugins from active plugins into new SSet
+   */
+  public filterPlugins(plugins: string[]) {
+    /* Perform diff in activePlugins, then remove unnecessary plugins */
+    return this.removePlugins(
+      _.difference(this.getActivePlugins(), plugins),
+    );
   }
 
   /** Checks whether current SSet is contained into another */

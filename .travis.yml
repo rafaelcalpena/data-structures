@@ -21,6 +21,7 @@ script:
   - nsp check
   - npm run build
   - npm run lint
+  - xvfb-run npm run coverage
   - codecov
 cache:
   directories:

@@ -15,16 +15,13 @@ export const updatePlugins = (
       props: PluginDeclarationProperties,
       state: any,
     ) => any = plugins[pluginName][action];
-    if (listener) {
-      return {
-        plugins,
-        props: {
-          ...acc.props,
-          [pluginName]: listener(item, hash, props[pluginName], state),
-        },
-        state,
-      };
-    }
-    return acc;
+    return {
+      plugins,
+      props: {
+        ...acc.props,
+        [pluginName]: listener(item, hash, props[pluginName], state),
+      },
+      state,
+    };
   }, internalState);
 };
