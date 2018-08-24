@@ -99,6 +99,6 @@ export class DefaultIndex {
     if (newInnerMap.size() === 0) {
       outerMap = outerMap.remove(k1);
     }
-    return outerMap;
+    return new DefaultIndex(outerMap);
   }
 }
