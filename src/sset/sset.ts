@@ -12,7 +12,6 @@ import {
 } from './sset.d';
 import { updatePlugins } from './update-plugins';
 
-
 import * as objectHash from 'object-hash';
 
 export const SSetStaticMethods: (a?: SSetPlugins) => SSetStaticProps = (curryPlugins) =>  {
@@ -91,7 +90,6 @@ export const SSetStaticMethods: (a?: SSetPlugins) => SSetStaticProps = (curryPlu
 
   };
 };
-
 
 type largestAndSmallestSets = (a: SSet, b: SSet) => [SSet, SSet];
 const getLargestAndSmallestSets: largestAndSmallestSets = (set1, set2)  => (

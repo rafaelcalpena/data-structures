@@ -1,8 +1,8 @@
 /* TODO: Maybe add array support? */
-import {PointerMap} from '../pointer-map/pointer-map'
 import _ = require('lodash');
-import {MultiMap} from '../multi-map/multi-map'
-import {SSet} from '../sset/sset'
+import {MultiMap} from '../multi-map/multi-map';
+import {PointerMap} from '../pointer-map/pointer-map';
+import {SSet} from '../sset/sset';
 
 export const createTriples = (triples, {hash: itemHash, item}) => {
   if (_.isPlainObject(item)) {
@@ -10,9 +10,9 @@ export const createTriples = (triples, {hash: itemHash, item}) => {
     /* TODO: add config to include/exclude properties
     and nested objects */
     const keys = Object.keys(item);
-    keys.forEach(k => {
-      triples = [...triples, [k, SSet.hashOf(item[k]), itemHash] ]
-    })
+    keys.forEach((k) => {
+      triples = [...triples, [k, SSet.hashOf(item[k]), itemHash] ];
+    });
   }
   return triples;
-}
+};

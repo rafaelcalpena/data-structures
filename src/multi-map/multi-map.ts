@@ -1,13 +1,13 @@
 import { PointerMap } from '../pointer-map/pointer-map';
 
-type stateAndProps = {
-  state: PointerMap,
+interface stateAndProps {
+  state: PointerMap;
   props: {
-    size: number
-  }
+    size: number,
+  };
 }
-type addFactory = (a: stateAndProps, e) => (k1, k2) => stateAndProps
-const addFactory : addFactory = ({state: outerMap, props: {size}}, errorMsg) => (k1, k2) => {
+type addFactory = (a: stateAndProps, e) => (k1, k2) => stateAndProps;
+const addFactory: addFactory = ({state: outerMap, props: {size}}, errorMsg) => (k1, k2) => {
   if (typeof k1 === 'undefined') {
     return {state: outerMap, props: {size}};
   }
@@ -27,8 +27,8 @@ const addFactory : addFactory = ({state: outerMap, props: {size}}, errorMsg) => 
   return {
     state: outerMap,
     props: {
-      size: size + 1
-    }
+      size: size + 1,
+    },
   };
 };
 
@@ -45,13 +45,13 @@ export class MultiMap {
       (pair[0], pair[1]), {
         state: outerMap,
         props: {
-          size: 0
-        }
+          size: 0,
+        },
       },
     );
 
     return new MultiMap({
-      ...stateAndProps
+      ...stateAndProps,
     });
   }
 
@@ -93,8 +93,8 @@ export class MultiMap {
       return new MultiMap({
         state: outerMap.remove(k1),
         props: {
-          size: size - outerMap.get(k1).size()
-        }
+          size: size - outerMap.get(k1).size(),
+        },
       });
     }
     const innerMap = outerMap.get(k1);
@@ -111,8 +111,8 @@ export class MultiMap {
     return new MultiMap({
       state: newOuterMap,
       props: {
-        size: size -1
-      }
+        size: size - 1,
+      },
     });
 
   }

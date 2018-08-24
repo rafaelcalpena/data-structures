@@ -1,54 +1,42 @@
-import {SSet} from '../sset/sset'
-import {Collection} from '../collection/collection'
-import * as _ from 'lodash'
+import * as _ from 'lodash';
+import {Collection} from '../collection/collection';
+import {SSet} from '../sset/sset';
 
 /* TODO: Only accept stringify-capable params for type */
-type GraphObjectNode = {
-  id?: any,
-  labels?: any[] | SSet | Collection,
-  [s: string]: any
+interface GraphObjectNode {
+  id?: any;
+  labels?: any[] | SSet | Collection;
+  [s: string]: any;
 }
 
-type GraphObjectEdge = {
-  id?: any,
-  from: any,
-  to: any,
-  labels?: any[] | SSet | Collection
-  [s: string]: any
+interface GraphObjectEdge {
+  id?: any;
+  from: any;
+  to: any;
+  labels?: any[] | SSet | Collection;
+  [s: string]: any;
 }
 
-type GraphObject = {
-  nodes: GraphObjectNode[],
-  edges: GraphObjectEdge[]
+interface GraphObject {
+  nodes: GraphObjectNode[];
+  edges: GraphObjectEdge[];
 }
 
-type InternalState = {
-  nodes: Collection,
-  edges: Collection
+interface InternalState {
+  nodes: Collection;
+  edges: Collection;
 }
 
 export class Graph {
 
-  static fromObject(obj: GraphObject) {
+  public static fromObject(obj: GraphObject) {
     const {nodes, edges} = obj;
-    let nodesCollection = Collection.fromArray(nodes);
-    let edgesCollection = Collection.fromArray(edges);
+    const nodesCollection = Collection.fromArray(nodes);
+    const edgesCollection = Collection.fromArray(edges);
     return new Graph({
       nodes: nodesCollection,
-      edges: edgesCollection
-    })
-  }
-
-  toObject(): GraphObject {
-    const {nodes, edges} = this.internal;
-    return {
-      nodes: nodes.toArray(),
-      edges: edges.toArray()
-    }
-  }
-
-  union(graph2: Graph): Graph {
-    return this.edges.union(graph2).nodes.union(graph2);
+      edges: edgesCollection,
+    });
   }
 
   /* TODO: add wrapper for bind functions */
@@ -57,34 +45,34 @@ export class Graph {
       const {nodes, edges} = this.internal;
       if (nodes.has(item)) {
         throw new Error (
-          `Could not add Node from Graph: Node already exists`
-        )
+          `Could not add Node from Graph: Node already exists`,
+        );
       }
       return new Graph({
         nodes: nodes.add(item),
-        edges
-      })
+        edges,
+      });
     }).bind(this),
 
     remove: ((item: any) => {
       const {nodes, edges} = this.internal;
       if (!nodes.has(item)) {
         throw new Error (
-          `Could not remove Node from Graph: Node does not exist`
-        )
+          `Could not remove Node from Graph: Node does not exist`,
+        );
       }
       return new Graph({
         nodes: nodes.remove(item),
-        edges
-      })
+        edges,
+      });
     }).bind(this),
 
     union : ((g2: Graph) => {
       const {nodes, edges} = this.internal;
       return new Graph({
         nodes: nodes.union(g2.nodes.getAll()),
-        edges
-      })
+        edges,
+      });
     }).bind(this),
 
     getAll : (() => {
@@ -95,57 +83,57 @@ export class Graph {
       const {nodes, edges} = this.internal;
       if (!nodes.has(item)) {
         throw new Error (
-          `Could not update Node from Graph: Node does not exist`
-        )
+          `Could not update Node from Graph: Node does not exist`,
+        );
       }
       return new Graph({
         nodes: nodes.remove(item).add(newItem),
-        edges
-      })
+        edges,
+      });
     }).bind(this),
 
     getId : ((id: any) => {
       const {nodes, edges} = this.internal;
-      let maybeNode = nodes.findOne({id});
+      const maybeNode = nodes.findOne({id});
       if (_.isUndefined(maybeNode)) {
         throw new Error (
-          `Could not get Node: Node Id '${id}' does not exist in Graph`
-        )
-      };
+          `Could not get Node: Node Id '${id}' does not exist in Graph`,
+        );
+      }
       return maybeNode;
     }).bind(this),
 
     hasId : ((id: any) => {
       const {nodes, edges} = this.internal;
-      let maybeNode = nodes.findOne({id});
+      const maybeNode = nodes.findOne({id});
       return (typeof maybeNode !== 'undefined') ? true : false;
     }).bind(this),
 
     reachedById: ((id) => {
       const edgesGraph = this.edges.fromId(id);
-      const nodes = edgesGraph.internal.edges.map(edge => {
-        return this.nodes.getId(edge.to)
+      const nodes = edgesGraph.internal.edges.map((edge) => {
+        return this.nodes.getId(edge.to);
       });
 
       return new Graph({
-        nodes: nodes,
-        edges: Collection.fromArray([])
-      })
+        nodes,
+        edges: Collection.fromArray([]),
+      });
     }).bind(this),
 
     [Symbol.iterator]: (() => {
       return this.internal.nodes[Symbol.iterator]();
-    }).bind(this)
+    }).bind(this),
 
-  }
+  };
 
   public edges = {
     union : ((g2: Graph) => {
       const {nodes, edges} = this.internal;
       return new Graph({
         nodes,
-        edges: edges.union(g2.edges.getAll())
-      })
+        edges: edges.union(g2.edges.getAll()),
+      });
     }).bind(this),
 
     map: ((fn) => {
@@ -153,8 +141,8 @@ export class Graph {
 
       return new Graph({
         nodes,
-        edges: edges.map(fn)
-      })
+        edges: edges.map(fn),
+      });
     }),
 
     getAll : (() => {
@@ -165,9 +153,9 @@ export class Graph {
       const {nodes, edges} = this.internal;
 
       if (this.edges.hasId(item.id)) {
-        return this.edges.remove(item)
+        return this.edges.remove(item);
       } else {
-        return this.edges.add(item)
+        return this.edges.add(item);
       }
     }).bind(this),
 
@@ -175,44 +163,44 @@ export class Graph {
       const {nodes, edges} = this.internal;
       if (!edges.has(item)) {
         throw new Error (
-          `Could not remove Edge from Graph: Edge does not exist`
-        )
+          `Could not remove Edge from Graph: Edge does not exist`,
+        );
       }
       return new Graph({
         edges: edges.remove(item),
-        nodes
-      })
+        nodes,
+      });
     }).bind(this),
 
     add: ((item: any) => {
       const {nodes, edges} = this.internal;
       if (edges.has(item)) {
         throw new Error (
-          `Could not add Edge to Graph: Edge already exists`
-        )
+          `Could not add Edge to Graph: Edge already exists`,
+        );
       }
       return new Graph({
         edges: edges.add(item),
-        nodes
-      })
+        nodes,
+      });
     }).bind(this),
 
     update: ((item, newItem)  => {
       const {nodes, edges} = this.internal;
       if (!edges.has(item)) {
         throw new Error (
-          `Could not update Edge from Graph: Edge does not exist`
-        )
+          `Could not update Edge from Graph: Edge does not exist`,
+        );
       }
       return new Graph({
         nodes,
-        edges: edges.remove(item).add(newItem)
-      })
+        edges: edges.remove(item).add(newItem),
+      });
     }).bind(this),
 
     hasId : ((id: any) => {
       const {nodes, edges} = this.internal;
-      let maybeNode = edges.findOne({id});
+      const maybeNode = edges.findOne({id});
       return (typeof maybeNode !== 'undefined') ? true : false;
     }).bind(this),
 
@@ -220,15 +208,27 @@ export class Graph {
       const {nodes, edges} = this.internal;
       return new Graph ({
         nodes: Collection.fromArray([]),
-        edges: edges.find({from})
-      })
+        edges: edges.find({from}),
+      });
     }).bind(this),
 
     [Symbol.iterator]: (() => {
       return this.internal.edges[Symbol.iterator]();
-    }).bind(this)
+    }).bind(this),
 
+  };
+
+  constructor(private internal: InternalState) {}
+
+  public toObject(): GraphObject {
+    const {nodes, edges} = this.internal;
+    return {
+      nodes: nodes.toArray(),
+      edges: edges.toArray(),
+    };
   }
 
-  constructor (private internal: InternalState) {}
+  public union(graph2: Graph): Graph {
+    return this.edges.union(graph2).nodes.union(graph2);
+  }
 }

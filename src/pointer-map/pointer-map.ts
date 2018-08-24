@@ -21,8 +21,8 @@ export class PointerMap {
       if (acc === false) {
         return false;
       }
-      return pointerMap.has(key)
-    }, true)
+      return pointerMap.has(key);
+    }, true);
   }
 
   public static fromPairs(pairs: pairsArray) {
@@ -107,31 +107,31 @@ export class PointerMap {
 
   public keysIntersection(...pointerMaps) {
     pointerMaps = [this, ...pointerMaps];
-    let smallest = pointerMaps.reduce((acc, p) => {
+    const smallest = pointerMaps.reduce((acc, p) => {
       return (p.size() < acc.size) ? {
         item: p,
-        size: p.size()
+        size: p.size(),
       } : acc;
     }, {
       item: -1,
-      size: Infinity
-    })
+      size: Infinity,
+    });
 
-    return smallest.item.filter(i => {
+    return smallest.item.filter((i) => {
       /* check if every pointerMaps has key */
       return PointerMap.keyInEvery(i, pointerMaps);
-    }, true)
+    }, true);
 
   }
 
-  filter(fn, clearValues?) {
+  public filter(fn, clearValues?) {
     let result = PointerMap.fromObject({});
     /* TODO: Memoize object keys */
-    Object.keys(this.internal.state).forEach(k => {
-      if(fn(k) === true) {
+    Object.keys(this.internal.state).forEach((k) => {
+      if (fn(k) === true) {
         result = result.add(k, clearValues ? true : this.internal.state[k]);
       }
-    })
+    });
     return result;
   }
 
@@ -154,11 +154,11 @@ export class PointerMap {
     });
   }
 
-  reduce(fn: (acc, value, key) => any, acc: any) {
+  public reduce(fn: (acc, value, key) => any, acc: any) {
     const {state} = this.internal;
     return Object.keys(state).reduce(
       (acc, key) => fn(acc, state[key], key),
-      acc)
+      acc);
   }
 
 }
