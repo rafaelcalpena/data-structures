@@ -3,13 +3,13 @@ import {Collection} from '../collection/collection';
 import {SSet} from '../sset/sset';
 
 /* TODO: Only accept stringify-capable params for type */
-interface GraphObjectNode {
+interface IGraphObjectNode {
   id?: any;
   labels?: any[] | SSet | Collection;
   [s: string]: any;
 }
 
-interface GraphObjectEdge {
+interface IGraphObjectEdge {
   id?: any;
   from: any;
   to: any;
@@ -17,9 +17,9 @@ interface GraphObjectEdge {
   [s: string]: any;
 }
 
-interface GraphObject {
-  nodes: GraphObjectNode[];
-  edges: GraphObjectEdge[];
+interface IGraphObject {
+  nodes: IGraphObjectNode[];
+  edges: IGraphObjectEdge[];
 }
 
 interface InternalState {
@@ -29,13 +29,13 @@ interface InternalState {
 
 export class Graph {
 
-  public static fromObject(obj: GraphObject) {
+  public static fromObject(obj: IGraphObject) {
     const {nodes, edges} = obj;
     const nodesCollection = Collection.fromArray(nodes);
     const edgesCollection = Collection.fromArray(edges);
     return new Graph({
-      nodes: nodesCollection,
       edges: edgesCollection,
+      nodes: nodesCollection,
     });
   }
 
@@ -49,8 +49,8 @@ export class Graph {
         );
       }
       return new Graph({
-        nodes: nodes.add(item),
         edges,
+        nodes: nodes.add(item),
       });
     }).bind(this),
 
@@ -62,16 +62,16 @@ export class Graph {
         );
       }
       return new Graph({
-        nodes: nodes.remove(item),
         edges,
+        nodes: nodes.remove(item),
       });
     }).bind(this),
 
     union : ((g2: Graph) => {
       const {nodes, edges} = this.internal;
       return new Graph({
-        nodes: nodes.union(g2.nodes.getAll()),
         edges,
+        nodes: nodes.union(g2.nodes.getAll()),
       });
     }).bind(this),
 
@@ -87,8 +87,8 @@ export class Graph {
         );
       }
       return new Graph({
-        nodes: nodes.remove(item).add(newItem),
         edges,
+        nodes: nodes.remove(item).add(newItem),
       });
     }).bind(this),
 
@@ -116,8 +116,8 @@ export class Graph {
       });
 
       return new Graph({
-        nodes,
         edges: Collection.fromArray([]),
+        nodes,
       });
     }).bind(this),
 
@@ -131,8 +131,8 @@ export class Graph {
     union : ((g2: Graph) => {
       const {nodes, edges} = this.internal;
       return new Graph({
-        nodes,
         edges: edges.union(g2.edges.getAll()),
+        nodes,
       });
     }).bind(this),
 
@@ -140,8 +140,8 @@ export class Graph {
       const {nodes, edges} = this.internal;
 
       return new Graph({
-        nodes,
         edges: edges.map(fn),
+        nodes,
       });
     }),
 
@@ -193,8 +193,8 @@ export class Graph {
         );
       }
       return new Graph({
-        nodes,
         edges: edges.remove(item).add(newItem),
+        nodes,
       });
     }).bind(this),
 
@@ -207,8 +207,8 @@ export class Graph {
     fromId: ((from) => {
       const {nodes, edges} = this.internal;
       return new Graph ({
-        nodes: Collection.fromArray([]),
         edges: edges.find({from}),
+        nodes: Collection.fromArray([]),
       });
     }).bind(this),
 
@@ -220,11 +220,11 @@ export class Graph {
 
   constructor(private internal: InternalState) {}
 
-  public toObject(): GraphObject {
+  public toObject(): IGraphObject {
     const {nodes, edges} = this.internal;
     return {
-      nodes: nodes.toArray(),
       edges: edges.toArray(),
+      nodes: nodes.toArray(),
     };
   }
 

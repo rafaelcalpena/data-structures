@@ -1,12 +1,12 @@
 import { PointerMap } from '../pointer-map/pointer-map';
 
-interface stateAndProps {
+interface IStateAndProps {
   state: PointerMap;
   props: {
     size: number,
   };
 }
-type addFactory = (a: stateAndProps, e) => (k1, k2) => stateAndProps;
+type addFactory = (a: IStateAndProps, e) => (k1, k2) => IStateAndProps;
 const addFactory: addFactory = ({state: outerMap, props: {size}}, errorMsg) => (k1, k2) => {
   if (typeof k1 === 'undefined') {
     return {state: outerMap, props: {size}};
@@ -25,10 +25,10 @@ const addFactory: addFactory = ({state: outerMap, props: {size}}, errorMsg) => (
   outerMap = outerMap.set(k1, newInnerMap);
 
   return {
-    state: outerMap,
     props: {
       size: size + 1,
     },
+    state: outerMap,
   };
 };
 
@@ -43,10 +43,10 @@ export class MultiMap {
       addFactory(outer,
       (k1, k2) => `Could not create MultiMap: Pairs contain duplicate path '${k1}' -> '${k2}'`)
       (pair[0], pair[1]), {
-        state: outerMap,
         props: {
           size: 0,
         },
+        state: outerMap,
       },
     );
 
@@ -57,7 +57,7 @@ export class MultiMap {
 
   /* TODO: add fromObject */
 
-  constructor(private internal: stateAndProps) {
+  constructor(private internal: IStateAndProps) {
 
   }
 
@@ -91,10 +91,10 @@ export class MultiMap {
     }
     if (typeof k2 === 'undefined') {
       return new MultiMap({
-        state: outerMap.remove(k1),
         props: {
           size: size - outerMap.get(k1).size(),
         },
+        state: outerMap.remove(k1),
       });
     }
     const innerMap = outerMap.get(k1);
@@ -109,10 +109,10 @@ export class MultiMap {
       newOuterMap = outerMap.set(k1, newInnerMap);
     }
     return new MultiMap({
-      state: newOuterMap,
       props: {
         size: size - 1,
       },
+      state: newOuterMap,
     });
 
   }

@@ -157,7 +157,7 @@ export class PointerMap {
   public reduce(fn: (acc, value, key) => any, acc: any) {
     const {state} = this.internal;
     return Object.keys(state).reduce(
-      (acc, key) => fn(acc, state[key], key),
+      (a, key) => fn(a, state[key], key),
       acc);
   }
 

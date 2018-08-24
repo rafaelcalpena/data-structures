@@ -67,10 +67,10 @@ export const indexPlugin = {
           /* Run sub-queries for each property key */
           const results: PointerMap[] = _.reduce(
             query,
-            (result, value, propName) => {
+            (r, value, propName) => {
               const args = [propName, SSet.hashOf(value)];
               return [
-                ...result,
+                ...r,
                 props.has(args[0], args[1]) ?
                   props.from(args[0], args[1]) :
                   PointerMap.fromObject({}),
