@@ -8,7 +8,7 @@ describe('MultiMap', () => {
         ['a', 'b'],
         ['a', 'b']
       ])).toThrowError(`Could not create MultiMap: Pairs contain duplicate path 'a' -> 'b'`)
-
+      expect(multiMap).not.toBeDefined()
       expect(() => multiMap = MultiMap.fromPairs([
         []
       ])).not.toThrow()
@@ -137,6 +137,27 @@ describe('MultiMap', () => {
      expect(result.toObject()).toEqual({
        c: true
      })
+    })
+
+    it('has size method', () => {
+      let multiMap = MultiMap.fromPairs([
+        ['a', 'b'],
+        ['a', 'c'],
+        ['a', 'm'],
+        ['b', 'c']
+      ])
+      let result;
+      expect(() => result = multiMap.size()).not.toThrow();
+      expect(result).toEqual(4)
+      expect(() => multiMap = multiMap.remove('b', 'c')).not.toThrow();
+      expect(() => result = multiMap.size()).not.toThrow();
+      expect(result).toEqual(3)
+      expect(() => multiMap = multiMap.remove('a', 'm')).not.toThrow();
+      expect(() => result = multiMap.size()).not.toThrow();
+      expect(result).toEqual(2)
+      expect(() => multiMap = multiMap.remove('a')).not.toThrow();
+      expect(() => result = multiMap.size()).not.toThrow();
+      expect(result).toEqual(0)      
     })
   })
 
