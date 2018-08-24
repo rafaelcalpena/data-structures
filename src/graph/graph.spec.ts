@@ -511,6 +511,110 @@ describe('graph', () => {
     })
   })
 
+  describe('edges toggle', () => {
+    it('should toggle edges', () => {
+      let result = Graph.fromObject({
+        nodes: [
+          {
+            name: 'Harry',
+            lastName: 'Potter',
+            id: 'harry'
+          },
+          {
+            name: 'James',
+            lastName: 'Potter',
+            id: 'james'
+          }
+        ],
+        edges: []
+      })
+
+      expect(() => result = result.edges.toggle({
+        from: 'james',
+        to: 'harry',
+        labels: ['FATHER OF'],
+        id: 'e1'
+      })).not.toThrow()
+
+      expect(result.toObject()).toEqual({
+        nodes: [
+          {
+            name: 'Harry',
+            lastName: 'Potter',
+            id: 'harry'
+          },
+          {
+            name: 'James',
+            lastName: 'Potter',
+            id: 'james'
+          }
+        ],
+        edges: [
+          {
+            from: 'james',
+            to: 'harry',
+            labels: ['FATHER OF'],
+            id: 'e1'
+          }
+        ]
+      })
+
+      expect(() => result = result.edges.toggle({
+        from: 'james',
+        to: 'harry',
+        labels: ['FATHER OF'],
+        id: 'e1'
+      })).not.toThrow()
+
+      expect(result.toObject()).toEqual({
+        nodes: [
+          {
+            name: 'Harry',
+            lastName: 'Potter',
+            id: 'harry'
+          },
+          {
+            name: 'James',
+            lastName: 'Potter',
+            id: 'james'
+          }
+        ],
+        edges: []
+      })
+
+      expect(() => result = result.edges.toggle({
+        from: 'james',
+        to: 'harry',
+        labels: ['FATHER OF'],
+        id: 'e1'
+      })).not.toThrow()
+
+      expect(result.toObject()).toEqual({
+        nodes: [
+          {
+            name: 'Harry',
+            lastName: 'Potter',
+            id: 'harry'
+          },
+          {
+            name: 'James',
+            lastName: 'Potter',
+            id: 'james'
+          }
+        ],
+        edges: [
+          {
+            from: 'james',
+            to: 'harry',
+            labels: ['FATHER OF'],
+            id: 'e1'
+          }
+        ]
+      })
+
+    })
+  })
+
   describe('union', () => {
     it('should merge 2 graphs into a new one', () => {
       let g1;
