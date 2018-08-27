@@ -146,6 +146,17 @@ export class Collection {
     );
   }
 
+  public difference(collection: Collection) {
+    const {set} = collection.internal;
+    const newSet = this.internal.set.difference(set);
+    return new Collection(
+      {
+        ...this.internal,
+        set: newSet,
+      },
+    );
+  }
+
   public has(item) {
     return this.internal.set.has(item);
   }
@@ -158,6 +169,10 @@ export class Collection {
         set: newSet,
       },
     );
+  }
+
+  public getOne() {
+    return this.internal.set.getOne();
   }
 
   /** Iterate over SSet using for ... of loops */
