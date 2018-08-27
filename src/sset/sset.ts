@@ -435,6 +435,11 @@ export class SSet {
     return SSet.hashOf(value) in this.statePropsPlugins.state;
   }
 
+  public getOne() {
+    return this.getSortedKeysArray()
+    .map((key) => this.statePropsPlugins.state[key])[0];
+  }
+
   /** Iterate over SSet using for ... of loops */
   public [Symbol.iterator](): SSetIterator {
     return {
