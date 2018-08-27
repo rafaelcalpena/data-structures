@@ -109,6 +109,12 @@ export class Graph {
       return (typeof maybeNode !== 'undefined') ? true : false;
     }).bind(this),
 
+    oneReachedById: ((id) => {
+      const edgesGraph = this.edges.fromId(id);
+      const edge = edgesGraph.edges.getAll().getOne();
+      return this.nodes.getId(edge.to);
+    }).bind(this),
+
     reachedById: ((id) => {
       const edgesGraph = this.edges.fromId(id);
       const nodes = edgesGraph.internal.edges.map((edge) => {
@@ -136,6 +142,14 @@ export class Graph {
       });
     }).bind(this),
 
+    difference: ((g2: Graph) => {
+      const {nodes, edges} = this.internal;
+      return new Graph({
+        edges: edges.difference(g2.edges.getAll()),
+        nodes,
+      });
+    }).bind(this),
+
     map: ((fn) => {
       const {nodes, edges} = this.internal;
 
@@ -143,7 +157,19 @@ export class Graph {
         edges: edges.map(fn),
         nodes,
       });
-    }),
+    }).bind(this),
+
+    find: ((query) => {
+      const {nodes, edges} = this.internal;
+      return new Graph({
+        edges: edges.find(query),
+        nodes: Collection.fromArray([]),
+      });
+    }).bind(this),
+
+    findAndDifference: ((query) => {
+      return this.edges.difference(this.edges.find(query));
+    }).bind(this),
 
     getAll : (() => {
       return this.internal.edges;
@@ -188,6 +214,20 @@ export class Graph {
     update: ((item, newItem)  => {
       const {nodes, edges} = this.internal;
       if (!edges.has(item)) {
+        throw new Error (
+          `Could not update Edge from Graph: Edge does not exist`,
+        );
+      }
+      return new Graph({
+        edges: edges.remove(item).add(newItem),
+        nodes,
+      });
+    }).bind(this),
+
+    updateId: ((id, newItem) => {
+      const {nodes, edges} = this.internal;
+      const item = edges.findOne({id});
+      if (!item) {
         throw new Error (
           `Could not update Edge from Graph: Edge does not exist`,
         );
