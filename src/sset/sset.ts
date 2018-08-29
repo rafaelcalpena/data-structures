@@ -10,8 +10,86 @@ import {
   SSetStatePropsPluginsJSON,
   SSetStaticProps,
 } from './sset.d';
-import { SSetStaticMethods } from './static-methods';
 import { updatePlugins } from './update-plugins';
+
+import * as objectHash from 'object-hash';
+
+export const SSetStaticMethods: (a?: SSetPlugins) => SSetStaticProps = (curryPlugins) =>  {
+  return {
+    /** Given an array, create a SSet from it */
+    fromArray(array: any[], props?: any): SSet {
+      /* Remove any unsupported values for JSON */
+      array = JSON.parse(JSON.stringify(array));
+
+      const internalState = {
+        plugins: curryPlugins,
+        props: props ? props : {
+            size: array.length,
+        },
+        state: array.reduce((acc, value) => {
+          return {
+            ...acc,
+            [this.hashOf(value)]: value,
+          };
+        }, {}),
+      };
+
+      const pluginNames = Object.keys(curryPlugins);
+
+      const newInternalState = initializePlugins(internalState, pluginNames);
+
+      return new SSet(newInternalState);
+    },
+    /** Static method for obtaining default key for a given element and ensuring
+     * their uniqueness. By default, uses object-hash sha1 algorithm.
+     * If customized, needs to take into account possible collision scenarios and
+     * deep-equality checking.
+     */
+    hashOf(value: any): any {
+      /* Use respectType: false to avoid passing prototype, __proto__ and
+      constructor properties. */
+      return objectHash(value, {respectType: false, algorithm: 'sha1'});
+    },
+
+    /** Used for recreating a stringified SSet */
+    fromJSON(JSONString: string): SSet {
+      const jsonData = JSON.parse(JSONString);
+      return SSet.addPlugins(curryPlugins).fromArray(jsonData.state, jsonData.props);
+    },
+
+    /** Add a new plugin to the SSet constructor. All sets created with this
+     * constructor will contain the provided plugins.
+     */
+    addPlugins(plugins: SSetPlugins): SSetStaticProps {
+      const result = SSetStaticMethods({
+        ...curryPlugins,
+        ...plugins,
+      });
+      return result;
+    },
+
+    removePlugins(plugins: string[]): SSetStaticProps {
+      const result = _.omit({...curryPlugins}, plugins);
+      return SSetStaticMethods(
+        result,
+      );
+    },
+
+    filterPlugins(plugins: string[]): SSetStaticProps {
+      return SSetStaticMethods({
+        ...curryPlugins,
+      }).removePlugins(
+        _.difference(
+          Object.keys(curryPlugins),
+          plugins,
+        ),
+      );
+    },
+
+    getActivePlugins: () => Object.keys(curryPlugins),
+
+  };
+};
 
 type largestAndSmallestSets = (a: SSet, b: SSet) => [SSet, SSet];
 const getLargestAndSmallestSets: largestAndSmallestSets = (set1, set2)  => (
@@ -214,7 +292,6 @@ export class SSet {
 
   /** Get items that are both contained in current and given set
    */
-  /* TODO: Add onIntersection plugin listener(s) */
   public intersection(set: SSet): SSet {
     return this.internalTwoSetsOperations(
       ['intersection'], this, set,
@@ -356,6 +433,11 @@ export class SSet {
     value = JSON.parse(JSON.stringify(value));
 
     return SSet.hashOf(value) in this.statePropsPlugins.state;
+  }
+
+  public getOne() {
+    return this.getSortedKeysArray()
+    .map((key) => this.statePropsPlugins.state[key])[0];
   }
 
   /** Iterate over SSet using for ... of loops */

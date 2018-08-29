@@ -16,6 +16,15 @@ export class PointerMap {
     });
   }
 
+  public static keyInEvery(key, pointerMaps) {
+    return pointerMaps.reduce((acc, pointerMap) => {
+      if (acc === false) {
+        return false;
+      }
+      return pointerMap.has(key);
+    }, true);
+  }
+
   public static fromPairs(pairs: pairsArray) {
     let size = 0;
     const state = pairs.reduce((acc, pair) => {
@@ -96,12 +105,60 @@ export class PointerMap {
     return {...this.internal.state};
   }
 
+  public keysIntersection(...pointerMaps) {
+    pointerMaps = [this, ...pointerMaps];
+    const smallest = pointerMaps.reduce((acc, p) => {
+      return (p.size() < acc.size) ? {
+        item: p,
+        size: p.size(),
+      } : acc;
+    }, {
+      item: -1,
+      size: Infinity,
+    });
+
+    return smallest.item.filter((i) => {
+      /* check if every pointerMaps has key */
+      return PointerMap.keyInEvery(i, pointerMaps);
+    }, true);
+
+  }
+
+  public filter(fn, clearValues?) {
+    let result = PointerMap.fromObject({});
+    /* TODO: Memoize object keys */
+    Object.keys(this.internal.state).forEach((k) => {
+      if (fn(k) === true) {
+        result = result.add(k, clearValues ? true : this.internal.state[k]);
+      }
+    });
+    return result;
+  }
+
+  public firstKey() {
+    const {state} = this.internal;
+    let result;
+    for (const key in state) {
+      if (!state.hasOwnProperty(key)) { continue; }
+      result = key;
+      break;
+    }
+    return result;
+  }
+
   public toPairs() {
     const {state, items} = this.internal;
     const keys = Object.keys(state);
     return keys.map((key) => {
       return [key, state[key]];
     });
+  }
+
+  public reduce(fn: (acc, value, key) => any, acc: any) {
+    const {state} = this.internal;
+    return Object.keys(state).reduce(
+      (a, key) => fn(a, state[key], key),
+      acc);
   }
 
 }

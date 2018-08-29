@@ -1,8 +1,15 @@
 import { PointerMap } from '../pointer-map/pointer-map';
 
-const addFactory = (outerMap, errorMsg) => (k1, k2) => {
+interface IStateAndProps {
+  state: PointerMap;
+  props: {
+    size: number,
+  };
+}
+type addFactory = (a: IStateAndProps, e) => (k1, k2) => IStateAndProps;
+const addFactory: addFactory = ({state: outerMap, props: {size}}, errorMsg) => (k1, k2) => {
   if (typeof k1 === 'undefined') {
-    return outerMap;
+    return {state: outerMap, props: {size}};
   }
   if (!outerMap.has(k1)) {
     outerMap = outerMap.add(k1, PointerMap.fromObject({}));
@@ -16,7 +23,13 @@ const addFactory = (outerMap, errorMsg) => (k1, k2) => {
   newInnerMap = innerMap.add(k2);
 
   outerMap = outerMap.set(k1, newInnerMap);
-  return outerMap;
+
+  return {
+    props: {
+      size: size + 1,
+    },
+    state: outerMap,
+  };
 };
 
 /**
@@ -26,25 +39,31 @@ const addFactory = (outerMap, errorMsg) => (k1, k2) => {
 export class MultiMap {
   public static fromPairs(arrayPairs) {
     const outerMap = PointerMap.fromObject({});
-    const state = arrayPairs.reduce((outer, pair) =>
+    const stateAndProps = arrayPairs.reduce((outer, pair) =>
       addFactory(outer,
       (k1, k2) => `Could not create MultiMap: Pairs contain duplicate path '${k1}' -> '${k2}'`)
-      (pair[0], pair[1]), outerMap,
+      (pair[0], pair[1]), {
+        props: {
+          size: 0,
+        },
+        state: outerMap,
+      },
     );
+
     return new MultiMap({
-      state,
+      ...stateAndProps,
     });
   }
 
   /* TODO: add fromObject */
 
-  constructor(private internal) {
+  constructor(private internal: IStateAndProps) {
 
   }
 
   public add(k1, k2) {
     return new MultiMap({
-      state: addFactory(this.internal.state, (p1, p2) =>
+      ...addFactory(this.internal, (p1, p2) =>
       `Could not add to MultiMap: Path '${p1}' -> '${p2}' already exists`)(
         k1, k2,
       ),
@@ -66,12 +85,15 @@ export class MultiMap {
   }
 
   public remove(k1, k2?) {
-    const {state: outerMap} = this.internal;
+    const {state: outerMap, props: {size}} = this.internal;
     if (!outerMap.has(k1)) {
       throw new Error(`Could not remove from MultiMap: key '${k1}' does not exist`);
     }
     if (typeof k2 === 'undefined') {
       return new MultiMap({
+        props: {
+          size: size - outerMap.get(k1).size(),
+        },
         state: outerMap.remove(k1),
       });
     }
@@ -87,6 +109,9 @@ export class MultiMap {
       newOuterMap = outerMap.set(k1, newInnerMap);
     }
     return new MultiMap({
+      props: {
+        size: size - 1,
+      },
       state: newOuterMap,
     });
 
@@ -100,5 +125,9 @@ export class MultiMap {
         [key]: outerMap[key].toObject(),
       };
     }, {});
+  }
+
+  public size() {
+    return this.internal.props.size;
   }
 }

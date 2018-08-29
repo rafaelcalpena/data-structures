@@ -190,6 +190,112 @@ describe('PointerMap', () => {
     })
   })
 
+  describe('filter', () => {
+    it('should keep items when function result is truthy', () => {
+      let pm = PointerMap.fromObject({
+        10: '',
+        20: '',
+        21: '',
+        22: ''
+      })
+      let result;
+
+      expect(() => result = pm.filter(i => i % 10 === 0)).not.toThrow()
+      expect(result.toObject()).toEqual({
+        10: '',
+        20: ''
+      })
+
+      pm = PointerMap.fromObject({
+        10: 'abc',
+        20: 'def',
+        21: 'ghi',
+        22: 'jkl'
+      })
+      result;
+
+      expect(() => result = pm.filter(i => i % 10 === 0)).not.toThrow()
+      expect(result.toObject()).toEqual({
+        10: 'abc',
+        20: 'def'
+      })
+
+    })
+  })
+
+  describe('intersection', () => {
+    it('should return the intersection between empty PointerMaps', () => {
+      let p1 = PointerMap.fromObject({});
+      let p2 = PointerMap.fromObject({});
+      let i1;
+      let i2;
+
+      expect(() => i1 = p1.keysIntersection(p2)).not.toThrow();
+      expect(() => i2 = p2.keysIntersection(p1)).not.toThrow();
+
+      expect(i1.toObject()).toEqual({})
+      expect(i2.toObject()).toEqual({})
+    })
+
+    it('should return the intersection between PointerMaps', () => {
+      let p1 = PointerMap.fromObject({
+        a: '123',
+        b: '234',
+        c: '345'
+      });
+      let p2 = PointerMap.fromObject({
+        a: '567',
+        b: '098',
+        d: '745'
+      });
+      let i1;
+      let i2;
+
+      expect(() => i1 = p1.keysIntersection(p2)).not.toThrow();
+      expect(() => i2 = p2.keysIntersection(p1)).not.toThrow();
+
+      let expectedIntersection = {
+        a: true,
+        b: true
+      };
+      expect(i1.toObject()).toEqual(expectedIntersection)
+      expect(i2.toObject()).toEqual(expectedIntersection)
+
+      let i3;
+      let p3 = PointerMap.fromObject({
+        b: '32',
+        c: '67'
+      })
+
+      expect(() => i3 = p1.keysIntersection(p2, p3)).not.toThrow();
+      expect(i3.toObject()).toEqual({
+        b: true
+      })
+
+
+    })
+  })
+
+  describe('inEvery', () => {
+    it('checks whether key is present in all pointerMaps', () => {
+      let p1 = PointerMap.fromObject({
+        a: '1',
+        b: '2'
+      });
+      let p2 = PointerMap.fromObject({
+        a: '1',
+        c: '2'
+      });
+      let result;
+      expect(() => result = PointerMap.keyInEvery('a', [p1, p2])).not.toThrow()
+      expect(result).toBeTruthy();
+      expect(() => result = PointerMap.keyInEvery('b', [p1, p2])).not.toThrow()
+      expect(result).toBeFalsy();
+      expect(() => result = PointerMap.keyInEvery('c', [p1, p2])).not.toThrow()
+      expect(result).toBeFalsy();
+    })
+  })
+
   describe('toObject', () => {
     it('should convert to object', () => {
       const initialObj = {
@@ -227,6 +333,26 @@ describe('PointerMap', () => {
         result = pointerMap.toPairs()
       }).not.toThrow();
       expect(result).toEqual([['a', 'b']])
+    })
+  })
+
+  describe('reduce', () => {
+    it('should run reduce function', () => {
+      let pm = PointerMap.fromObject({
+        a: 'b',
+        c: 'd'
+      })
+      let result;
+      expect(() => result = pm.reduce(
+        (acc, v, k) => {
+          return [...acc, k + v]
+        },
+        []
+      )).not.toThrow()
+      expect(result).toEqual([
+        'ab',
+        'cd'
+      ])
     })
   })
 

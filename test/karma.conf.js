@@ -44,7 +44,7 @@ module.exports = function (config) {
             stats: 'errors-only'
         },
         exclude: [],
-        port: 8080,
+        port: 8081,
         browsers: ['ChromeHeadless'],
         singleRun: true,
         browserConsoleLogOptions: {
