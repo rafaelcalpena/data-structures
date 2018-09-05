@@ -127,6 +127,14 @@ export class Graph {
       });
     }).bind(this),
 
+    find: ((query) => {
+      const {nodes, edges} = this.internal;
+      return new Graph({
+        nodes: nodes.find(query),
+        edges: Collection.fromArray([])
+      });
+    }).bind(this),
+
     [Symbol.iterator]: (() => {
       return this.internal.nodes[Symbol.iterator]();
     }).bind(this),
@@ -255,6 +263,14 @@ export class Graph {
     [Symbol.iterator]: (() => {
       return this.internal.edges[Symbol.iterator]();
     }).bind(this),
+
+    findOne: ((query) => {
+      const {nodes, edges} = this.internal;
+      return edges.findOne(query)
+    }).bind(this),
+
+    /* TODO: Follow up method, used for Tree Graphs.
+    Starting from a given node, will return the path order */
 
   };
 
