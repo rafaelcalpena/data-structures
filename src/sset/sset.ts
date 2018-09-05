@@ -276,7 +276,14 @@ export class SSet {
   Should be the props of el that looks most alike
   For plugins: send before and after, rate of difference */
   public difference(set: SSet): SSet {
-    return this.internalTwoSetsOperations(['difference'], this, set).difference;
+    /* Performance improvement: only return new Set
+    if difference is not itself */
+    const result = this.internalTwoSetsOperations(['difference'], this, set).difference;
+    /* TODO: Use fastEquals here */
+    if (result.equals(this)) {
+      return this;
+    }
+    return result;
   }
 
   /** Get items that are exclusive to either current SSet or another
@@ -287,7 +294,12 @@ export class SSet {
     const {union, intersection} = this.internalTwoSetsOperations(
       ['union', 'intersection'], this, set,
     );
-    return union.difference(intersection);
+    /* Must use internalTwoSetsOperations, otherwise will
+    trigger infinite loop between equals, difference and
+    symmetricDifference */
+    return this.internalTwoSetsOperations(
+      ['difference'], union, intersection
+    ).difference;
   }
 
   /** Get items that are both contained in current and given set

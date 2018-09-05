@@ -149,6 +149,10 @@ export class Collection {
   public difference(collection: Collection) {
     const {set} = collection.internal;
     const newSet = this.internal.set.difference(set);
+    /* Performance improvement */
+    if (newSet === this.internal.set) {
+      return this;
+    }
     return new Collection(
       {
         ...this.internal,

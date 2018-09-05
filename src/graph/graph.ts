@@ -152,8 +152,13 @@ export class Graph {
 
     difference: ((g2: Graph) => {
       const {nodes, edges} = this.internal;
+      const result = edges.difference(g2.edges.getAll());
+      /* Performance optimization */
+      if (result === edges) {
+        return this;
+      }
       return new Graph({
-        edges: edges.difference(g2.edges.getAll()),
+        edges: result,
         nodes,
       });
     }).bind(this),
@@ -183,6 +188,9 @@ export class Graph {
       return this.internal.edges;
     }).bind(this),
 
+    /** Given an edge, will check if its ID is present in the graph.
+    If so, will remove the edge from the graph.
+    If not, will add the edge to the graph */
     toggle: ((item) => {
       const {nodes, edges} = this.internal;
 
