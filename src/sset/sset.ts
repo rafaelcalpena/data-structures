@@ -298,7 +298,7 @@ export class SSet {
     trigger infinite loop between equals, difference and
     symmetricDifference */
     return this.internalTwoSetsOperations(
-      ['difference'], union, intersection
+      ['difference'], union, intersection,
     ).difference;
   }
 

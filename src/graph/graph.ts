@@ -130,8 +130,8 @@ export class Graph {
     find: ((query) => {
       const {nodes, edges} = this.internal;
       return new Graph({
+        edges: Collection.fromArray([]),
         nodes: nodes.find(query),
-        edges: Collection.fromArray([])
       });
     }).bind(this),
 
@@ -188,9 +188,10 @@ export class Graph {
       return this.internal.edges;
     }).bind(this),
 
-    /** Given an edge, will check if its ID is present in the graph.
-    If so, will remove the edge from the graph.
-    If not, will add the edge to the graph */
+   /** Given an edge, will check if its ID is present in the graph.
+    * If so, will remove the edge from the graph.
+    * If not, will add the edge to the graph
+    */
     toggle: ((item) => {
       const {nodes, edges} = this.internal;
 
@@ -274,7 +275,7 @@ export class Graph {
 
     findOne: ((query) => {
       const {nodes, edges} = this.internal;
-      return edges.findOne(query)
+      return edges.findOne(query);
     }).bind(this),
 
     /* TODO: Follow up method, used for Tree Graphs.
