@@ -127,6 +127,14 @@ export class Graph {
       });
     }).bind(this),
 
+    find: ((query) => {
+      const {nodes, edges} = this.internal;
+      return new Graph({
+        edges: Collection.fromArray([]),
+        nodes: nodes.find(query),
+      });
+    }).bind(this),
+
     [Symbol.iterator]: (() => {
       return this.internal.nodes[Symbol.iterator]();
     }).bind(this),
@@ -144,8 +152,13 @@ export class Graph {
 
     difference: ((g2: Graph) => {
       const {nodes, edges} = this.internal;
+      const result = edges.difference(g2.edges.getAll());
+      /* Performance optimization */
+      if (result === edges) {
+        return this;
+      }
       return new Graph({
-        edges: edges.difference(g2.edges.getAll()),
+        edges: result,
         nodes,
       });
     }).bind(this),
@@ -175,6 +188,10 @@ export class Graph {
       return this.internal.edges;
     }).bind(this),
 
+   /** Given an edge, will check if its ID is present in the graph.
+    * If so, will remove the edge from the graph.
+    * If not, will add the edge to the graph
+    */
     toggle: ((item) => {
       const {nodes, edges} = this.internal;
 
@@ -255,6 +272,14 @@ export class Graph {
     [Symbol.iterator]: (() => {
       return this.internal.edges[Symbol.iterator]();
     }).bind(this),
+
+    findOne: ((query) => {
+      const {nodes, edges} = this.internal;
+      return edges.findOne(query);
+    }).bind(this),
+
+    /* TODO: Follow up method, used for Tree Graphs.
+    Starting from a given node, will return the path order */
 
   };
 
