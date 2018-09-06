@@ -1,6 +1,6 @@
 {
   "name": "@labshare/data-structures",
-  "main": "./ui/app.ts",
+  "main": "./src/index.ts",
   "version": "0.0.1",
   "description": "",
   "contributors": "https://github.com/LabShare/data-structures/graphs/contributors",
