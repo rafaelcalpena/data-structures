@@ -165,6 +165,10 @@ export class Collection {
     return this.internal.set.has(item);
   }
 
+  public isEmpty(): any {
+    return this.size() === 0;
+  }
+
   public remove(item) {
     const newSet = this.internal.set.remove(item);
     return new Collection(
@@ -188,6 +192,17 @@ export class Collection {
     return new Collection({
       ...this.internal,
       set: this.internal.set.map(fn),
+    });
+  }
+
+  public forEach(fn) {
+    this.internal.set.forEach(fn);
+  }
+
+  public filter(fn) {
+    return new Collection({
+      ...this.internal,
+      set: this.internal.set.filter(fn),
     });
   }
 
