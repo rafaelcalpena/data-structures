@@ -39,6 +39,13 @@ export class Graph {
     });
   }
 
+  public static fromEmpty() {
+    return Graph.fromObject({
+      edges: [],
+      nodes: [],
+    });
+  }
+
   /* TODO: add wrapper for bind functions */
   public nodes = {
     add: ((item: any) => {
@@ -135,6 +142,74 @@ export class Graph {
       });
     }).bind(this),
 
+    filter: ((query) => {
+      const {nodes, edges} = this.internal;
+      return new Graph({
+        edges: Collection.fromArray([]),
+        nodes: nodes.filter(query),
+      });
+    }).bind(this),
+
+    forEach: ((fn) => {
+      const {nodes, edges} = this.internal;
+      nodes.forEach(fn);
+    }).bind(this),
+
+    isEmpty: (() => {
+      return this.internal.nodes.isEmpty();
+    }).bind(this),
+
+    getStartingNodes: (() => {
+      return this.nodes.filter((i) => {
+        return this.edges.findOne({
+          to: i.id,
+        }) === undefined;
+      });
+    }).bind(this),
+
+    topologicalSort: (() => {
+
+      const step = (graph, arr = []) => {
+        if (graph.nodes.isEmpty()) {
+          return arr;
+        }
+        /* Get Nodes without Incoming Edges - "Starting" nodes */
+        const levelNodes = graph.nodes.getStartingNodes();
+        /* Remove levelNodes from graph */
+        const graphWithoutLevelNodes = graph.nodes.difference(levelNodes);
+        /* Remove edges attached to removed nodes */
+        /* TODO: Abstract step into custom method */
+        const nodesCollection = Collection.fromArray(levelNodes.toObject().nodes);
+        let graphWithoutLevelEdges = graphWithoutLevelNodes;
+        nodesCollection.forEach((item) => {
+          graphWithoutLevelEdges = graphWithoutLevelEdges.edges.findAndDifference({
+            from: item.id,
+          });
+        });
+
+        return step(
+          graphWithoutLevelEdges,
+          [...arr, levelNodes],
+        );
+      };
+
+      return step(this);
+
+    }).bind(this),
+
+    difference: ((g2: Graph) => {
+      const {nodes, edges} = this.internal;
+      const result = nodes.difference(g2.nodes.getAll());
+      /* Performance optimization */
+      if (result === nodes) {
+        return this;
+      }
+      return new Graph({
+        edges,
+        nodes: result,
+      });
+    }).bind(this),
+
     [Symbol.iterator]: (() => {
       return this.internal.nodes[Symbol.iterator]();
     }).bind(this),
@@ -169,6 +244,14 @@ export class Graph {
       return new Graph({
         edges: edges.map(fn),
         nodes,
+      });
+    }).bind(this),
+
+    filter: ((query) => {
+      const {nodes, edges} = this.internal;
+      return new Graph({
+        edges: edges.filter(query),
+        nodes: Collection.fromArray([]),
       });
     }).bind(this),
 
@@ -249,6 +332,10 @@ export class Graph {
           `Could not update Edge from Graph: Edge does not exist`,
         );
       }
+      /* Performance improvement */
+      if (SSet.hashOf(item) === SSet.hashOf(newItem)) {
+        return this;
+      }
       return new Graph({
         edges: edges.remove(item).add(newItem),
         nodes,
@@ -276,6 +363,17 @@ export class Graph {
     findOne: ((query) => {
       const {nodes, edges} = this.internal;
       return edges.findOne(query);
+    }).bind(this),
+
+    getId : ((id: any) => {
+      const {edges} = this.internal;
+      const maybeEdge = edges.findOne({id});
+      if (_.isUndefined(maybeEdge)) {
+        throw new Error (
+          `Could not get Edge: Edge Id '${id}' does not exist in Graph`,
+        );
+      }
+      return maybeEdge;
     }).bind(this),
 
     /* TODO: Follow up method, used for Tree Graphs.
