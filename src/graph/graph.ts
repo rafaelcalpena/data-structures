@@ -48,7 +48,10 @@ export class Graph {
 
   /* TODO: add wrapper for bind functions */
   public nodes = {
-    add: ((item: any) => {
+    /** Adds a new Node to the Graph.
+     * Will throw an error if Node already exists
+     */
+    add: ((item: any): Graph => {
       const {nodes, edges} = this.internal;
       if (nodes.has(item)) {
         throw new Error (
@@ -61,7 +64,10 @@ export class Graph {
       });
     }).bind(this),
 
-    remove: ((item: any) => {
+    /** Removes a Node from the Graph.
+     * Will throw an error if Node does not exist in Graph
+     */
+    remove: ((item: any): Graph => {
       const {nodes, edges} = this.internal;
       if (!nodes.has(item)) {
         throw new Error (
@@ -74,7 +80,11 @@ export class Graph {
       });
     }).bind(this),
 
-    union : ((g2: Graph) => {
+    /**
+     * Adds Nodes Graphs and keeps Edges as is for "this" Graph
+     * If you would like to add Edges as well, please use Graph.union()
+     */
+    union : ((g2: Graph): Graph => {
       const {nodes, edges} = this.internal;
       return new Graph({
         edges,
@@ -82,11 +92,17 @@ export class Graph {
       });
     }).bind(this),
 
-    getAll : (() => {
+    /** Returns Nodes as Collection Type instead of Graph */
+    getAll : ((): Collection => {
       return this.internal.nodes;
     }).bind(this),
 
-    update: ((item, newItem)  => {
+    /** Update a Node from the Graph.
+     * This method will update only one matching Node.
+     * Query must be exactly equal to the Node. If you'd like to
+     * query only by "id" property, please use updateId()
+     */
+    update: ((item, newItem): Graph  => {
       const {nodes, edges} = this.internal;
       if (!nodes.has(item)) {
         throw new Error (
@@ -99,10 +115,17 @@ export class Graph {
       });
     }).bind(this),
 
-    has: ((item) => {
+    /** Check if a given item is contained in the Graph Nodes
+     * Query must be exactly equal to the Node. If you'd like to
+     * query only by "id" property, please use hasId()
+     */
+    has: ((item) : boolean => {
       return this.internal.nodes.has(item);
     }).bind(this),
 
+    /** Gets Node by querying its id
+     * If Node Id does not exist in Graph, will throw an error.
+     */
     getId : ((id: any) => {
       const {nodes, edges} = this.internal;
       const maybeNode = nodes.findOne({id});
@@ -114,12 +137,14 @@ export class Graph {
       return maybeNode;
     }).bind(this),
 
+    /** Check if a given item id is contained in the Graph Nodes */
     hasId : ((id: any) => {
       const {nodes, edges} = this.internal;
       const maybeNode = nodes.findOne({id});
       return (typeof maybeNode !== 'undefined') ? true : false;
     }).bind(this),
 
+    /** Get one Node that contains an incoming edge from id supplied */
     oneReachedById: ((id) => {
       const edgesGraph = this.edges.fromId(id);
       if (edgesGraph.edges.isEmpty()) {
@@ -129,6 +154,9 @@ export class Graph {
       return this.nodes.getId(edge.to);
     }).bind(this),
 
+    /* Get all Nodes that contain an incoming edge from id supplied
+     * Return does not contain Edges
+     */
     reachedById: ((id) => {
       const edgesGraph = this.edges.fromId(id);
       const nodes = edgesGraph.internal.edges.map((edge) => {
@@ -141,6 +169,11 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Find Nodes that satisfy a given query. Exactly matches one-level-deep
+     * property indexes, such as "id".
+     * If you would like to run a complex query, please use filter() instead
+     * Return does not contain Edges.
+     */
     find: ((query) => {
       const {nodes, edges} = this.internal;
       return new Graph({
@@ -149,6 +182,9 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Run a query function against all Nodes and return the ones that pass the test
+     * Return does not contain Edges
+     */
     filter: ((query) => {
       const {nodes, edges} = this.internal;
       return new Graph({
@@ -157,15 +193,20 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Run a function against all Nodes */
     forEach: ((fn) => {
       const {nodes, edges} = this.internal;
       nodes.forEach(fn);
     }).bind(this),
 
+    /** Check whether Graph contains no Nodes */
     isEmpty: (() => {
       return this.internal.nodes.isEmpty();
     }).bind(this),
 
+    /** Get all Nodes that do not have incoming edges
+     * Return does not contain edges
+     */
     getStartingNodes: (() => {
       return this.nodes.filter((i) => {
         return this.edges.findOne({
@@ -174,6 +215,9 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Sort Nodes topologically.
+     * Return contains an Array of Graphs that do not contain Edges
+     */
     topologicalSort: (() => {
       /* TODO: Add cycle detection */
       const step = (graph, arr = []) => {
@@ -204,6 +248,9 @@ export class Graph {
 
     }).bind(this),
 
+    /** Get the Nodes difference between two Graphs.
+     * Edges remain unaltered for "this" Graph
+     */
     difference: ((g2: Graph) => {
       const {nodes, edges} = this.internal;
       const result = nodes.difference(g2.nodes.getAll());
@@ -217,6 +264,7 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Iterator for Nodes. Can be used in for ... of loops, for example */
     [Symbol.iterator]: (() => {
       return this.internal.nodes[Symbol.iterator]();
     }).bind(this),
@@ -224,6 +272,10 @@ export class Graph {
   };
 
   public edges = {
+    /**
+     * Adds Edges Graphs and keeps Nodes as is for "this" Graph
+     * If you would like to add Nodes as well, please use Graph.union()
+     */
     union : ((g2: Graph) => {
       const {nodes, edges} = this.internal;
       return new Graph({
@@ -232,6 +284,9 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Get the Edges difference between two Graphs.
+     * Nodes remain unaltered for "this" Graph
+     */
     difference: ((g2: Graph) => {
       const {nodes, edges} = this.internal;
       const result = edges.difference(g2.edges.getAll());
@@ -245,6 +300,9 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Maps Edges to a new Graph
+     * Resulting Graph keep Nodes unaltered
+     */
     map: ((fn) => {
       const {nodes, edges} = this.internal;
 
@@ -254,6 +312,9 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Run a query function against all Edges and return the ones that pass the test
+     * Return does not contain Nodes
+     */
     filter: ((query) => {
       const {nodes, edges} = this.internal;
       return new Graph({
@@ -262,6 +323,11 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Find Edges that satisfy a given query. Exactly matches one-level-deep
+     * property indexes, such as "id".
+     * If you would like to run a complex query, please use filter() instead
+     * Return does not contain Nodes.
+     */
     find: ((query) => {
       const {nodes, edges} = this.internal;
       return new Graph({
@@ -270,10 +336,12 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Shortcut method for piping Edges.find() => Edges.difference */
     findAndDifference: ((query) => {
       return this.edges.difference(this.edges.find(query));
     }).bind(this),
 
+    /** Returns Edges as Collection Type instead of Graph */
     getAll : (() => {
       return this.internal.edges;
     }).bind(this),
@@ -292,6 +360,9 @@ export class Graph {
       }
     }).bind(this),
 
+    /** Removes an Edge from the Graph.
+     * Will throw an error if Edge does not exist in Graph
+     */
     remove: ((item: any) => {
       const {nodes, edges} = this.internal;
       if (!edges.has(item)) {
@@ -305,6 +376,9 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Adds a new Edge to the Graph.
+     * Will throw an error if Edge already exists
+     */
     add: ((item: any) => {
       const {nodes, edges} = this.internal;
       if (edges.has(item)) {
@@ -318,6 +392,11 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Updates an Edge from the Graph.
+     * This method will update only one matching Edge.
+     * Query must be exactly equal to the Edge. If you'd like to
+     * query only by "id" property, please use updateId()
+     */
     update: ((item, newItem)  => {
       const {nodes, edges} = this.internal;
       if (!edges.has(item)) {
@@ -331,6 +410,7 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Updates an Edge from Graph by querying its id */
     updateId: ((id, newItem) => {
       const {nodes, edges} = this.internal;
       const item = edges.findOne({id});
@@ -349,12 +429,16 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Checks whether id is contained in Graph Edges */
     hasId : ((id: any) => {
       const {nodes, edges} = this.internal;
       const maybeNode = edges.findOne({id});
       return (typeof maybeNode !== 'undefined') ? true : false;
     }).bind(this),
 
+    /** Gets All Edges that have "from" property set to given id
+     * Return does not contain Nodes
+     */
     fromId: ((from) => {
       const {nodes, edges} = this.internal;
       return new Graph ({
@@ -363,23 +447,30 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Iterator for Edges. Can be used in for ... of loops, for example */
     [Symbol.iterator]: (() => {
       return this.internal.edges[Symbol.iterator]();
     }).bind(this),
 
+    /** Finds one item in Edges that satifies the query provided */
     findOne: ((query) => {
       const {nodes, edges} = this.internal;
       return edges.findOne(query);
     }).bind(this),
 
+    /** Gets the number of Edges in the Graph */
     size: (() => {
       return this.internal.edges.size();
     }).bind(this),
 
+    /** Check whether Graph contains no Edges */
     isEmpty: (() => {
       return this.internal.edges.isEmpty();
     }).bind(this),
 
+    /** Gets Edge by querying its id
+     * If Edge Id does not exist in Graph, will throw an error.
+     */
     getId : ((id: any) => {
       const {edges} = this.internal;
       const maybeEdge = edges.findOne({id});
