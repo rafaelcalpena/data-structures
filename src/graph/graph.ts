@@ -52,7 +52,7 @@ export class Graph {
       const {nodes, edges} = this.internal;
       if (nodes.has(item)) {
         throw new Error (
-          `Could not add Node from Graph: Node already exists`,
+          `Could not add Node to Graph: Node already exists`,
         );
       }
       return new Graph({
@@ -99,6 +99,10 @@ export class Graph {
       });
     }).bind(this),
 
+    has: ((item) => {
+      return this.internal.nodes.has(item);
+    }).bind(this),
+
     getId : ((id: any) => {
       const {nodes, edges} = this.internal;
       const maybeNode = nodes.findOne({id});
@@ -118,6 +122,9 @@ export class Graph {
 
     oneReachedById: ((id) => {
       const edgesGraph = this.edges.fromId(id);
+      if (edgesGraph.edges.isEmpty()){
+        return;
+      }
       const edge = edgesGraph.edges.getAll().getOne();
       return this.nodes.getId(edge.to);
     }).bind(this),
@@ -168,7 +175,7 @@ export class Graph {
     }).bind(this),
 
     topologicalSort: (() => {
-
+      /* TODO: Add cycle detection */
       const step = (graph, arr = []) => {
         if (graph.nodes.isEmpty()) {
           return arr;
@@ -363,6 +370,14 @@ export class Graph {
     findOne: ((query) => {
       const {nodes, edges} = this.internal;
       return edges.findOne(query);
+    }).bind(this),
+
+    size: (() => {
+      return this.internal.edges.size();
+    }).bind(this),
+
+    isEmpty: (() => {
+      return this.internal.edges.isEmpty();
     }).bind(this),
 
     getId : ((id: any) => {

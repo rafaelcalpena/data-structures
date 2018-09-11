@@ -201,7 +201,6 @@ export class Collection {
 
   public filter(fn) {
     return new Collection({
-      ...this.internal,
       set: this.internal.set.filter(fn),
     });
   }
