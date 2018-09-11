@@ -268,4 +268,114 @@ describe('collection', () => {
     })
   })
 
+  describe('getOne', () => {
+    it('should return a value from the Collection', () => {
+      let c = Collection.fromArray([
+        'firstItem'
+      ]);
+      let item;
+      expect(() => item = c.getOne()).not.toThrow();
+      expect(item).toEqual('firstItem');
+      c = Collection.fromArray([]);
+      expect(() => item = c.getOne()).not.toThrow();
+      expect(item).toBeUndefined();
+      c = Collection.fromArray([
+        'firstItem',
+        'secondItem',
+        'thirdItem'
+      ]);
+      expect(() => item = c.getOne()).not.toThrow();
+      /* must be any of the three */
+      expect(['firstItem', 'secondItem', 'thirdItem']).toContain(item);
+    })
+  })
+
+  describe('isEmpty', () => {
+    it ('should return true for empty collection', () => {
+      let c = Collection.fromArray([]);
+      expect(c.isEmpty()).toBeTruthy();
+      c = Collection.fromArray([
+        'firstItem'
+      ]);
+      expect(c.isEmpty()).toBeFalsy();
+      c = Collection.fromArray([
+        'firstItem',
+        'secondItem'
+      ]);
+      expect(c.isEmpty()).toBeFalsy();
+    })
+  })
+
+  describe('difference', () => {
+
+    it('should allow difference from another collection', () => {
+      let c = Collection.fromArray([5, 7, 8, 9, 12]),
+      c2 = Collection.fromArray([1, 2, 3, 4, 9, 6, 7]),
+      c3;
+      expect(() => c3 = c.difference(c2)).not.toThrow();
+      expect(c3.size()).toBe(3);
+      expect(c3.has(7)).toBeFalsy();
+      expect(c3.has(9)).toBeFalsy();
+      expect(c3.has(5)).toBeTruthy();
+      expect(c3.has(8)).toBeTruthy();
+      expect(c3.has(12)).toBeTruthy();
+    })
+
+    it('should return self reference when difference equals self', () => {
+      let c = Collection.fromArray([5, 7, 8, 9, 12]),
+      c2 = Collection.fromArray([89, 90, 8172, 123]),
+      c3;
+      expect(() => c3 = c.difference(c2)).not.toThrow();
+      expect(c3).toBe(c);
+
+      c2 = Collection.fromArray([5]);
+      expect(() => c3 = c.difference(c2)).not.toThrow();
+      expect(c3).not.toBe(c);
+
+    })
+
+  })
+
+  describe('iterators', () => {
+    it('should contain iterator for "for ... of" loops', () => {
+      let c = Collection.fromArray([1, 2, 3, 4]);
+      let str = "";
+      for (let item of c) {
+        str += `${item};`;
+      }
+      expect(str).toBe('2;1;3;4;')
+    })
+
+    it('should contain forEach method', () => {
+      const arr = [
+        'abc',
+        'def',
+        'ghi',
+        'jkl'
+      ];
+      let c = Collection.fromArray(arr);
+      c.forEach(item => {
+        expect(c.has(item)).toBeTruthy()
+        expect(arr.find((i) => i === item)).toEqual(item);
+        arr.splice(arr.indexOf(item), 1);
+      })
+      expect(arr.length).toBe(0);
+    })
+
+    it('should contain filter method', () => {
+      const arr = ['Walked', 'Talked', 'Faked', 'Made', 'Did'].map(
+        i => ({id: i})
+      );
+      let c = Collection.fromArray(arr);
+      let c2 = c.filter(word => {
+        return word.id.match(/ed$/)
+      });
+      expect(c2.has({id: 'Walked'})).toBeTruthy();
+      expect(c2.has({id: 'Talked'})).toBeTruthy();
+      expect(c2.has({id: 'Faked'})).toBeTruthy();
+      expect(c2.has({id: 'Made'})).toBeFalsy();
+      expect(c2.has({id: 'Did'})).toBeFalsy();
+    })
+  })
+
 })
