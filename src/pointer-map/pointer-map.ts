@@ -138,11 +138,10 @@ export class PointerMap {
   public firstKey() {
     const {state} = this.internal;
     let result;
-    for (const key in state) {
-      if (!state.hasOwnProperty(key)) { continue; }
+    _.forEach(state, (value, key) => {
       result = key;
-      break;
-    }
+      return false;
+    });
     return result;
   }
 
