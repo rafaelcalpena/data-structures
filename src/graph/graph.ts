@@ -122,7 +122,7 @@ export class Graph {
 
     oneReachedById: ((id) => {
       const edgesGraph = this.edges.fromId(id);
-      if (edgesGraph.edges.isEmpty()){
+      if (edgesGraph.edges.isEmpty()) {
         return;
       }
       const edge = edgesGraph.edges.getAll().getOne();

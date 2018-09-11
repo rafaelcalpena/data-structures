@@ -141,7 +141,7 @@ export class PointerMap {
     _.forEach(state, (value, key) => {
       result = key;
       return false;
-    })
+    });
     return result;
   }
 
