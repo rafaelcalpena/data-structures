@@ -119,7 +119,7 @@ export class Graph {
      * Query must be exactly equal to the Node. If you'd like to
      * query only by "id" property, please use hasId()
      */
-    has: ((item) : boolean => {
+    has: ((item): boolean => {
       return this.internal.nodes.has(item);
     }).bind(this),
 
