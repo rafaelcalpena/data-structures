@@ -18,7 +18,7 @@
     "test:watch": "karma start ./test/karma.conf.js --single-run false",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "lint:fix": "tslint --fix -p tsconfig.json -c tslint.json",
-    "build": "tsc",
+    "build": "tsc --outDir build/",
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "semantic-release": "semantic-release",
     "typedoc": "./node_modules/typedoc/bin/typedoc --out docs/ --module commonjs"

@@ -17,8 +17,7 @@
       "es2017",
       "dom"
     ],
-    "downlevelIteration": true,
-    "outDir": "build"
+    "downlevelIteration": true
   },
   "files": [
     "src/index.ts"
