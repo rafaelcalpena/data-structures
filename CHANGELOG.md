@@ -1,3 +1,10 @@
+## [1.1.5](https://github.com/LabShare/data-structures/compare/v1.1.4...v1.1.5) (2018-09-12)
+
+
+### Bug Fixes
+
+* **pkg:** refactor package.json script duplication ([a0c22f4](https://github.com/LabShare/data-structures/commit/a0c22f4))
+
 ## [1.1.4](https://github.com/LabShare/data-structures/compare/v1.1.3...v1.1.4) (2018-09-12)
 
 
