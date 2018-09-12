@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/LabShare/data-structures/compare/v1.1.3...v1.1.4) (2018-09-12)
+
+
+### Bug Fixes
+
+* **pkg:** npm publish config access should be public ([d5d325a](https://github.com/LabShare/data-structures/commit/d5d325a))
+
 ## [1.1.3](https://github.com/LabShare/data-structures/compare/v1.1.2...v1.1.3) (2018-09-12)
 
 
