@@ -6,13 +6,6 @@ sudo: required
 addons:
   chrome: stable
 before_install:
-  - |-
-    if [ $TRAVIS_PULL_REQUEST == false ] && [ $TRAVIS_BRANCH == "master" ];
-     then
-        echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > ~/.npmrc;
-      else
-        echo "//registry.npmjs.org/:_authToken=\${NPM_INSTALL_TOKEN}" > ~/.npmrc;
-    fi
   - 'git config --global url."git@github.com:".insteadOf "https://github.com/"'
 install:
   - npm i -g lsc nsp codecov
