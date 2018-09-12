@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/LabShare/data-structures/compare/v1.1.2...v1.1.3) (2018-09-12)
+
+
+### Bug Fixes
+
+* **ci:** remove unnecessary Travis config ([0f9ec35](https://github.com/LabShare/data-structures/commit/0f9ec35))
+
 ## [1.1.2](https://github.com/LabShare/data-structures/compare/v1.1.1...v1.1.2) (2018-09-12)
 
 
