@@ -21,7 +21,7 @@
     "build": "tsc --outDir build/",
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "semantic-release": "semantic-release",
-    "typedoc": "./node_modules/typedoc/bin/typedoc --out docs/ --module commonjs"
+    "docs": "./node_modules/typedoc/bin/typedoc --out docs/ --module commonjs && touch ./docs/.nojekyll"
   },
   "dependencies": {
     "lodash": "^4.17.10",
