@@ -21,7 +21,7 @@
     "build": "tsc --outDir build/",
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "semantic-release": "semantic-release",
-    "typedoc": "./node_modules/typedoc/bin/typedoc --out docs/ --module commonjs"
+    "docs": "./node_modules/typedoc/bin/typedoc && touch ./docs/.nojekyll"
   },
   "dependencies": {
     "lodash": "^4.17.10",
@@ -51,7 +51,7 @@
     "ts-loader": "^4.3.0",
     "typescript": "^2.7.2",
     "webpack": "4.10.1",
-    "typedoc": "^0.11.1",
+    "typedoc": "^0.12.0",
     "tslint": "^5.9.1"
   },
   "publishConfig": {
