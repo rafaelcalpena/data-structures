@@ -9,19 +9,23 @@ export const initializePlugins: initializePluginsType = (internalState, pluginNa
   For last possibility, the plugin can decide whether to trust
   provided properties or not. */
   const {plugins, state, props} = internalState;
-  const updatedProps = pluginNames.reduce((acc, pluginName) => {
+  const updatedPropsAndState = pluginNames.reduce((acc, pluginName) => {
+    const {props: newProps, state: newState} = plugins[pluginName].onInit(
+        state,
+        props[pluginName],
+      );
     const r = {
-      ...acc,
-      [pluginName]: plugins[pluginName].onInit(
-          state,
-          props[pluginName],
-        ),
-      };
+      props: {
+        ...acc.props,
+        [pluginName]: newProps
+      },
+      state: newState
+    };
 
     return r;
-  }, {...props});
+  }, {props: {...props}, state: {...state}});
   return {
     ...internalState,
-    props: updatedProps,
+    ...updatedPropsAndState,
   };
 };
