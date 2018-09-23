@@ -4,17 +4,47 @@ import _ = require("lodash");
 import {DefaultIndex} from '../default-index/default-index';
 import {PointerMap} from '../pointer-map/pointer-map';
 import {createTriples} from './create-triples';
+import * as uuid from 'uuid/v4';
 
 export const indexPlugin = {
   onInit(state) {
+    /* TODO: Abstract id verification and creation from
+    onInit and onBeforeAdd into single function */
+    /* Add ids to items that do not have it */
+    state = _.reduce(state, (acc, value, key) => {
+
+      if (!_.isPlainObject(value)) {
+        throw new Error(`All items within a Collection must be plain objects`)
+      }
+
+      /* Hash key must change due to id insertion */
+      if (!('id' in value)) {
+        let newObj = {
+          ...value,
+          id: uuid()
+        };
+        return _.omit({
+          ...acc,
+          [SSet.hashOf(newObj)]: newObj
+        }, [key])
+      }
+      return {
+        ...acc,
+        [key]: value
+      }
+    }, {})
     /* For each item created, update indexes */
     const itemHashes = Object.keys(state).map(
       (h) => ({hash: h, item: state[h]}),
     );
     const triples = itemHashes.reduce(createTriples, []);
-    return DefaultIndex.fromTriples(
+
+    return {
+      props: DefaultIndex.fromTriples(
       triples,
-    );
+      ),
+      state
+    }
   },
   onRemove(item, itemHash, props, state) {
     let defaultIndex = props;
@@ -23,6 +53,23 @@ export const indexPlugin = {
       return acc.remove(key, SSet.hashOf(value), itemHash);
     }, defaultIndex);
     return defaultIndex;
+  },
+  onBeforeAdd(item, itemHash, props: DefaultIndex, state) {
+    if (!item.id) {
+      return {
+        continue: true,
+        message: null,
+        value: {
+          ...item,
+          id: uuid()
+        }
+      }
+    }
+    return {
+      continue: true,
+      message: null,
+      value: item
+    }
   },
   onAdd(item, itemHash, props, state) {
     let defaultIndex = props;
@@ -88,6 +135,11 @@ export const indexPlugin = {
           return Collection.fromArray(result);
         }
       },
+
+      getIndex() {
+        return props;
+      }
+
     };
   },
 };
