@@ -264,4 +264,56 @@ export class Collection {
   public toArray() {
     return this.internal.set.toArray();
   }
+
+  public getByHash(hash) {
+    return this.internal.set.getByHash(hash);
+  }
+
+  public getByIdHash(hash) {
+    return this.internal.set.getByHash(
+      this.internal.set.$('indexPlugin').getIndex().get('id', hash)
+    );
+  }
+
+  public changesFrom(c2: Collection) {
+    return c2.changesTo(this);
+  }
+
+  public changesTo(c2: Collection) {
+    let changesList = Collection.fromArray([]);
+    let comparingCollection = c2;
+    /* Algorithm should track items by 'id' property */
+    this.forEach(item => {
+      let id = item.id;
+      let c2Item = comparingCollection.findOne({id});
+      if (c2Item) {
+        /* TODO: Avoid rehashing to improve performance */
+        if (SSet.hashOf(c2Item) !== SSet.hashOf(item)) {
+          changesList = changesList.add({
+            type: 'edit',
+            id,
+            before: item,
+            after: c2Item
+          })
+        }
+        comparingCollection = comparingCollection.remove(c2Item)
+      } else {
+        changesList = changesList.add({
+          type: 'remove',
+          id,
+          item
+        })
+      }
+    })
+    comparingCollection.forEach(item => {
+      let id = item.id;
+      changesList = changesList.add({
+        type: 'add',
+        id,
+        item
+      });
+    })
+
+    return changesList;
+  }
 }
