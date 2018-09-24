@@ -286,27 +286,27 @@ export class Collection {
         /* TODO: Avoid rehashing to improve performance */
         if (SSet.hashOf(c2Item) !== SSet.hashOf(item)) {
           changesList = changesList.add({
-            type: 'edit',
-            id,
-            before: item,
             after: c2Item,
+            before: item,
+            id,
+            type: 'edit',
           });
         }
         comparingCollection = comparingCollection.remove(c2Item);
       } else {
         changesList = changesList.add({
-          type: 'remove',
           id,
           item,
+          type: 'remove',
         });
       }
     });
     comparingCollection.forEach((item) => {
       const id = item.id;
       changesList = changesList.add({
-        type: 'add',
         id,
         item,
+        type: 'add'        
       });
     });
 

@@ -29,7 +29,7 @@ interface InternalState {
 
 type CollectionChangeList = Collection;
 
-interface ChangeLog {
+interface IChangeLog {
   nodes: CollectionChangeList;
   edges: CollectionChangeList;
 }
@@ -544,7 +544,7 @@ export class Graph {
     return this.edges.union(graph2).nodes.union(graph2);
   }
 
-  public changesFrom(graph2: Graph): ChangeLog {
+  public changesFrom(graph2: Graph): IChangeLog {
     /* Changes are based on "id" field, which must be unique */
     const {nodes, edges} = this.internal;
 
@@ -554,7 +554,7 @@ export class Graph {
     };
   }
 
-  public changesTo(graph2: Graph): ChangeLog {
+  public changesTo(graph2: Graph): IChangeLog {
     return graph2.changesFrom(this);
   }
 }
