@@ -29,9 +29,9 @@ interface InternalState {
 
 type CollectionChangeList = Collection;
 
-type ChangeLog = {
-  nodes: CollectionChangeList,
-  edges: CollectionChangeList
+interface ChangeLog {
+  nodes: CollectionChangeList;
+  edges: CollectionChangeList;
 }
 
 export class Graph {
@@ -550,8 +550,8 @@ export class Graph {
 
     return {
       edges: edges.changesFrom(graph2.edges.getAll()),
-      nodes: nodes.changesFrom(graph2.nodes.getAll())
-    }
+      nodes: nodes.changesFrom(graph2.nodes.getAll()),
+    };
   }
 
   public changesTo(graph2: Graph): ChangeLog {

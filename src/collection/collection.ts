@@ -1,10 +1,10 @@
 import {SSet} from '../sset/sset';
 
 import _ = require("lodash");
+import * as uuid from 'uuid/v4';
 import {DefaultIndex} from '../default-index/default-index';
 import {PointerMap} from '../pointer-map/pointer-map';
 import {createTriples} from './create-triples';
-import * as uuid from 'uuid/v4';
 
 export const indexPlugin = {
   onInit(state) {
@@ -14,25 +14,25 @@ export const indexPlugin = {
     state = _.reduce(state, (acc, value, key) => {
 
       if (!_.isPlainObject(value)) {
-        throw new Error(`All items within a Collection must be plain objects`)
+        throw new Error(`All items within a Collection must be plain objects`);
       }
 
       /* Hash key must change due to id insertion */
       if (!('id' in value)) {
-        let newObj = {
+        const newObj = {
           ...value,
-          id: uuid()
+          id: uuid(),
         };
         return _.omit({
           ...acc,
-          [SSet.hashOf(newObj)]: newObj
-        }, [key])
+          [SSet.hashOf(newObj)]: newObj,
+        }, [key]);
       }
       return {
         ...acc,
-        [key]: value
-      }
-    }, {})
+        [key]: value,
+      };
+    }, {});
     /* For each item created, update indexes */
     const itemHashes = Object.keys(state).map(
       (h) => ({hash: h, item: state[h]}),
@@ -43,8 +43,8 @@ export const indexPlugin = {
       props: DefaultIndex.fromTriples(
       triples,
       ),
-      state
-    }
+      state,
+    };
   },
   onRemove(item, itemHash, props, state) {
     let defaultIndex = props;
@@ -61,15 +61,15 @@ export const indexPlugin = {
         message: null,
         value: {
           ...item,
-          id: uuid()
-        }
-      }
+          id: uuid(),
+        },
+      };
     }
     return {
       continue: true,
       message: null,
-      value: item
-    }
+      value: item,
+    };
   },
   onAdd(item, itemHash, props, state) {
     let defaultIndex = props;
@@ -134,7 +134,7 @@ export const indexPlugin = {
 
       getIndex() {
         return props;
-      }
+      },
 
     };
   },
@@ -267,7 +267,7 @@ export class Collection {
 
   public getByIdHash(hash) {
     return this.internal.set.getByHash(
-      this.internal.set.$('indexPlugin').getIndex().get('id', hash)
+      this.internal.set.$('indexPlugin').getIndex().get('id', hash),
     );
   }
 
@@ -279,9 +279,9 @@ export class Collection {
     let changesList = Collection.fromArray([]);
     let comparingCollection = c2;
     /* Algorithm should track items by 'id' property */
-    this.forEach(item => {
-      let id = item.id;
-      let c2Item = comparingCollection.findOne({id});
+    this.forEach((item) => {
+      const id = item.id;
+      const c2Item = comparingCollection.findOne({id});
       if (c2Item) {
         /* TODO: Avoid rehashing to improve performance */
         if (SSet.hashOf(c2Item) !== SSet.hashOf(item)) {
@@ -289,26 +289,26 @@ export class Collection {
             type: 'edit',
             id,
             before: item,
-            after: c2Item
-          })
+            after: c2Item,
+          });
         }
-        comparingCollection = comparingCollection.remove(c2Item)
+        comparingCollection = comparingCollection.remove(c2Item);
       } else {
         changesList = changesList.add({
           type: 'remove',
           id,
-          item
-        })
+          item,
+        });
       }
-    })
-    comparingCollection.forEach(item => {
-      let id = item.id;
+    });
+    comparingCollection.forEach((item) => {
+      const id = item.id;
       changesList = changesList.add({
         type: 'add',
         id,
-        item
+        item,
       });
-    })
+    });
 
     return changesList;
   }

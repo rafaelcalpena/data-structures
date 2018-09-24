@@ -17,9 +17,9 @@ export const initializePlugins: initializePluginsType = (internalState, pluginNa
     const r = {
       props: {
         ...acc.props,
-        [pluginName]: newProps
+        [pluginName]: newProps,
       },
-      state: newState
+      state: newState,
     };
 
     return r;

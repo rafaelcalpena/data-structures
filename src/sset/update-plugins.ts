@@ -9,11 +9,11 @@ export const updatePlugins = (
 ): SSetStatePropsPlugins | any => {
   const {plugins, state, props} = internalState;
 
-  if(action === 'onBeforeAdd') {
-    let finalResult = {
+  if (action === 'onBeforeAdd') {
+    const finalResult = {
       continue: true,
       message: null,
-      value: item
+      value: item,
     };
     return _.reduce(Object.keys(plugins), (acc, pluginName) => {
       let listener: (
@@ -23,22 +23,22 @@ export const updatePlugins = (
         state: any,
       ) => any = plugins[pluginName][action];
 
-      if(!listener) {
+      if (!listener) {
         listener = () => {
           return {
             continue: true,
             message: null,
-            value: item
-          }
+            value: item,
+          };
         };
       }
 
-      let result = listener(item, hash, props[pluginName], state);
+      const result = listener(item, hash, props[pluginName], state);
 
       if (result.continue !== true) {
         throw new Error(
-          `Plugin ${pluginName} did not allow insertion: ${result.message}`
-        )
+          `Plugin ${pluginName} did not allow insertion: ${result.message}`,
+        );
       }
 
       return result;
@@ -47,16 +47,15 @@ export const updatePlugins = (
 
   }
 
-
   return _.reduce(Object.keys(plugins), (acc, pluginName) => {
-    let listener: (
+    const listener: (
       item: any,
       hash: string,
       props: PluginDeclarationProperties,
       state: any,
     ) => any = plugins[pluginName][action];
 
-    let result = listener(item, hash, props[pluginName], state);
+    const result = listener(item, hash, props[pluginName], state);
 
     return {
       plugins,
