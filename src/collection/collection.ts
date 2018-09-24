@@ -306,7 +306,7 @@ export class Collection {
       changesList = changesList.add({
         id,
         item,
-        type: 'add'        
+        type: 'add',
       });
     });
 
