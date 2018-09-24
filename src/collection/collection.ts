@@ -82,58 +82,54 @@ export const indexPlugin = {
   API(state, props: DefaultIndex) {
     return {
       findOne(query) {
-        /* TODO: separate props in indexed and not-indexed */
-        if (_.isPlainObject(query)) {
-          /* Run sub-queries for each property key */
-          const results: PointerMap[] = _.reduce(
-            query,
-            (result, value, propName) => {
-              const args = [propName, SSet.hashOf(value)];
-              return [
-                ...result,
-                props.has(args[0], args[1]) ?
-                  props.from(args[0], args[1]) :
-                  PointerMap.fromObject({}),
-              ];
-            },
-            [],
-          );
-          let firstKey;
-          if (results.length > 1) {
-            firstKey = results[0].keysIntersection(...results.slice(1)).firstKey();
-          } else {
-            firstKey = results[0].firstKey();
-          }
-          return state[firstKey];
+      /* TODO: separate props in indexed and not-indexed */
+        /* Run sub-queries for each property key */
+        const results: PointerMap[] = _.reduce(
+          query,
+          (result, value, propName) => {
+            const args = [propName, SSet.hashOf(value)];
+            return [
+              ...result,
+              props.has(args[0], args[1]) ?
+                props.from(args[0], args[1]) :
+                PointerMap.fromObject({}),
+            ];
+          },
+          [],
+        );
+        let firstKey;
+        if (results.length > 1) {
+          firstKey = results[0].keysIntersection(...results.slice(1)).firstKey();
+        } else {
+          firstKey = results[0].firstKey();
         }
+        return state[firstKey];
       },
 
       find(query) {
         /* TODO: refactor/simplify with findOne */
-        if (_.isPlainObject(query)) {
-          /* Run sub-queries for each property key */
-          const results: PointerMap[] = _.reduce(
-            query,
-            (r, value, propName) => {
-              const args = [propName, SSet.hashOf(value)];
-              return [
-                ...r,
-                props.has(args[0], args[1]) ?
-                  props.from(args[0], args[1]) :
-                  PointerMap.fromObject({}),
-              ];
-            },
-            [],
-          );
-          let result;
-          if (results.length > 1) {
-            result = results[0].keysIntersection(...results.slice(1));
-          } else {
-            result = results[0];
-          }
-          result = result.toPairs().map(([k]) => state[k]);
-          return Collection.fromArray(result);
+        /* Run sub-queries for each property key */
+        const results: PointerMap[] = _.reduce(
+          query,
+          (r, value, propName) => {
+            const args = [propName, SSet.hashOf(value)];
+            return [
+              ...r,
+              props.has(args[0], args[1]) ?
+                props.from(args[0], args[1]) :
+                PointerMap.fromObject({}),
+            ];
+          },
+          [],
+        );
+        let result;
+        if (results.length > 1) {
+          result = results[0].keysIntersection(...results.slice(1));
+        } else {
+          result = results[0];
         }
+        result = result.toPairs().map(([k]) => state[k]);
+        return Collection.fromArray(result);
       },
 
       getIndex() {
