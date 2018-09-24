@@ -889,6 +889,46 @@ describe('SSet', () => {
       expect(onAddSpy.calls.count()).toBe(2);
     })
 
+    it('should throw error when plugin forbids insertion', () => {
+      let plugins = {
+        isSizeEven: {
+          onInit(state, props) {
+            return {
+              props: Object.keys(state).length,
+              state
+            };
+          },
+          onAdd(item, hash, props, state) {
+            return props + 1;
+          },
+          onBeforeAdd(item) {
+            if (item <= 8664) {
+              return {
+                continue: false,
+                message: 'Item value must be greater than 8664'
+              }
+            }
+            return {
+              continue: true,
+              value: item
+            }
+          },
+          API(state, props) {
+            return props % 2 === 0;
+          }
+        }
+      };
+
+      let sset;
+      expect(() => sset = SSet.addPlugins(plugins).fromArray([8665])).not.toThrow();
+      expect(() => sset = sset.add(10987)).not.toThrow();
+      expect(() => sset = sset.add(101)).toThrowError(
+        `Plugin isSizeEven did not allow insertion: Item value must be greater than 8664`
+      );
+
+
+    })
+
     it('should update plugin properties after removing value from set', () => {
       let plugins = {
         isSizeEvenV2: {

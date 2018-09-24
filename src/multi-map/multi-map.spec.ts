@@ -157,7 +157,7 @@ describe('MultiMap', () => {
       expect(result).toEqual(2)
       expect(() => multiMap = multiMap.remove('a')).not.toThrow();
       expect(() => result = multiMap.size()).not.toThrow();
-      expect(result).toEqual(0)      
+      expect(result).toEqual(0)
     })
   })
 
@@ -197,4 +197,19 @@ describe('MultiMap', () => {
       })
     })
   })
+
+  describe('getOne', () => {
+    it ('should return one item from given key', () => {
+      let multiMap, result;
+      multiMap = MultiMap.fromPairs([
+        ['a', 'y'],
+        ['a', 'z'],
+        ['b', 'c']
+      ])
+      expect(() => result = multiMap.getOne('b')).not.toThrow();
+      expect(result).toEqual('c');      
+    })
+
+  })
+
 })

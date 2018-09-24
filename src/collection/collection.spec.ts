@@ -1,4 +1,5 @@
 import {Collection} from './collection'
+import { SSet } from '../sset/sset';
 
 describe('collection', () => {
   describe('create', () => {
@@ -60,6 +61,15 @@ describe('collection', () => {
       let anotherItem = c.toArray().find(i => i.anotherItem === 'anotherItem')
       expect(anotherItem).toBeDefined();
     })
+
+    it('should forbid non-plain objects', () => {
+      let c;
+      expect(() => c = Collection.fromArray([
+        ['1', '2']
+      ])).toThrowError(
+        `All items within a Collection must be plain objects`
+      );
+    })
   })
 
   describe('findOne', () => {
@@ -118,9 +128,16 @@ describe('collection', () => {
         jasmine.objectContaining(harry),
       )
       expect(collection.find({
-        lastName: 'Potter'
+        lastName: 'Potter',
+        name: 'Lilian'
       }).toArray()).toContain(
         jasmine.objectContaining(lilian),
+      )
+      expect(collection.find({
+        lastName: 'Potter',
+        name: 'Harry'
+      }).toArray()).toContain(
+        jasmine.objectContaining(harry),
       )
     })
   })
@@ -312,6 +329,60 @@ describe('collection', () => {
     })
   })
 
+  describe('getByHash', () => {
+    it('should return item when given hash', () => {
+      let c = Collection.fromArray([
+        {
+          id: 0,
+          name: 'abc'
+        },
+        {
+          id: 1,
+          name: 'def'
+        }
+      ]);
+      expect(c.getByHash(SSet.hashOf({
+        id: 0,
+        name: 'abc'
+      }))).toEqual({
+        id: 0,
+        name: 'abc'
+      });
+
+      expect(c.getByHash(SSet.hashOf({
+        id: 1,
+        name: 'def'
+      }))).toEqual({
+        id: 1,
+        name: 'def'
+      });
+    })
+  })
+
+  describe('getByIdHash', () => {
+    it('should return item with given hashed id', () => {
+      let c = Collection.fromArray([
+        {
+          id: 0,
+          name: 'abc'
+        },
+        {
+          id: 1,
+          name: 'def'
+        }
+      ]);
+      expect(c.getByIdHash(SSet.hashOf(0))).toEqual({
+        id: 0,
+        name: 'abc'
+      });
+
+      expect(c.getByIdHash(SSet.hashOf(1))).toEqual({
+        id: 1,
+        name: 'def'
+      });
+    })
+  })
+
   describe('isEmpty', () => {
     it ('should return true for empty collection', () => {
       let c = Collection.fromArray([]);
@@ -471,11 +542,13 @@ describe('collection', () => {
     it('should output many changes between two collections', () => {
       let c1 = Collection.fromArray([
         {id: 'a'},
-        {id: 'c'}
+        {id: 'c'},
+        {id: 'unchanged'}
       ]);
       let c2 = Collection.fromArray([
         {id: 'a', name: 'b'},
-        {id: 'd', text: true}
+        {id: 'd', text: true},
+        {id: 'unchanged'}
       ]);
       let diff;
       expect(() => diff = c2.changesFrom(c1)).not.toThrow();

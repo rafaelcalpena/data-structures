@@ -1,4 +1,5 @@
 import {Graph} from './graph'
+import { SSet } from '../sset/sset';
 
 describe('graph', () => {
   describe('create', () => {
@@ -443,6 +444,81 @@ describe('graph', () => {
           lastName: 'Voldemort',
           id: 'the-evil-one'
       })
+    })
+  })
+
+  describe('nodes getByHash', () => {
+    it ('should return node by hash', () => {
+      let g = Graph.fromObject({
+        edges: [],
+        nodes: [{
+          abc: 'def',
+          id: 1234
+        }]
+      })
+      expect(g.nodes.getByHash(SSet.hashOf({
+        abc: 'def',
+        id: 1234
+      }))).toEqual({
+        abc: 'def',
+        id: 1234
+      });
+    })
+  })
+
+  describe('nodes getByIdHash', () => {
+    it ('should return node by id hashed', () => {
+      let g = Graph.fromObject({
+        edges: [],
+        nodes: [{
+          abc: 'def',
+          id: 1234
+        }]
+      })
+      expect(g.nodes.getByIdHash(SSet.hashOf(1234))).toEqual({
+        abc: 'def',
+        id: 1234
+      });
+    })
+  })
+
+  describe('edges getByHash', () => {
+    it ('should return edge by hash', () => {
+      let g = Graph.fromObject({
+        edges: [{
+          from: 'abc',
+          to: 'def',
+          id: 1234
+        }],
+        nodes: []
+      })
+      expect(g.edges.getByHash(SSet.hashOf({
+        from: 'abc',
+        to: 'def',
+        id: 1234
+      }))).toEqual({
+        from: 'abc',
+        to: 'def',
+        id: 1234
+      });
+    })
+  })
+
+  describe('edges getByIdHash', () => {
+    it ('should return edge by id hashed', () => {
+      let g = Graph.fromObject({
+        edges: [{
+          from: 'abc',
+          to: 'def',
+          id: 1234
+        }],
+        nodes: []
+      })
+      expect(g.edges.getByIdHash(SSet.hashOf(1234))).toEqual({
+        from: 'abc',
+        to: 'def',
+        id: 1234
+      });
     })
   })
 
@@ -1259,6 +1335,70 @@ describe('graph', () => {
       expect(g2).toBe(g);
     })
   })
+
+
+  describe('nodes updateId', () => {
+    it('should throw error if node does not exist', () => {
+      let g = Graph.fromEmpty();
+      expect(() => g.nodes.updateId({
+        id: 'inexistent'
+      })).toThrowError(
+        `Could not update Node from Graph: Node does not exist`
+      )
+    })
+
+    it('should update node', () => {
+      let node = {
+        f: 0,
+        id: 'node',
+        t: 1,
+        labels: []
+      }
+      let g = Graph.fromObject({
+        edges: [],
+        nodes: [node]
+      });
+      let g2;
+      expect(() => g2 = g.nodes.updateId('node', {
+        f: 1,
+        t: 2,
+        labels: ['TEST']
+      })).not.toThrow();
+
+      expect(g2.toObject()).toEqual({
+        nodes: [jasmine.objectContaining({
+          f: 1,
+          t: 2,
+          labels: ['TEST']
+        })],
+        edges: []
+      })
+      expect(g2).not.toBe(g);
+    })
+
+    it('should return self if there were no changes', () => {
+      let obj = {
+        f: 0,
+        id: 'node',
+        t: 1,
+        labels: []
+      }
+      let g = Graph.fromObject({
+        nodes: [obj],
+        edges: []
+      });
+      let g2;
+      expect(() => g2 = g.nodes.updateId('node', {
+        f: 0,
+        id: 'node',
+        t: 1,
+        labels: []
+      })).not.toThrow();
+
+      expect(g2).toBe(g);
+    })
+  })
+
 
 
   describe('edges union', () => {
