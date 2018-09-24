@@ -137,7 +137,7 @@ export class Graph {
       const item = nodes.findOne({id});
       if (!item) {
         throw new Error (
-          `Could not update Node from Graph: Edge does not exist`,
+          `Could not update Node from Graph: Node does not exist`,
         );
       }
       /* Performance improvement */
@@ -145,7 +145,7 @@ export class Graph {
         return this;
       }
       return new Graph({
-        edges,        
+        edges,
         nodes: nodes.remove(item).add(newItem),
       });
     }).bind(this),
