@@ -76,6 +76,10 @@ export class MultiMap {
     );
   }
 
+  public getOne(k1) {
+    return this.internal.state.get(k1).firstKey();
+  }
+
   public from(k1) {
     const {state: outerMap} = this.internal;
     if (!outerMap.has(k1)) {

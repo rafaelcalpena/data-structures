@@ -1,20 +1,50 @@
 import {SSet} from '../sset/sset';
 
 import _ = require("lodash");
+import * as uuid from 'uuid/v4';
 import {DefaultIndex} from '../default-index/default-index';
 import {PointerMap} from '../pointer-map/pointer-map';
 import {createTriples} from './create-triples';
 
 export const indexPlugin = {
   onInit(state) {
+    /* TODO: Abstract id verification and creation from
+    onInit and onBeforeAdd into single function */
+    /* Add ids to items that do not have it */
+    state = _.reduce(state, (acc, value, key) => {
+
+      if (!_.isPlainObject(value)) {
+        throw new Error(`All items within a Collection must be plain objects`);
+      }
+
+      /* Hash key must change due to id insertion */
+      if (!('id' in value)) {
+        const newObj = {
+          ...value,
+          id: uuid(),
+        };
+        return _.omit({
+          ...acc,
+          [SSet.hashOf(newObj)]: newObj,
+        }, [key]);
+      }
+      return {
+        ...acc,
+        [key]: value,
+      };
+    }, {});
     /* For each item created, update indexes */
     const itemHashes = Object.keys(state).map(
       (h) => ({hash: h, item: state[h]}),
     );
     const triples = itemHashes.reduce(createTriples, []);
-    return DefaultIndex.fromTriples(
+
+    return {
+      props: DefaultIndex.fromTriples(
       triples,
-    );
+      ),
+      state,
+    };
   },
   onRemove(item, itemHash, props, state) {
     let defaultIndex = props;
@@ -23,6 +53,23 @@ export const indexPlugin = {
       return acc.remove(key, SSet.hashOf(value), itemHash);
     }, defaultIndex);
     return defaultIndex;
+  },
+  onBeforeAdd(item, itemHash, props: DefaultIndex, state) {
+    if (!item.id) {
+      return {
+        continue: true,
+        message: null,
+        value: {
+          ...item,
+          id: uuid(),
+        },
+      };
+    }
+    return {
+      continue: true,
+      message: null,
+      value: item,
+    };
   },
   onAdd(item, itemHash, props, state) {
     let defaultIndex = props;
@@ -35,59 +82,60 @@ export const indexPlugin = {
   API(state, props: DefaultIndex) {
     return {
       findOne(query) {
-        /* TODO: separate props in indexed and not-indexed */
-        if (_.isPlainObject(query)) {
-          /* Run sub-queries for each property key */
-          const results: PointerMap[] = _.reduce(
-            query,
-            (result, value, propName) => {
-              const args = [propName, SSet.hashOf(value)];
-              return [
-                ...result,
-                props.has(args[0], args[1]) ?
-                  props.from(args[0], args[1]) :
-                  PointerMap.fromObject({}),
-              ];
-            },
-            [],
-          );
-          let firstKey;
-          if (results.length > 1) {
-            firstKey = results[0].keysIntersection(...results.slice(1)).firstKey();
-          } else {
-            firstKey = results[0].firstKey();
-          }
-          return state[firstKey];
+      /* TODO: separate props in indexed and not-indexed */
+        /* Run sub-queries for each property key */
+        const results: PointerMap[] = _.reduce(
+          query,
+          (result, value, propName) => {
+            const args = [propName, SSet.hashOf(value)];
+            return [
+              ...result,
+              props.has(args[0], args[1]) ?
+                props.from(args[0], args[1]) :
+                PointerMap.fromObject({}),
+            ];
+          },
+          [],
+        );
+        let firstKey;
+        if (results.length > 1) {
+          firstKey = results[0].keysIntersection(...results.slice(1)).firstKey();
+        } else {
+          firstKey = results[0].firstKey();
         }
+        return state[firstKey];
       },
 
       find(query) {
         /* TODO: refactor/simplify with findOne */
-        if (_.isPlainObject(query)) {
-          /* Run sub-queries for each property key */
-          const results: PointerMap[] = _.reduce(
-            query,
-            (r, value, propName) => {
-              const args = [propName, SSet.hashOf(value)];
-              return [
-                ...r,
-                props.has(args[0], args[1]) ?
-                  props.from(args[0], args[1]) :
-                  PointerMap.fromObject({}),
-              ];
-            },
-            [],
-          );
-          let result;
-          if (results.length > 1) {
-            result = results[0].keysIntersection(...results.slice(1));
-          } else {
-            result = results[0];
-          }
-          result = result.toPairs().map(([k]) => state[k]);
-          return Collection.fromArray(result);
+        /* Run sub-queries for each property key */
+        const results: PointerMap[] = _.reduce(
+          query,
+          (r, value, propName) => {
+            const args = [propName, SSet.hashOf(value)];
+            return [
+              ...r,
+              props.has(args[0], args[1]) ?
+                props.from(args[0], args[1]) :
+                PointerMap.fromObject({}),
+            ];
+          },
+          [],
+        );
+        let result;
+        if (results.length > 1) {
+          result = results[0].keysIntersection(...results.slice(1));
+        } else {
+          result = results[0];
         }
+        result = result.toPairs().map(([k]) => state[k]);
+        return Collection.fromArray(result);
       },
+
+      getIndex() {
+        return props;
+      },
+
     };
   },
 };
@@ -211,5 +259,57 @@ export class Collection {
 
   public toArray() {
     return this.internal.set.toArray();
+  }
+
+  public getByHash(hash) {
+    return this.internal.set.getByHash(hash);
+  }
+
+  public getByIdHash(hash) {
+    return this.internal.set.getByHash(
+      this.internal.set.$('indexPlugin').getIndex().get('id', hash),
+    );
+  }
+
+  public changesFrom(c2: Collection) {
+    return c2.changesTo(this);
+  }
+
+  public changesTo(c2: Collection) {
+    let changesList = Collection.fromArray([]);
+    let comparingCollection = c2;
+    /* Algorithm should track items by 'id' property */
+    this.forEach((item) => {
+      const id = item.id;
+      const c2Item = comparingCollection.findOne({id});
+      if (c2Item) {
+        /* TODO: Avoid rehashing to improve performance */
+        if (SSet.hashOf(c2Item) !== SSet.hashOf(item)) {
+          changesList = changesList.add({
+            after: c2Item,
+            before: item,
+            id,
+            type: 'edit',
+          });
+        }
+        comparingCollection = comparingCollection.remove(c2Item);
+      } else {
+        changesList = changesList.add({
+          id,
+          item,
+          type: 'remove',
+        });
+      }
+    });
+    comparingCollection.forEach((item) => {
+      const id = item.id;
+      changesList = changesList.add({
+        id,
+        item,
+        type: 'add',
+      });
+    });
+
+    return changesList;
   }
 }

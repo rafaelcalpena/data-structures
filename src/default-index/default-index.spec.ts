@@ -216,4 +216,20 @@ describe('DefaultIndex', () => {
       })
     })
   })
+
+  describe('get', () => {
+    it ('should return value for provided keys', () => {
+      let c = DefaultIndex.fromTriples([
+        ['a', 'b', 'c'],
+        ['d', 'e', 'f']
+      ]);
+      let result;
+
+      expect(() => result = c.get('a', 'b')).not.toThrow();
+      expect(result).toEqual('c')
+
+      expect(() => result = c.get('d', 'e')).not.toThrow();
+      expect(result).toEqual('f')      
+    })
+  })
 })

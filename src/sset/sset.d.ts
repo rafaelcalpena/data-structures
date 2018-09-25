@@ -45,7 +45,10 @@ export type SSetIterator = {
 }
 
 export type PluginDeclarationProperties = {
-  onInit: (state, props) => any,
+  onInit: (state, props) => {
+    state: any,
+    props: any
+  }
   onAdd?: (item, hash, props, state) => any,
   onRemove?: (items, hash, props, state) => any,
   onDestroy?: () => void,

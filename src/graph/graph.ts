@@ -27,6 +27,13 @@ interface InternalState {
   edges: Collection;
 }
 
+type CollectionChangeList = Collection;
+
+interface IChangeLog {
+  nodes: CollectionChangeList;
+  edges: CollectionChangeList;
+}
+
 export class Graph {
 
   public static fromObject(obj: IGraphObject) {
@@ -97,6 +104,14 @@ export class Graph {
       return this.internal.nodes;
     }).bind(this),
 
+    getByHash: ((hash): any => {
+      return this.internal.nodes.getByHash(hash);
+    }).bind(this),
+
+    getByIdHash: ((hash): any => {
+      return this.internal.nodes.getByIdHash(hash);
+    }).bind(this),
+
     /** Update a Node from the Graph.
      * This method will update only one matching Node.
      * Query must be exactly equal to the Node. If you'd like to
@@ -108,6 +123,26 @@ export class Graph {
         throw new Error (
           `Could not update Node from Graph: Node does not exist`,
         );
+      }
+      return new Graph({
+        edges,
+        nodes: nodes.remove(item).add(newItem),
+      });
+    }).bind(this),
+
+    /** Updates a Node from Graph by querying its id */
+    /* TODO: Move to Collection */
+    updateId: ((id, newItem) => {
+      const {nodes, edges} = this.internal;
+      const item = nodes.findOne({id});
+      if (!item) {
+        throw new Error (
+          `Could not update Node from Graph: Node does not exist`,
+        );
+      }
+      /* Performance improvement */
+      if (SSet.hashOf(item) === SSet.hashOf(newItem)) {
+        return this;
       }
       return new Graph({
         edges,
@@ -346,6 +381,14 @@ export class Graph {
       return this.internal.edges;
     }).bind(this),
 
+    getByHash: ((hash): any => {
+      return this.internal.edges.getByHash(hash);
+    }).bind(this),
+
+    getByIdHash: ((hash): any => {
+      return this.internal.edges.getByIdHash(hash);
+    }).bind(this),
+
    /** Given an edge, will check if its ID is present in the graph.
     * If so, will remove the edge from the graph.
     * If not, will add the edge to the graph
@@ -499,5 +542,19 @@ export class Graph {
 
   public union(graph2: Graph): Graph {
     return this.edges.union(graph2).nodes.union(graph2);
+  }
+
+  public changesFrom(graph2: Graph): IChangeLog {
+    /* Changes are based on "id" field, which must be unique */
+    const {nodes, edges} = this.internal;
+
+    return {
+      edges: edges.changesFrom(graph2.edges.getAll()),
+      nodes: nodes.changesFrom(graph2.nodes.getAll()),
+    };
+  }
+
+  public changesTo(graph2: Graph): IChangeLog {
+    return graph2.changesFrom(this);
   }
 }

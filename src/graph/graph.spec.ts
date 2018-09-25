@@ -1,4 +1,5 @@
 import {Graph} from './graph'
+import { SSet } from '../sset/sset';
 
 describe('graph', () => {
   describe('create', () => {
@@ -28,19 +29,19 @@ describe('graph', () => {
         edges: []
       })).not.toThrow();
       expect(() => result = graph.toObject()).not.toThrow()
-      expect(result).toEqual({
-        nodes: [
-          {
-            name: 'Albus',
-            lastName: 'Dumbledore'
-          },
-          {
-            name: 'Lucius',
-            lastName: 'Malfoy'
-          }
-        ],
-        edges: []
-      })
+      expect(result.nodes).toContain(
+        jasmine.objectContaining({
+          name: 'Albus',
+          lastName: 'Dumbledore'
+        })
+      )
+      expect(result.nodes).toContain(
+        jasmine.objectContaining({
+          name: 'Lucius',
+          lastName: 'Malfoy'
+        })
+      )
+      expect(result.edges).toEqual([])
 
       expect(() => graph = Graph.fromObject({
         nodes: [
@@ -78,11 +79,11 @@ describe('graph', () => {
           }
         ],
         edges: [
-          {
+          jasmine.objectContaining({
             from: 'lucius',
             to: 'the-wisest',
             labels: ['dislikes']
-          }
+          })
         ]
       })
     })
@@ -93,6 +94,45 @@ describe('graph', () => {
       expect(graph.toObject()).toEqual({
         edges: [],
         nodes: []
+      })
+    })
+  })
+
+  describe('graph changes', () => {
+    describe('changesFrom', () => {
+      it('should return the changes between two graphs', () => {
+        let g1 = Graph.fromObject({
+          edges: [],
+          nodes: [{
+            testing: 'true',
+            id: '1'
+          }]
+        });
+        let g2 = Graph.fromObject({
+          edges: [],
+          nodes: []
+        });
+        let changeLog;
+
+        expect(() => changeLog = g1.changesFrom(g2)).not.toThrow();
+        expect(changeLog.nodes.toArray()).toContain({
+          type: 'add',
+          id: '1',
+          item: {
+            id: '1',
+            testing: 'true'
+          }
+        });
+
+        expect(() => changeLog = g1.changesTo(g2)).not.toThrow();
+        expect(changeLog.nodes.toArray()).toContain({
+          type: 'remove',
+          id: '1',
+          item: {
+            id: '1',
+            testing: 'true'
+          }
+        });
       })
     })
   })
@@ -141,20 +181,20 @@ describe('graph', () => {
       expect(() => result = g1.nodes.union(g2)).not.toThrow();
       expect(result.toObject()).toEqual({
         nodes: [
-          {
+          jasmine.objectContaining({
             name: 'Harry',
             lastName: 'Potter'
-          }
+          })
         ],
         edges: []
       })
       expect(() => result = g2.nodes.union(g1)).not.toThrow();
       expect(result.toObject()).toEqual({
         nodes: [
-          {
+          jasmine.objectContaining({
             name: 'Harry',
             lastName: 'Potter'
-          }
+          })
         ],
         edges: []
       })
@@ -195,11 +235,13 @@ describe('graph', () => {
         nodes: [
           {
             name: 'Albus',
-            lastName: 'Dumbledore'
+            lastName: 'Dumbledore',
+            id: 'albus'
           },
           {
             name: 'Lord',
-            lastName: 'Voldemort'
+            lastName: 'Voldemort',
+            id: 'voldemort'
           }
         ],
         edges: [
@@ -208,14 +250,15 @@ describe('graph', () => {
       })).not.toThrow()
       expect(() => result = g1.nodes.remove({
         name: 'Lord',
-        lastName: 'Voldemort'
+        lastName: 'Voldemort',
+        id: 'voldemort'
       })).not.toThrow();
       expect(result.toObject()).toEqual({
         nodes: [
-          {
+          jasmine.objectContaining({
             name: 'Albus',
             lastName: 'Dumbledore'
-          }
+          })
         ],
         edges: []
       })
@@ -225,11 +268,13 @@ describe('graph', () => {
         nodes: [
           {
             name: 'Albus',
-            lastName: 'Dumbledore'
+            lastName: 'Dumbledore',
+            id: 'albus'
           },
           {
             name: 'Lord',
-            lastName: 'Voldemort'
+            lastName: 'Voldemort',
+            id: 'voldemort'
           }
         ],
         edges: [
@@ -241,20 +286,21 @@ describe('graph', () => {
       })).not.toThrow()
       expect(() => result = g1.nodes.remove({
         name: 'Lord',
-        lastName: 'Voldemort'
+        lastName: 'Voldemort',
+        id: 'voldemort'
       })).not.toThrow();
       expect(result.toObject()).toEqual({
         nodes: [
-          {
+          jasmine.objectContaining({
             name: 'Albus',
             lastName: 'Dumbledore'
-          }
+          })
         ],
         edges: [
-          {
+          jasmine.objectContaining({
             from: 0,
             to: 1
-          }
+          })
         ]
       })
     })
@@ -398,6 +444,81 @@ describe('graph', () => {
           lastName: 'Voldemort',
           id: 'the-evil-one'
       })
+    })
+  })
+
+  describe('nodes getByHash', () => {
+    it ('should return node by hash', () => {
+      let g = Graph.fromObject({
+        edges: [],
+        nodes: [{
+          abc: 'def',
+          id: 1234
+        }]
+      })
+      expect(g.nodes.getByHash(SSet.hashOf({
+        abc: 'def',
+        id: 1234
+      }))).toEqual({
+        abc: 'def',
+        id: 1234
+      });
+    })
+  })
+
+  describe('nodes getByIdHash', () => {
+    it ('should return node by id hashed', () => {
+      let g = Graph.fromObject({
+        edges: [],
+        nodes: [{
+          abc: 'def',
+          id: 1234
+        }]
+      })
+      expect(g.nodes.getByIdHash(SSet.hashOf(1234))).toEqual({
+        abc: 'def',
+        id: 1234
+      });
+    })
+  })
+
+  describe('edges getByHash', () => {
+    it ('should return edge by hash', () => {
+      let g = Graph.fromObject({
+        edges: [{
+          from: 'abc',
+          to: 'def',
+          id: 1234
+        }],
+        nodes: []
+      })
+      expect(g.edges.getByHash(SSet.hashOf({
+        from: 'abc',
+        to: 'def',
+        id: 1234
+      }))).toEqual({
+        from: 'abc',
+        to: 'def',
+        id: 1234
+      });
+    })
+  })
+
+  describe('edges getByIdHash', () => {
+    it ('should return edge by id hashed', () => {
+      let g = Graph.fromObject({
+        edges: [{
+          from: 'abc',
+          to: 'def',
+          id: 1234
+        }],
+        nodes: []
+      })
+      expect(g.edges.getByIdHash(SSet.hashOf(1234))).toEqual({
+        from: 'abc',
+        to: 'def',
+        id: 1234
+      });
     })
   })
 
@@ -648,47 +769,47 @@ describe('graph', () => {
         }]
       })
       let fromUS = g.nodes.filter(n => n.country === 'USA')
-      expect(fromUS.toObject().nodes).toContain({
+      expect(fromUS.toObject().nodes).toContain(jasmine.objectContaining({
         name: 'California',
         country: 'USA'
-      })
-      expect(fromUS.toObject().nodes).toContain({
+      }))
+      expect(fromUS.toObject().nodes).toContain(jasmine.objectContaining({
         name: 'DC',
         country: 'USA'
-      })
-      expect(fromUS.toObject().nodes).toContain({
+      }))
+      expect(fromUS.toObject().nodes).toContain(jasmine.objectContaining({
         name: 'Missouri',
         country: 'USA'
-      })
-      expect(fromUS.toObject().nodes).not.toContain({
+      }))
+      expect(fromUS.toObject().nodes).not.toContain(jasmine.objectContaining({
         name: 'Sao Paulo',
         country: 'Brazil'
-      })
-      expect(fromUS.toObject().nodes).not.toContain({
+      }))
+      expect(fromUS.toObject().nodes).not.toContain(jasmine.objectContaining({
         name: 'Maranhao',
         country: 'Brazil'
-      })
+      }))
       let startsWithM = g.nodes.filter(n => n.name[0] === 'M');
-      expect(startsWithM.toObject().nodes).not.toContain({
+      expect(startsWithM.toObject().nodes).not.toContain(jasmine.objectContaining({
         name: 'California',
         country: 'USA'
-      })
-      expect(startsWithM.toObject().nodes).not.toContain({
+      }))
+      expect(startsWithM.toObject().nodes).not.toContain(jasmine.objectContaining({
         name: 'DC',
         country: 'USA'
-      })
-      expect(startsWithM.toObject().nodes).toContain({
+      }))
+      expect(startsWithM.toObject().nodes).toContain(jasmine.objectContaining({
         name: 'Missouri',
         country: 'USA'
-      })
-      expect(startsWithM.toObject().nodes).not.toContain({
+      }))
+      expect(startsWithM.toObject().nodes).not.toContain(jasmine.objectContaining({
         name: 'Sao Paulo',
         country: 'Brazil'
-      })
-      expect(startsWithM.toObject().nodes).toContain({
+      }))
+      expect(startsWithM.toObject().nodes).toContain(jasmine.objectContaining({
         name: 'Maranhao',
         country: 'Brazil'
-      })
+      }))
     })
   })
 
@@ -718,29 +839,36 @@ describe('graph', () => {
         edges: [],
         nodes: [{
           name: 'California',
-          country: 'USA'
+          country: 'USA',
+          id: 0
         }, {
           name: 'DC',
-          country: 'USA'
+          country: 'USA',
+          id: 1
         }, {
           name: 'Sao Paulo',
-          country: 'Brazil'
+          country: 'Brazil',
+          id: 2
         }, {
           name: 'Missouri',
-          country: 'USA'
+          country: 'USA',
+          id: 3
         }, {
           name: 'Maranhao',
-          country: 'Brazil'
+          country: 'Brazil',
+          id: 4
         }]
       })
 
       expect(g.nodes.has({
         name: 'California',
-        country: 'USA'
+        country: 'USA',
+        id: 0
       })).toBe(true);
       expect(g.nodes.has({
         name: 'Florida',
-        country: 'USA'
+        country: 'USA',
+        id: 0
       })).toBe(false);
     })
   })
@@ -1109,7 +1237,8 @@ describe('graph', () => {
         edges: [{
           from: 0,
           to: 1,
-          labels: []
+          labels: [],
+          id: 'edge'
         }],
         nodes: [{
           name: 'abc'
@@ -1118,22 +1247,23 @@ describe('graph', () => {
       expect(() => g = g.edges.update({
         from: 0,
         to: 1,
-        labels: []
+        labels: [],
+        id: 'edge'
       }, {
         from: 1,
         to: 2,
         labels: ['TEST']
       })).not.toThrow();
 
-      expect(g.toObject()).toEqual({
-        edges: [{
+      expect(g.toObject()).toEqual(<any> {
+        edges: [jasmine.objectContaining({
           from: 1,
           to: 2,
           labels: ['TEST']
-        }],
-        nodes: [{
+        })],
+        nodes: [jasmine.objectContaining({
           name: 'abc'
-        }]
+        })]
       })
     })
   })
@@ -1169,14 +1299,14 @@ describe('graph', () => {
       })).not.toThrow();
 
       expect(g2.toObject()).toEqual({
-        edges: [{
+        edges: [jasmine.objectContaining({
           from: 1,
           to: 2,
           labels: ['TEST']
-        }],
-        nodes: [{
+        })],
+        nodes: [jasmine.objectContaining({
           name: 'abc'
-        }]
+        })]
       })
       expect(g2).not.toBe(g);
     })
@@ -1205,6 +1335,70 @@ describe('graph', () => {
       expect(g2).toBe(g);
     })
   })
+
+
+  describe('nodes updateId', () => {
+    it('should throw error if node does not exist', () => {
+      let g = Graph.fromEmpty();
+      expect(() => g.nodes.updateId({
+        id: 'inexistent'
+      })).toThrowError(
+        `Could not update Node from Graph: Node does not exist`
+      )
+    })
+
+    it('should update node', () => {
+      let node = {
+        f: 0,
+        id: 'node',
+        t: 1,
+        labels: []
+      }
+      let g = Graph.fromObject({
+        edges: [],
+        nodes: [node]
+      });
+      let g2;
+      expect(() => g2 = g.nodes.updateId('node', {
+        f: 1,
+        t: 2,
+        labels: ['TEST']
+      })).not.toThrow();
+
+      expect(g2.toObject()).toEqual({
+        nodes: [jasmine.objectContaining({
+          f: 1,
+          t: 2,
+          labels: ['TEST']
+        })],
+        edges: []
+      })
+      expect(g2).not.toBe(g);
+    })
+
+    it('should return self if there were no changes', () => {
+      let obj = {
+        f: 0,
+        id: 'node',
+        t: 1,
+        labels: []
+      }
+      let g = Graph.fromObject({
+        nodes: [obj],
+        edges: []
+      });
+      let g2;
+      expect(() => g2 = g.nodes.updateId('node', {
+        f: 0,
+        id: 'node',
+        t: 1,
+        labels: []
+      })).not.toThrow();
+
+      expect(g2).toBe(g);
+    })
+  })
+
 
 
   describe('edges union', () => {
@@ -1239,43 +1433,46 @@ describe('graph', () => {
       expect(() => g1 = Graph.fromObject({
         nodes: [{
           name: 'Harry',
-          lastName: 'Potter'
+          lastName: 'Potter',
+          id: 'harry'
         }],
         edges: [
           {
             from: '0',
-            to: '1'
+            to: '1',
+            id: 'edge'
           }
         ]
       })).not.toThrow();
       expect(() => g2 = Graph.fromObject({
         nodes: [{
           name: 'Lord',
-          lastName: 'Voldemort'
+          lastName: 'Voldemort',
+          id: 'voldemort'
         }],
         edges: [
           {
             from: '1',
-            to: '2'
+            to: '2',
+            id: 'edge2'
           }
         ]
       })).not.toThrow();
       expect(() => result = g1.edges.union(g2)).not.toThrow();
-      expect(result.toObject()).toEqual({
-        nodes: [
-          {
+      expect(result.toObject().nodes).toEqual([
+          jasmine.objectContaining({
             name: 'Harry',
             lastName: 'Potter'
-          }
-        ],
-        edges: [{
-          from: '1',
-          to: '2'
-        }, {
-          from: '0',
-          to: '1'
-        }]
-      })
+          })
+        ])
+      expect(result.toObject().edges).toContain(jasmine.objectContaining({
+        from: '1',
+        to: '2'
+      }))
+      expect(result.toObject().edges).toContain(jasmine.objectContaining({
+        from: '0',
+        to: '1'
+      }))
     })
   })
 
@@ -1461,68 +1658,69 @@ describe('graph', () => {
         }],
         nodes: []
       })
+
       let fromUS = g.edges.filter(n => n.country === 'USA')
-      expect(fromUS.toObject().edges).toContain({
+      expect(fromUS.toObject().edges).toContain(jasmine.objectContaining({
         from: 0,
         to: 0,
         name: 'California',
         country: 'USA'
-      })
-      expect(fromUS.toObject().edges).toContain({
+      }))
+      expect(fromUS.toObject().edges).toContain(jasmine.objectContaining({
         from: 0,
         to: 0,
         name: 'DC',
         country: 'USA'
-      })
-      expect(fromUS.toObject().edges).toContain({
+      }))
+      expect(fromUS.toObject().edges).toContain(jasmine.objectContaining({
         from: 0,
         to: 0,
         name: 'Missouri',
         country: 'USA'
-      })
-      expect(fromUS.toObject().edges).not.toContain({
+      }))
+      expect(fromUS.toObject().edges).not.toContain(jasmine.objectContaining({
         from: 0,
         to: 0,
         name: 'Sao Paulo',
         country: 'Brazil'
-      })
-      expect(fromUS.toObject().edges).not.toContain({
+      }))
+      expect(fromUS.toObject().edges).not.toContain(jasmine.objectContaining({
         from: 0,
         to: 0,
         name: 'Maranhao',
         country: 'Brazil'
-      })
+      }))
       let startsWithM = g.edges.filter(n => n.name[0] === 'M');
-      expect(startsWithM.toObject().edges).not.toContain({
+      expect(startsWithM.toObject().edges).not.toContain(jasmine.objectContaining({
         from: 0,
         to: 0,
         name: 'California',
         country: 'USA'
-      })
-      expect(startsWithM.toObject().edges).not.toContain({
+      }))
+      expect(startsWithM.toObject().edges).not.toContain(jasmine.objectContaining({
         from: 0,
         to: 0,
         name: 'DC',
         country: 'USA'
-      })
-      expect(startsWithM.toObject().edges).toContain({
+      }))
+      expect(startsWithM.toObject().edges).toContain(jasmine.objectContaining({
         from: 0,
         to: 0,
         name: 'Missouri',
         country: 'USA'
-      })
-      expect(startsWithM.toObject().edges).not.toContain({
+      }))
+      expect(startsWithM.toObject().edges).not.toContain(jasmine.objectContaining({
         from: 0,
         to: 0,
         name: 'Sao Paulo',
         country: 'Brazil'
-      })
-      expect(startsWithM.toObject().edges).toContain({
+      }))
+      expect(startsWithM.toObject().edges).toContain(jasmine.objectContaining({
         from: 0,
         to: 0,
         name: 'Maranhao',
         country: 'Brazil'
-      })
+      }))
     })
   })
 
@@ -1591,10 +1789,10 @@ describe('graph', () => {
       })).not.toThrow();
       expect(() => result = g1.union(g2)).not.toThrow();
       expect(result.toObject()).toEqual({
-        nodes: [{
+        nodes: [jasmine.objectContaining({
           name: 'Harry',
           lastName: 'Potter'
-        }],
+        })],
         edges: []
       })
 
@@ -1612,53 +1810,59 @@ describe('graph', () => {
       })).not.toThrow();
       expect(() => result = g1.union(g2)).not.toThrow();
       expect(result.toObject()).toEqual({
-        nodes: [{
+        nodes: [jasmine.objectContaining({
           name: 'Harry',
           lastName: 'Potter'
-        }],
+        })],
         edges: []
       })
 
 
-      expect(() => g1 = Graph.fromObject({
+      expect(() => g1 = Graph.fromObject(<any> {
         nodes: [{
           name: 'Lord',
-          lastName: 'Voldemort'
+          lastName: 'Voldemort',
+          id: 'voldemort'
         }],
         edges: [{
           from: '2',
-          to: '3'
+          to: '3',
+          id: 'edge'
         }]
       })).not.toThrow();
       expect(() => g2 = Graph.fromObject({
         nodes: [{
           name: 'Harry',
-          lastName: 'Potter'
+          lastName: 'Potter',
+          id: 'harry'
         }],
         edges: [{
           from: '1',
-          to: '2'
+          to: '2',
+          id: 'edge'
         }]
       })).not.toThrow();
       expect(() => result = g1.union(g2)).not.toThrow();
-      expect(result.toObject()).toEqual({
-        nodes: [{
+      expect(result.toObject().nodes).toContain(
+        jasmine.objectContaining({
           name: 'Harry',
           lastName: 'Potter'
-        }, {
+        }))
+      expect(result.toObject().nodes).toContain(
+        jasmine.objectContaining({
           name: 'Lord',
           lastName: 'Voldemort'
-        }],
-        edges: [{
-          from: '2',
-          to: '3'
-        }, {
-          from: '1',
-          to: '2'
-        }]
-
-
-      })
+        }))
+      expect(result.toObject().edges).toContain(
+        jasmine.objectContaining({
+        from: '2',
+        to: '3'
+      }))
+      expect(result.toObject().edges).toContain(
+      jasmine.objectContaining({
+        from: '1',
+        to: '2'
+      }))
     })
   })
 

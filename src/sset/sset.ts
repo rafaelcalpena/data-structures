@@ -199,6 +199,9 @@ export class SSet {
     const hash = SSet.hashOf(value);
     const isNewItem = !(hash in this.statePropsPlugins.state);
 
+    /* trigger onBeforeAdd if defined */
+    value = updatePlugins('onBeforeAdd', value, hash, this.statePropsPlugins).value;
+
     let newInternalState: SSetStatePropsPlugins = {
       plugins: this.statePropsPlugins.plugins,
       props: {

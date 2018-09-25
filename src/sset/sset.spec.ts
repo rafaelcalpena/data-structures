@@ -521,7 +521,12 @@ describe('SSet', () => {
             onAdd: (state, props) => {
               return props + 3;
             },
-            onInit: jasmine.createSpy('a.onInit').and.returnValue(15),
+            onInit: (state, props) => {
+              return {
+                props: 15,
+                state
+              }
+            },
             onDestroy: jasmine.createSpy('a.onDestroy'),
             onRemove: jasmine.createSpy('a.onRemove'),
             API: (state, props) => {
@@ -530,7 +535,11 @@ describe('SSet', () => {
           },
           b: {
             onAdd: jasmine.createSpy('b.onAdd'),
-            onInit: jasmine.createSpy('b.onInit'),
+            onInit: (state, props) => {
+              return {
+                state
+              }
+            },
             onDestroy: jasmine.createSpy('b.onDestroy'),
             onRemove: jasmine.createSpy('b.onRemove'),
             API: (state, props) => {
@@ -539,6 +548,8 @@ describe('SSet', () => {
           }
         };
         spyOn(plugins.a, 'onAdd');
+        spyOn(plugins.a, 'onInit').and.callThrough();
+        spyOn(plugins.b, 'onInit').and.callThrough();
 
         expect(() => ssetConstructor = SSet.addPlugins(plugins)).not.toThrow();
         expect(() => activePlugins = ssetConstructor.getActivePlugins()).not.toThrow();
@@ -595,7 +606,12 @@ describe('SSet', () => {
         const plugins = {
           a: {
             onAdd: jasmine.createSpy('a.onAdd'),
-            onInit: jasmine.createSpy('a.onInit').and.returnValue(15),
+            onInit: (state, props) => {
+              return {
+                state,
+                props: 15
+              }
+            },
             onDestroy: jasmine.createSpy('a.onDestroy'),
             onRemove: jasmine.createSpy('a.onRemove'),
             API: (state, props) => {
@@ -604,7 +620,10 @@ describe('SSet', () => {
           },
           b: {
             onAdd: jasmine.createSpy('b.onAdd'),
-            onInit: jasmine.createSpy('b.onInit'),
+            onInit: (state, props) => ({
+              state,
+              props: undefined
+            }),
             onDestroy: jasmine.createSpy('b.onDestroy'),
             onRemove: jasmine.createSpy('b.onRemove'),
             API: (state, props) => {
@@ -613,7 +632,10 @@ describe('SSet', () => {
           },
           c: {
             onAdd: jasmine.createSpy('c.onAdd'),
-            onInit: jasmine.createSpy('c.onInit'),
+            onInit: (state, props) => ({
+              state,
+              props: undefined
+            }),
             onDestroy: jasmine.createSpy('c.onDestroy'),
             onRemove: jasmine.createSpy('c.onRemove'),
             API: (state, props) => {
@@ -621,6 +643,11 @@ describe('SSet', () => {
             }
           }
         };
+
+        let spyA = spyOn(plugins.a, 'onInit').and.callThrough()
+        let spyB = spyOn(plugins.b, 'onInit').and.callThrough()
+        let spyC = spyOn(plugins.c, 'onInit').and.callThrough()
+
         let ssetConstructor, activePlugins, sset;
         expect(() => ssetConstructor = SSet.addPlugins(plugins)).not.toThrow();
         expect(() => activePlugins = ssetConstructor.getActivePlugins()).not.toThrow();
@@ -643,15 +670,15 @@ describe('SSet', () => {
         expect(plugins.c.onInit).toHaveBeenCalled();
 
         plugins.a.onAdd.calls.reset();
-        plugins.a.onInit.calls.reset();
+        spyA.calls.reset();
         plugins.a.onRemove.calls.reset();
         plugins.a.onDestroy.calls.reset();
         plugins.b.onAdd.calls.reset();
-        plugins.b.onInit.calls.reset();
+        spyB.calls.reset();
         plugins.b.onRemove.calls.reset();
         plugins.b.onDestroy.calls.reset();
         plugins.c.onAdd.calls.reset();
-        plugins.c.onInit.calls.reset();
+        spyC.calls.reset();
         plugins.c.onRemove.calls.reset();
         plugins.c.onDestroy.calls.reset();
 
@@ -673,7 +700,10 @@ describe('SSet', () => {
         const plugins = {
           a: {
             onAdd: jasmine.createSpy('a.onAdd'),
-            onInit: jasmine.createSpy('a.onInit').and.returnValue(15),
+            onInit: (state) => ({
+              props: 15,
+              state
+            }),
             onDestroy: jasmine.createSpy('a.onDestroy'),
             onRemove: jasmine.createSpy('a.onRemove'),
             API: (state, props) => {
@@ -682,7 +712,10 @@ describe('SSet', () => {
           },
           b: {
             onAdd: jasmine.createSpy('b.onAdd'),
-            onInit: jasmine.createSpy('b.onInit'),
+            onInit: (state, props) => ({
+              state,
+              props
+            }),
             onDestroy: jasmine.createSpy('b.onDestroy'),
             onRemove: jasmine.createSpy('b.onRemove'),
             API: (state, props) => {
@@ -690,6 +723,10 @@ describe('SSet', () => {
             }
           }
         };
+
+        let spyA = spyOn(plugins.a, 'onInit').and.callThrough()
+        let spyB = spyOn(plugins.b, 'onInit').and.callThrough()
+
         let sset;
         expect(() => sset = SSet.addPlugins(plugins).fromArray([
           'm', 'n', 'o'
@@ -756,7 +793,12 @@ describe('SSet', () => {
             onAdd: (state, props) => {
               return props + 3;
             },
-            onInit: jasmine.createSpy('a.onInit').and.returnValue(15),
+            onInit: (state, props) => {
+              return {
+                props: 15,
+                state
+              }
+            },
             onDestroy: jasmine.createSpy('a.onDestroy'),
             onRemove: jasmine.createSpy('a.onRemove'),
             API: (state, props) => {
@@ -765,7 +807,12 @@ describe('SSet', () => {
           },
           b: {
             onAdd: jasmine.createSpy('b.onAdd'),
-            onInit: jasmine.createSpy('b.onInit'),
+            onInit: (state, props) => {
+              return {
+                props,
+                state
+              }
+            },
             onDestroy: jasmine.createSpy('b.onDestroy'),
             onRemove: jasmine.createSpy('b.onRemove'),
             API: (state, props) => {
@@ -773,6 +820,9 @@ describe('SSet', () => {
             }
           }
         };
+
+        spyOn(plugins.a, 'onInit').and.callThrough();
+        spyOn(plugins.b, 'onInit').and.callThrough();
 
         expect(() => sset = sset.addPlugins(plugins)).not.toThrow();
 
@@ -807,7 +857,10 @@ describe('SSet', () => {
       let plugins = {
         isSizeEven: {
           onInit(state, props) {
-            return Object.keys(state).length;
+            return {
+              props: Object.keys(state).length,
+              state
+            };
           },
           onAdd(item, hash, props, state) {
             return props + 1;
@@ -836,11 +889,54 @@ describe('SSet', () => {
       expect(onAddSpy.calls.count()).toBe(2);
     })
 
+    it('should throw error when plugin forbids insertion', () => {
+      let plugins = {
+        isSizeEven: {
+          onInit(state, props) {
+            return {
+              props: Object.keys(state).length,
+              state
+            };
+          },
+          onAdd(item, hash, props, state) {
+            return props + 1;
+          },
+          onBeforeAdd(item) {
+            if (item <= 8664) {
+              return {
+                continue: false,
+                message: 'Item value must be greater than 8664'
+              }
+            }
+            return {
+              continue: true,
+              value: item
+            }
+          },
+          API(state, props) {
+            return props % 2 === 0;
+          }
+        }
+      };
+
+      let sset;
+      expect(() => sset = SSet.addPlugins(plugins).fromArray([8665])).not.toThrow();
+      expect(() => sset = sset.add(10987)).not.toThrow();
+      expect(() => sset = sset.add(101)).toThrowError(
+        `Plugin isSizeEven did not allow insertion: Item value must be greater than 8664`
+      );
+
+
+    })
+
     it('should update plugin properties after removing value from set', () => {
       let plugins = {
         isSizeEvenV2: {
           onInit(state, props) {
-            return Object.keys(state).length;
+            return {
+              props: Object.keys(state).length,
+              state
+            }
           },
           onRemove(item, hash, props, state) {
             return props - 1;

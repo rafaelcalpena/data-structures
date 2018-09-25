@@ -48,6 +48,10 @@ export class DefaultIndex {
     );
   }
 
+  public get(propName, valueHash) {
+    return this.internal.get(propName).getOne(valueHash);
+  }
+
   public from(propName, valueHash?) {
     if (this.internal.has(propName)) {
       const firstLevel = this.internal.get(propName);
