@@ -175,12 +175,28 @@ export class Collection {
 
   constructor(private internal: InternalState) { }
 
+  public filterHashes(hashes: StringSet): Collection {
+    return this.filter((item, hash) => hashes.has(hash));
+  }
+
   public findOne(query) {
-    return this.internal.set.$('indexPlugin').findOne(query);
+    return this.internal.set.$('indexPlugin', [this]).findOne(query);
+  }
+
+  public findOneHash(query) {
+    return this.internal.set.$('indexPlugin', [this]).findOneHash(query);
+  }
+
+  public findOneHashOrigin(query) {
+    return this.internal.set.$('indexPlugin', [this]).findOneHashOrigin(query);
   }
 
   public find(query) {
-    return this.internal.set.$('indexPlugin').find(query);
+    return this.internal.set.$('indexPlugin', [this]).find(query);
+  }
+
+  public findHash(query) {
+    return this.internal.set.$('indexPlugin', [this]).findHash(query);
   }
 
   public add(item) {
