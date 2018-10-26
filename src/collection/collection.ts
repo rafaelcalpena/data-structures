@@ -3,8 +3,28 @@ import {SSet} from '../sset/sset';
 import _ = require("lodash");
 import * as uuid from 'uuid/v4';
 import {DefaultIndex} from '../default-index/default-index';
-import {PointerMap} from '../pointer-map/pointer-map';
+import {StringSet} from '../string-set/string-set';
 import {createTriples} from './create-triples';
+
+const performIndexLookup = (args, props) => {
+  return props.index.has(args[0], args[1]) ?
+  props.index.from(args[0], args[1]) :
+  StringSet.fromEmpty();
+};
+
+const orOperator = (propName, values, props) => {
+  const sets = values.reduce((acc, v) => {
+    return [
+      ...acc,
+      performIndexLookup([propName, v], props),
+    ];
+  }, []);
+  /* Perform union between StringSets */
+  const finalStringSet = sets[0] ?
+  sets[0].union(...sets.splice(1)) :
+   StringSet.fromEmpty();
+  return finalStringSet;
+};
 
 export const indexPlugin = {
   onInit(state) {
