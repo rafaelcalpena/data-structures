@@ -294,12 +294,21 @@ export class Collection {
   }
 
   public forEach(fn) {
-    this.internal.set.forEach(fn);
+    /* For collection, item metadata is included by default */
+    this.internal.set.forEach((item, hash) => {
+      const metadata = this.getMetadata().get(hash);
+      fn(item, hash, metadata);
+    });
   }
 
   public filter(fn) {
+    /* For collection, item metadata is included by default */
     return new Collection({
-      set: this.internal.set.filter(fn),
+      ...this.internal,
+      set: this.internal.set.filter((item, hash) => {
+        const metadata = this.getMetadata().get(hash);
+        return fn(item, hash, metadata);
+      }),
     });
   }
 
