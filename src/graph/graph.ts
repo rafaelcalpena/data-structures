@@ -371,9 +371,25 @@ export class Graph {
       });
     }).bind(this),
 
+    findHash: ((query) => {
+      const {nodes, edges} = this.internal;
+      return new Graph({
+        edges: edges.findHash(query),
+        nodes: Collection.fromArray([]),
+      });
+    }).bind(this),
+
     /** Shortcut method for piping Edges.find() => Edges.difference */
     findAndDifference: ((query) => {
       return this.edges.difference(this.edges.find(query));
+    }).bind(this),
+
+    /** Shortcut method for piping Edges.find() => Edges.difference */
+    findAndDifferenceHash: ((query) => {
+      const z = this.edges.findHash(query);
+      const d = this.edges.difference(z);
+
+      return d;
     }).bind(this),
 
     /** Returns Edges as Collection Type instead of Graph */
