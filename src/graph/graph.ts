@@ -175,6 +175,9 @@ export class Graph {
     /** Check if a given item id is contained in the Graph Nodes */
     hasId : ((id: any) => {
       const {nodes, edges} = this.internal;
+      if (id === undefined) {
+        return false;
+      }
       const maybeNode = nodes.findOne({id});
       return (typeof maybeNode !== 'undefined') ? true : false;
     }).bind(this),
