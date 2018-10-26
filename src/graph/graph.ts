@@ -494,6 +494,9 @@ export class Graph {
     /** Checks whether id is contained in Graph Edges */
     hasId : ((id: any) => {
       const {nodes, edges} = this.internal;
+      if (id === undefined) {
+        return false;
+      }
       const maybeNode = edges.findOne({id});
       return (typeof maybeNode !== 'undefined') ? true : false;
     }).bind(this),
