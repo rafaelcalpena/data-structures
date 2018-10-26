@@ -3,6 +3,18 @@ import {PointerMap} from '../pointer-map/pointer-map';
 
 type triplesType = [string, string, string];
 
+type orderedTriplesArray = any[];
+
+interface multiMapRemoveManyQuery {
+  [s: string]: string[];
+}
+
+interface defaultIndexRemoveManyQuery {
+  [s: string]: multiMapRemoveManyQuery;
+}
+
+type separatedFirstKeys = (i: string) => [string, multiMapRemoveManyQuery];
+
 /* TODO: Generalize for n dimensions */
 export class DefaultIndex {
 
