@@ -247,6 +247,20 @@ export class Collection {
     );
   }
 
+  public removeHash(item) {
+    return this.removeHashes([item]);
+  }
+
+  public removeHashes(item) {
+    const newSet = this.internal.set.removeHashes(item);
+    return new Collection(
+      {
+        ...this.internal,
+        set: newSet,
+      },
+    );
+  }
+
   public getOne() {
     return this.internal.set.getOne();
   }
