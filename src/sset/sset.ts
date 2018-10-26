@@ -160,8 +160,8 @@ const getOperationReducers = (set1: SSet, set2: SSet, largest: SSet, smallest: S
 };
 
 type setsOps = 'union' | 'difference' | 'oppositeDifference' | 'intersection';
-type opReducerFnAcc = {set: SSet, hashes?: string[]};
-type opReducerFn = (acc: opReducerFnAcc, item: any, largestHasIt: boolean, itemHash: any, isLast: boolean) => SSet | opReducerFnAcc
+interface opReducerFnAcc {set: SSet; hashes?: string[]; }
+type opReducerFn = (acc: opReducerFnAcc, item: any, largestHasIt: boolean, itemHash: any, isLast: boolean) => SSet | opReducerFnAcc;
 type opReducer = [
   any,
   opReducerFn
