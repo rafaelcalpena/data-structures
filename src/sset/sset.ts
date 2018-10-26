@@ -134,7 +134,7 @@ const getOperationReducers = (set1: SSet, set2: SSet, largest: SSet, smallest: S
   },
   ];
 
-  const unionReducer: opReducerFn = (acc: opReducerFnAcc, item, largestHasIt, itemHash) => ({
+  const unionReducer: opReducerFn = (acc: IOpReducerFnAcc, item, largestHasIt, itemHash) => ({
     set: acc.set.mergeHash(itemHash, item),
   });
 
@@ -160,8 +160,14 @@ const getOperationReducers = (set1: SSet, set2: SSet, largest: SSet, smallest: S
 };
 
 type setsOps = 'union' | 'difference' | 'oppositeDifference' | 'intersection';
-interface opReducerFnAcc {set: SSet; hashes?: string[]; }
-type opReducerFn = (acc: opReducerFnAcc, item: any, largestHasIt: boolean, itemHash: any, isLast: boolean) => SSet | opReducerFnAcc;
+interface IOpReducerFnAcc {set: SSet; hashes?: string[]; }
+type opReducerFn = (
+  acc: IOpReducerFnAcc,
+  item: any,
+  largestHasIt: boolean,
+  itemHash: any,
+  isLast: boolean,
+) => SSet | IOpReducerFnAcc;
 type opReducer = [
   any,
   opReducerFn
@@ -322,7 +328,11 @@ export class SSet {
     };
 
     /* trigger onRemove */
-    newInternalState = updatePlugins('onRemove', hashedValues.map((h) => this.statePropsPlugins.state[h]), hashedValues, newInternalState);
+    newInternalState = updatePlugins('onRemove',
+      hashedValues.map((h) => this.statePropsPlugins.state[h]),
+      hashedValues,
+      newInternalState,
+    );
 
     return new SSet(newInternalState);
   }

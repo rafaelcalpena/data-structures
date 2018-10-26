@@ -1,12 +1,12 @@
 import _ = require('lodash');
 import {PointerMap} from '../pointer-map/pointer-map';
 
-interface StringSetInternal {
+interface IStringSetInternal {
   state: PointerMap;
   props?: any;
 }
 
-interface StringSetObject {
+interface IStringSetObject {
   [s: string]: true;
 }
 
@@ -24,7 +24,7 @@ export class StringSet {
       state: PointerMap.fromPairs(newArray),
     });
   }
-  constructor(private internal: StringSetInternal) {}
+  constructor(private internal: IStringSetInternal) {}
 
   public add(item: string): StringSet {
 
@@ -91,7 +91,7 @@ export class StringSet {
     this.internal.state.forEach(fn);
   }
 
-  public toObject(): StringSetObject {
+  public toObject(): IStringSetObject {
     return this.internal.state.toObject();
   }
 

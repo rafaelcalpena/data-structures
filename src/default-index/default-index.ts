@@ -5,15 +5,15 @@ type triplesType = [string, string, string];
 
 type orderedTriplesArray = any[];
 
-interface multiMapRemoveManyQuery {
+interface IMultiMapRemoveManyQuery {
   [s: string]: string[];
 }
 
-interface defaultIndexRemoveManyQuery {
-  [s: string]: multiMapRemoveManyQuery;
+interface IDefaultIndexRemoveManyQuery {
+  [s: string]: IMultiMapRemoveManyQuery;
 }
 
-type separatedFirstKeys = (i: string) => [string, multiMapRemoveManyQuery];
+type separatedFirstKeys = (i: string) => [string, IMultiMapRemoveManyQuery];
 
 /* TODO: Generalize for n dimensions */
 export class DefaultIndex {
@@ -105,7 +105,7 @@ export class DefaultIndex {
     return this.removeMany([[k1, k2, k3]]);
   }
 
-  public orderTriples(items: string[][]): defaultIndexRemoveManyQuery {
+  public orderTriples(items: string[][]): IDefaultIndexRemoveManyQuery {
     /* Using mutable for performance improvement */
     const acc = {};
     items.forEach((item: string[]) => {
@@ -145,7 +145,7 @@ export class DefaultIndex {
     const orderedArray: orderedTriplesArray = keys.map(separateFirstKeys);
 
     /* Loop through first keys and update them respectively */
-    type removeInnerKeysType = (a: [string, multiMapRemoveManyQuery]) => void;
+    type removeInnerKeysType = (a: [string, IMultiMapRemoveManyQuery]) => void;
     const removeInnerKeys: removeInnerKeysType = ([key, inner]) => {
       let innerMap: MultiMap = outerMap.get(key);
       innerMap = innerMap.removeMany(inner);

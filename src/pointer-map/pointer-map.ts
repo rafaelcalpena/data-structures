@@ -75,8 +75,7 @@ export class PointerMap {
   }
 
   public keysUnion(...pointerMaps): PointerMap {
-    const result = this;
-    const r = pointerMaps.reduce((acc, p) => {
+    const result = pointerMaps.reduce((acc, p) => {
       let r = acc;
       p.forEach((key, value) => {
         /* TODO: Implement merge */
@@ -85,9 +84,9 @@ export class PointerMap {
         }
       });
       return r;
-    }, result);
+    }, this);
 
-    return r;
+    return result;
   }
 
   public set(key, value) {
