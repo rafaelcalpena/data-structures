@@ -328,13 +328,20 @@ export class Collection {
   public changesTo(c2: Collection) {
     let changesList = Collection.fromArray([]);
     let comparingCollection = c2;
+    const removeItems = [];
     /* Algorithm should track items by 'id' property */
-    this.forEach((item) => {
+    this.forEach((item, hash, metadata) => {
       const id = item.id;
-      const c2Item = comparingCollection.findOne({id});
+      /* TODO: Create wrapper for info */
+      const c2Item = comparingCollection.findOneHash({
+        id: metadata.getOne('id'),
+      });
+      const c2ItemHash = comparingCollection.findOneHashOrigin({
+        id: metadata.getOne('id'),
+      });
       if (c2Item) {
         /* TODO: Avoid rehashing to improve performance */
-        if (SSet.hashOf(c2Item) !== SSet.hashOf(item)) {
+        if (c2ItemHash !== hash) {
           changesList = changesList.add({
             after: c2Item,
             before: item,
@@ -342,7 +349,7 @@ export class Collection {
             type: 'edit',
           });
         }
-        comparingCollection = comparingCollection.remove(c2Item);
+        removeItems.push(c2ItemHash);
       } else {
         changesList = changesList.add({
           id,
@@ -351,6 +358,7 @@ export class Collection {
         });
       }
     });
+    comparingCollection = comparingCollection.removeHashes(removeItems);
     comparingCollection.forEach((item) => {
       const id = item.id;
       changesList = changesList.add({
