@@ -60,7 +60,7 @@ export class Graph {
      */
     add: ((item: any): Graph => {
       const {nodes, edges} = this.internal;
-      if (nodes.has(item)) {
+      if (this.nodes.hasId(item.id)) {
         throw new Error (
           `Could not add Node to Graph: Node already exists`,
         );
