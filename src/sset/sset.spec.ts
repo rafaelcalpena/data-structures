@@ -96,6 +96,7 @@ describe('SSet', () => {
     it('should contain map method', () => {
       const arr = [1, 2, 3, 4];
       let sset = SSet.fromArray(arr);
+
       const sset2 = sset.map(item => item * 3);
       expect(sset.size()).toBe(4);
       expect(sset2.size()).toBe(4);
@@ -170,6 +171,30 @@ describe('SSet', () => {
         str += `${item};`;
       }
       expect(str).toBe('2;1;3;4;')
+    })
+
+    it('should return same objects for two iterators', () => {
+      let sset = SSet.fromArray([{a: true}, {b: true}, {c: true}, {d: true}]);
+      let jsSet = new Set();
+      for (let item of sset) {
+        jsSet.add(item)
+      }
+      for (let item of sset) {
+        expect(jsSet.has(item)).toBeTruthy();
+      }
+      expect(jsSet.size).toEqual(4);
+
+      let sset2 = sset.add({y: 'z'});
+      jsSet = new Set();
+      for (let item of sset2) {
+        jsSet.add(item)
+      }
+      for (let item of sset) {
+        expect(jsSet.has(item)).toBeTruthy();
+        jsSet.add(item)
+      }
+      expect(jsSet.size).toEqual(5);
+
     })
   })
 
