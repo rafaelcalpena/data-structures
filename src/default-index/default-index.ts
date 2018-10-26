@@ -49,7 +49,9 @@ export class DefaultIndex {
   }
 
   public get(propName, valueHash) {
-    return this.internal.get(propName).getOne(valueHash);
+    return (valueHash !== undefined) ?
+      this.internal.get(propName).getOne(valueHash) :
+      this.internal.get(propName);
   }
 
   public from(propName, valueHash?) {
