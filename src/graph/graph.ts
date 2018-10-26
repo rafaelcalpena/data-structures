@@ -501,6 +501,12 @@ export class Graph {
       return edges.findOne(query);
     }).bind(this),
 
+    /** Finds one item in Edges that satifies the query provided */
+    findOneHash: ((query) => {
+      const {nodes, edges} = this.internal;
+      return edges.findOneHash(query);
+    }).bind(this),
+
     /** Gets the number of Edges in the Graph */
     size: (() => {
       return this.internal.edges.size();
