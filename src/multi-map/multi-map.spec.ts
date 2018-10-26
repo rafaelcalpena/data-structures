@@ -207,7 +207,7 @@ describe('MultiMap', () => {
         ['b', 'c']
       ])
       expect(() => result = multiMap.getOne('b')).not.toThrow();
-      expect(result).toEqual('c');      
+      expect(result).toEqual('c');
     })
 
   })
