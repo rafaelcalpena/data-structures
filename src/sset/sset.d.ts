@@ -52,7 +52,7 @@ export type PluginDeclarationProperties = {
   onAdd?: (item, hash, props, state) => any,
   onRemove?: (items, hash, props, state) => any,
   onDestroy?: () => void,
-  API: (state, props) => any
+  API: (state, props, set: SSet, args: any[]) => any
 }
 
 export type SSetPlugins = {
