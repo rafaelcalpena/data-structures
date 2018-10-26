@@ -246,11 +246,36 @@ export class Graph {
      * Return does not contain edges
      */
     getStartingNodes: (() => {
-      return this.nodes.filter((i) => {
-        return this.edges.findOne({
-          to: i.id,
+      const nodesWithoutIncidentEdges = (i, hash, itemMetadata) => {
+        const nodeIdHash = itemMetadata.getOne('id');
+        const itemHash = this.edges.findOneHash({
+          to: nodeIdHash,
         }) === undefined;
+        return itemHash;
+      };
+      return this.nodes.filter(nodesWithoutIncidentEdges);
+    }).bind(this),
+
+    removeEdgesFromNodes: ((graph, nodesGraph: Graph): Graph => {
+      /* Remove levelNodes from graph */
+      const graphWithoutLevelNodes = graph.nodes.difference(nodesGraph);
+
+      /* Remove edges attached to removed nodes */
+      /* TODO: Abstract step into custom method */
+      const nodesCollection = nodesGraph.nodes.getAll();
+      let graphWithoutEdges = graphWithoutLevelNodes;
+      const hashes = [];
+
+      const addToHashesQueue = (item, hash, itemMetadata) => {
+        hashes.push(itemMetadata.getOne('id'));
+      };
+      nodesCollection.forEach(addToHashesQueue);
+
+      graphWithoutEdges = graphWithoutEdges.edges.findAndDifferenceHash({
+        from: hashes,
       });
+
+      return graphWithoutEdges;
     }).bind(this),
 
     /** Sort Nodes topologically.
@@ -264,18 +289,7 @@ export class Graph {
         }
         /* Get Nodes without Incoming Edges - "Starting" nodes */
         const levelNodes = graph.nodes.getStartingNodes();
-        /* Remove levelNodes from graph */
-        const graphWithoutLevelNodes = graph.nodes.difference(levelNodes);
-        /* Remove edges attached to removed nodes */
-        /* TODO: Abstract step into custom method */
-        const nodesCollection = Collection.fromArray(levelNodes.toObject().nodes);
-        let graphWithoutLevelEdges = graphWithoutLevelNodes;
-        nodesCollection.forEach((item) => {
-          graphWithoutLevelEdges = graphWithoutLevelEdges.edges.findAndDifference({
-            from: item.id,
-          });
-        });
-
+        const graphWithoutLevelEdges = this.nodes.removeEdgesFromNodes(graph, levelNodes);
         return step(
           graphWithoutLevelEdges,
           [...arr, levelNodes],
