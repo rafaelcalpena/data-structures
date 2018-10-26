@@ -440,9 +440,9 @@ export class Graph {
      */
     add: ((item: any) => {
       const {nodes, edges} = this.internal;
-      if (edges.has(item)) {
+      if (this.edges.hasId(item.id)) {
         throw new Error (
-          `Could not add Edge to Graph: Edge already exists`,
+          `Could not add Edge to Graph: Edge Id already exists`,
         );
       }
       return new Graph({
