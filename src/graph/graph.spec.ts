@@ -993,6 +993,7 @@ describe('graph', () => {
       })
 
       let toArray = (arr) => arr.map(l => l.toObject().nodes);
+
       expect(toArray(g.nodes.topologicalSort())).toEqual([
         [{id: 1}],
         [{id: 2}]
@@ -1187,7 +1188,7 @@ describe('graph', () => {
         to: 1,
         id: 987
       })).toThrowError(
-        `Could not add Edge to Graph: Edge already exists`
+        `Could not add Edge to Graph: Edge Id already exists`
       )
     })
   })
