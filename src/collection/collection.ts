@@ -321,6 +321,14 @@ export class Collection {
     );
   }
 
+  public getIndex() {
+    return this.internal.set.$('indexPlugin').getIndex();
+  }
+
+  public getMetadata() {
+    return this.internal.set.$('indexPlugin').getMetadata();
+  }
+
   public changesFrom(c2: Collection) {
     return c2.changesTo(this);
   }
