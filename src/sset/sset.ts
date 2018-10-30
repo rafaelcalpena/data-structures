@@ -314,7 +314,7 @@ export class SSet {
 
     hashedValues.forEach((hashedValue) => {
       if (!(hashedValue in this.statePropsPlugins.state)) {
-        throw new Error(`There is no hash ${hashedValue} in the set.`);
+        throw new Error(`Could not remove hash from SSet: hash '${hashedValue}' does not exist in the set`);
       }
     });
 
