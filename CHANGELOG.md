@@ -1,3 +1,43 @@
+# [3.0.0](https://github.com/LabShare/data-structures.git/compare/v2.0.0...v3.0.0) (2018-10-30)
+
+
+### Bug Fixes
+
+* assign to variable ([7f4dcdc](https://github.com/LabShare/data-structures.git/commit/7f4dcdc))
+* check by id instead of content ([fa1d5db](https://github.com/LabShare/data-structures.git/commit/fa1d5db))
+* improve error message for duplicated id ([2e8c314](https://github.com/LabShare/data-structures.git/commit/2e8c314))
+* improve get method ([b21826d](https://github.com/LabShare/data-structures.git/commit/b21826d))
+* return false when id is absent ([725c42c](https://github.com/LabShare/data-structures.git/commit/725c42c))
+* return false when id is absent ([4f4397e](https://github.com/LabShare/data-structures.git/commit/4f4397e))
+* update error message ([af3ab10](https://github.com/LabShare/data-structures.git/commit/af3ab10))
+* update error message ([bccaab5](https://github.com/LabShare/data-structures.git/commit/bccaab5))
+* update test ([2f37d8a](https://github.com/LabShare/data-structures.git/commit/2f37d8a))
+* update toposort related methods ([d9276c9](https://github.com/LabShare/data-structures.git/commit/d9276c9))
+* use hash related methods for performance ([a861ccd](https://github.com/LabShare/data-structures.git/commit/a861ccd))
+
+
+### Features
+
+* add findHash and findAndDifferenceHash ([4a8a1dc](https://github.com/LabShare/data-structures.git/commit/4a8a1dc))
+* add findOneHash ([f8192c4](https://github.com/LabShare/data-structures.git/commit/f8192c4))
+* add removeHash and removeHashes methods ([e55e055](https://github.com/LabShare/data-structures.git/commit/e55e055))
+* add removeMany and orderTriples methods ([4b63925](https://github.com/LabShare/data-structures.git/commit/4b63925))
+* add, update and expose hash-related methods ([6844c99](https://github.com/LabShare/data-structures.git/commit/6844c99))
+* create StringSet, improve PointerMap ([4c97df1](https://github.com/LabShare/data-structures.git/commit/4c97df1))
+* export UUID ([0045082](https://github.com/LabShare/data-structures.git/commit/0045082))
+* expose getIndex and getMetadata methods ([dccd086](https://github.com/LabShare/data-structures.git/commit/dccd086))
+* implement bulk operations ([7d31561](https://github.com/LabShare/data-structures.git/commit/7d31561))
+* import StringSet, create utils functions ([e1f05d0](https://github.com/LabShare/data-structures.git/commit/e1f05d0))
+* improve MultiMap with bulk methods ([69dbf99](https://github.com/LabShare/data-structures.git/commit/69dbf99))
+* include hash information for iterators ([df7281c](https://github.com/LabShare/data-structures.git/commit/df7281c))
+* update plugins ([3a14747](https://github.com/LabShare/data-structures.git/commit/3a14747))
+
+
+### BREAKING CHANGES
+
+* plugins now must handle onAdd and onRemove as 
+multi-items operations
+
 # [2.0.0](https://github.com/LabShare/data-structures/compare/v1.1.5...v2.0.0) (2018-09-25)
 
 
