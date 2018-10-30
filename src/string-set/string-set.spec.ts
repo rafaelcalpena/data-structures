@@ -38,6 +38,11 @@ describe('StringSet', () => {
       expect(s.size()).toBe(1);
       expect(s.has('2')).toBeFalsy();
 
+      expect(() => s = s.remove('inexistentKey')).toThrowError(
+        `Could not remove from StringSet: item 'inexistentKey' does not exist`
+      );
+
+
       s = s.remove('1');
       expect(s.isEmpty()).toBeTruthy();
 

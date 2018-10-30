@@ -604,6 +604,16 @@ describe('graph', () => {
       expect(g.nodes.hasId('node0')).toEqual(true);
       expect(g.nodes.hasId('another-node')).toEqual(false);
     })
+
+    it('should return false when id is undefined', () => {
+      let g = Graph.fromObject({
+        edges: [],
+        nodes: [{
+          id: 'node0'
+        }]
+      });
+      expect(g.nodes.hasId()).toEqual(false);
+    })
   })
 
   describe('nodes update', () => {
@@ -743,6 +753,112 @@ describe('graph', () => {
       expect(result.toObject().nodes).toEqual([{
         id: 'n2',
         name: 'Node 2'
+      }]);
+    })
+  })
+
+  describe('edges findAndDifference', () => {
+    it('should find and remove edges', () => {
+      let g = Graph.fromObject({
+        nodes: [],
+        edges: [
+          {id: 1, from: 0, to: 0, color: 'red'}
+        ]
+      });
+      expect(g.edges.size()).toBe(1)
+      let r;
+      expect(() => r = g.edges.findAndDifference({
+        color: 'red'
+      })).not.toThrow();
+      expect(r.edges.size()).toBe(0)
+    })
+  })
+
+  describe('edges findOne', () => {
+    it('should find one edge', () => {
+      let g = Graph.fromObject({
+        nodes: [],
+        edges: [
+          {id: 1, from: 0, to: 0, color: 'red'}
+        ]
+      });
+      expect(g.edges.size()).toBe(1)
+      let r;
+      expect(() => r = g.edges.findOne({
+        color: 'red'
+      })).not.toThrow();
+      expect(r).toEqual(
+        {id: 1, from: 0, to: 0, color: 'red'}
+      )
+    })
+  })
+
+  describe('edges find', () => {
+
+    let g;
+    beforeEach(() => {
+      g = Graph.fromObject({
+        edges: [
+          {
+            id: 'n1',
+            from: 0,
+            to: 0
+          }, {
+            id: 'n2',
+            name: 'Node 2',
+            from: 0,
+            to: 0
+          }, {
+            id: 1,
+            from: 0,
+            to: 0
+          }
+        ],
+        nodes: []
+      });
+
+    })
+
+    it('should find edge by id', () => {
+      expect(g.edges.find({
+        id: 'n1'
+      }).toObject().edges).toEqual([{
+        id: 'n1',
+        from:0,
+        to: 0
+      }]);
+      expect(g.edges.find({
+        id: '1'
+      }).toObject().edges).toEqual([])
+      expect(g.edges.find({
+        id: 1
+      }).toObject().edges).toEqual([{
+        id: 1,
+        from: 0,
+        to: 0
+      }])
+    })
+
+    it('should not fail for inexistent key', () => {
+      let result;
+      expect(() => result = g.edges.find({
+        anyKey: 'anyValue'
+      })).not.toThrow();
+
+      expect(result.toObject().edges).toEqual([]);
+    })
+
+    it('should not fail for keys that exist in only one object', () => {
+      let result;
+      expect(() => result = g.edges.find({
+        name: 'Node 2'
+      })).not.toThrow();
+
+      expect(result.toObject().edges).toEqual([{
+        id: 'n2',
+        name: 'Node 2',
+        from: 0,
+        to: 0
       }]);
     })
   })

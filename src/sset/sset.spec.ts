@@ -1133,4 +1133,13 @@ describe('SSet', () => {
     })
 
   })
+
+  describe('removeHashes', () => {
+    it('should throw error if inexistent hash', () => {
+      let sset = SSet.fromArray([1, 2, 3]);
+      expect(() => sset.removeHashes(['inexistentHash'])).toThrowError(
+        `Could not remove hash from SSet: hash 'inexistentHash' does not exist in the set`
+      );
+    })
+  })
 })

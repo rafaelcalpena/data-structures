@@ -221,6 +221,21 @@ describe('PointerMap', () => {
       })
 
     })
+    it('should clear values when specified', () => {
+      let pm = PointerMap.fromObject({
+        10: '10',
+        20: '20',
+        21: '21',
+        22: '22'
+      })
+      let result;
+
+      expect(() => result = pm.filter(i => i % 10 === 0, true)).not.toThrow()
+      expect(result.toObject()).toEqual({
+        10: true,
+        20: true
+      })
+    })
   })
 
   describe('intersection', () => {
@@ -352,6 +367,86 @@ describe('PointerMap', () => {
       expect(result).toEqual([
         'ab',
         'cd'
+      ])
+    })
+  })
+
+  describe('keysSet', () => {
+    it('should return a set of keys', () => {
+      let pMap = PointerMap.fromObject({})
+      let set;
+      expect(() => set = pMap.keysSet()).not.toThrow();
+      expect(set.toArray()).toEqual([])
+
+      pMap = PointerMap.fromObject({
+        'a': 'b'
+      })
+      expect(() => set = pMap.keysSet()).not.toThrow();
+      expect(set.toArray()).toEqual(['a'])
+
+      pMap = PointerMap.fromObject({
+        'a': 'b',
+        'c': 'd'
+      })
+      expect(() => set = pMap.keysSet()).not.toThrow();
+      expect(set.toArray()).toEqual(['a', 'c'])
+
+    })
+  })
+
+  describe('keysUnion', () => {
+    it('should return keys union', () => {
+      let p = PointerMap.fromPairs([
+        ['a', 'b'],
+        ['c', 'd']
+      ])
+      let q = PointerMap.fromPairs([
+        ['e', 'f'],
+        ['g', 'h'],
+        ['i', 'j']
+      ])
+      let result;
+      expect(() => result = p.keysUnion(q)).not.toThrow();
+      expect(result.toPairs()).toEqual([
+        ['a', 'b'],
+        ['c', 'd'],
+        ['e', 'f'],
+        ['g', 'h'],
+        ['i', 'j']
+      ])
+
+      p = PointerMap.fromPairs([
+        ['a', 'b'],
+        ['c', 'd']
+      ])
+      q = PointerMap.fromPairs([
+        ['a', 'b'],
+        ['g', 'h'],
+        ['i', 'j']
+      ])
+
+      expect(() => result = p.keysUnion(q)).not.toThrow();
+      expect(result.toPairs()).toEqual([
+        ['a', 'b'],
+        ['c', 'd'],
+        ['g', 'h'],
+        ['i', 'j']
+      ])
+    })
+  })
+
+  describe('setMany', () => {
+    it('should overwrite key value pair', () => {
+      let p = PointerMap.fromObject({
+        a: '1234'
+      });
+      expect(() => p = p.setMany({
+        a: 2345,
+        b: true
+      })).not.toThrow();
+      expect(p.toPairs()).toEqual([
+        ['a', 2345],
+        ['b', true]
       ])
     })
   })
