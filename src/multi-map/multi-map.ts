@@ -1,4 +1,5 @@
 import { PointerMap } from '../pointer-map/pointer-map';
+import { StringSet } from '../string-set/string-set';
 
 interface IStateAndProps {
   state: PointerMap;
@@ -12,7 +13,7 @@ const addFactory: addFactory = ({state: outerMap, props: {size}}, errorMsg) => (
     return {state: outerMap, props: {size}};
   }
   if (!outerMap.has(k1)) {
-    outerMap = outerMap.add(k1, PointerMap.fromObject({}));
+    outerMap = outerMap.add(k1, StringSet.fromEmpty());
   }
   const innerMap = outerMap.get(k1);
 
@@ -34,7 +35,7 @@ const addFactory: addFactory = ({state: outerMap, props: {size}}, errorMsg) => (
 
 /**
  * A MultiMap consists of a pointerMap with keys that point to
- * other pointerMaps. This allows one-to-many relationships
+ * StringSets. This allows one-to-many relationships
  */
 export class MultiMap {
   public static fromPairs(arrayPairs) {
@@ -77,7 +78,7 @@ export class MultiMap {
   }
 
   public getOne(k1) {
-    return this.internal.state.get(k1).firstKey();
+    return this.internal.state.get(k1).first();
   }
 
   public from(k1) {
@@ -90,35 +91,61 @@ export class MultiMap {
 
   public remove(k1, k2?) {
     const {state: outerMap, props: {size}} = this.internal;
-    if (!outerMap.has(k1)) {
-      throw new Error(`Could not remove from MultiMap: key '${k1}' does not exist`);
-    }
+
     if (typeof k2 === 'undefined') {
-      return new MultiMap({
-        props: {
-          size: size - outerMap.get(k1).size(),
-        },
-        state: outerMap.remove(k1),
-      });
+      return this.removeMany({[k1]: true});
     }
-    const innerMap = outerMap.get(k1);
-    if (!innerMap.has(k2)) {
-      throw new Error(`Could not remove from MultiMap: path '${k1}' -> '${k2}' does not exist`);
-    }
-    const newInnerMap = outerMap.get(k1).remove(k2);
-    let newOuterMap;
-    if (newInnerMap.size() === 0) {
-      newOuterMap = outerMap.remove(k1);
-    } else {
-      newOuterMap = outerMap.set(k1, newInnerMap);
-    }
+
+    return this.removeMany({[k1]: [k2]});
+
+  }
+
+  public removeMany(query: {[s: string]: string[] | boolean}): MultiMap {
+    const outerMap = this.internal.state;
+    const removeOuterKeys = [];
+    const setOuterKeys = {};
+    let size = this.size();
+    const queryKeys = Object.keys(query);
+    type keyValues = [string, string[] | boolean];
+
+    const toPairs: (k: string) => keyValues = (k) => [k, query[k]];
+
+    const orderedQuery: keyValues[] = queryKeys.map(toPairs);
+    const removeInnerKeys = ([key, values]: keyValues) => {
+      if (!outerMap.has(key)) {
+        throw new Error(`Could not remove from MultiMap: key '${key}' does not exist`);
+      }
+      if (typeof values === "boolean") {
+        size -= outerMap.get(key).size(),
+        removeOuterKeys.push(key);
+      } else {
+
+        const innerMap = outerMap.get(key);
+        values.forEach((k2) => {
+          if (!innerMap.has(k2)) {
+            throw new Error(`Could not remove from MultiMap: path '${key}' -> '${k2}' does not exist`);
+          }
+        });
+        size -= values.length;
+        const newInnerMap = innerMap.removeMany(values);
+        if (newInnerMap.size() === 0) {
+          removeOuterKeys.push(key);
+        } else {
+          setOuterKeys[key] = newInnerMap;
+        }
+      }
+
+    };
+
+    orderedQuery.forEach(removeInnerKeys);
+
+    const newOuterMap = outerMap.removeMany(removeOuterKeys).setMany(setOuterKeys);
     return new MultiMap({
       props: {
-        size: size - 1,
+        size,
       },
       state: newOuterMap,
     });
-
   }
 
   public toObject() {

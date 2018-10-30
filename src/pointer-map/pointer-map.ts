@@ -1,9 +1,10 @@
 import _ = require('lodash');
+import { StringSet } from '../string-set/string-set';
 
 interface IHashMadeMap {
   [s: string]: string;
 }
-type keyValuePair = [string, string];
+type keyValuePair = [string, (string| boolean)];
 type pairsArray = keyValuePair[];
 
 export class PointerMap {
@@ -49,6 +50,10 @@ export class PointerMap {
     return this.internal.props.size;
   }
 
+  public isEmpty() {
+    return this.size() === 0;
+  }
+
   public has(key: string, value?: string) {
     const {state} = this.internal;
     return (key in state) && (value ? state[key] === value : true);
@@ -69,6 +74,21 @@ export class PointerMap {
     });
   }
 
+  public keysUnion(...pointerMaps): PointerMap {
+    const result = pointerMaps.reduce((acc, p) => {
+      let r = acc;
+      p.forEach((key, value) => {
+        /* TODO: Implement merge */
+        if (!r.has(key)) {
+          r = r.add(key, value);
+        }
+      });
+      return r;
+    }, this);
+
+    return result;
+  }
+
   public set(key, value) {
     const isOverwrite = this.has(key);
     return new PointerMap({
@@ -82,15 +102,44 @@ export class PointerMap {
     });
   }
 
-  public remove(key) {
-    if (!this.has(key)) {
-      throw new Error(`Could not remove from PointerMap: key '${key}' does not exist`);
-    }
+  public setMany(items: {[s: string]: any}) {
+    const newState = {
+      ...this.internal.state,
+    };
+    let size = this.internal.props.size;
+
+    _.forEach(items, (value, key) => {
+      const isOverwrite = this.has(key);
+      size += (isOverwrite ? 0 : 1);
+      newState[key] = value;
+    });
+
     return new PointerMap({
       props: {
-        size: this.internal.props.size - 1,
+        size,
       },
-      state: _.omit(this.internal.state, [key]),
+      state: newState,
+    });
+  }
+
+  public remove(key) {
+    return this.removeMany([key]);
+  }
+
+  public removeMany(keys: string[]) {
+    const newState = Object.assign({}, this.internal.state);
+
+    keys.forEach((key) => {
+      if (!this.has(key)) {
+        throw new Error(`Could not remove from PointerMap: key '${key}' does not exist`);
+      }
+      delete newState[key];
+    });
+    return  new PointerMap({
+      props: {
+        size: this.internal.props.size - keys.length,
+      },
+      state: newState,
     });
   }
 
@@ -105,7 +154,7 @@ export class PointerMap {
     return {...this.internal.state};
   }
 
-  public keysIntersection(...pointerMaps) {
+  public keysIntersection(...pointerMaps: PointerMap[]): StringSet {
     pointerMaps = [this, ...pointerMaps];
     const smallest = pointerMaps.reduce((acc, p) => {
       return (p.size() < acc.size) ? {
@@ -113,21 +162,21 @@ export class PointerMap {
         size: p.size(),
       } : acc;
     }, {
-      item: -1,
+      item: null,
       size: Infinity,
     });
 
-    return smallest.item.filter((i) => {
+    return smallest.item.reduce((acc, value, i) => {
       /* check if every pointerMaps has key */
-      return PointerMap.keyInEvery(i, pointerMaps);
-    }, true);
+      return PointerMap.keyInEvery(i, pointerMaps) ? acc.add(i) : acc;
+    }, StringSet.fromEmpty());
 
   }
 
   public filter(fn, clearValues?) {
     let result = PointerMap.fromObject({});
     /* TODO: Memoize object keys */
-    Object.keys(this.internal.state).forEach((k) => {
+    this.forEach((k) => {
       if (fn(k) === true) {
         result = result.add(k, clearValues ? true : this.internal.state[k]);
       }
@@ -135,7 +184,11 @@ export class PointerMap {
     return result;
   }
 
-  public firstKey() {
+  public forEach(fn) {
+    Object.keys(this.internal.state).forEach((key) => fn(key, this.internal.state[key]));
+  }
+
+  public firstKey(): string {
     const {state} = this.internal;
     let result;
     _.forEach(state, (value, key) => {
@@ -151,6 +204,16 @@ export class PointerMap {
     return keys.map((key) => {
       return [key, state[key]];
     });
+  }
+
+  public keysArray(): string[] {
+    const {state, items} = this.internal;
+    const keys = Object.keys(state);
+    return keys;
+  }
+
+  public keysSet(): StringSet {
+    return StringSet.fromArray(this.keysArray());
   }
 
   public reduce(fn: (acc, value, key) => any, acc: any) {

@@ -19,7 +19,7 @@ export const SSetStaticMethods: (a?: SSetPlugins) => SSetStaticProps = (curryPlu
     /** Given an array, create a SSet from it */
     fromArray(array: any[], props?: any): SSet {
       /* Remove any unsupported values for JSON */
-      array = JSON.parse(JSON.stringify(array));
+      JSON.parse(JSON.stringify(array));
 
       const internalState = {
         plugins: curryPlugins,
@@ -98,42 +98,79 @@ const getLargestAndSmallestSets: largestAndSmallestSets = (set1, set2)  => (
 
 const getOperationReducers = (set1: SSet, set2: SSet, largest: SSet, smallest: SSet) => {
 
-  type argsType = (a: SSet, b: any, c: boolean) => SSet;
-  const lsDifference: [SSet, argsType] =
-  [ largest,
-    (acc: SSet, item: any, largestHasIt: boolean): SSet => largestHasIt ?
-    acc.remove(item) : acc,
+  type argsType = (a: {set: SSet, hashes?: string[]}, b: any, c: boolean, d: any, e: boolean) => {set: SSet};
+  const lsDifference: [{set: SSet, hashes: string[]}, argsType] =
+  [ {set: largest, hashes: []},
+    (acc: {set: SSet, hashes?: string[]}, item: any, largestHasIt: boolean, itemHash, isLast: boolean) => {
+
+      /* Using Mutable for performance gains */
+      if (largestHasIt) {
+        acc.hashes.push(itemHash);
+      }
+
+      if (isLast === true) {
+        return {
+          set: acc.set.removeHashes(acc.hashes),
+        };
+      }
+      return acc;
+    },
   ];
-  const slDifference: [SSet, argsType] =
-  [ smallest,
-    (acc: SSet, item: any, largestHasIt: boolean): SSet => largestHasIt ?
-    acc.remove(item) : acc,
+  const slDifference: [{set: SSet, hashes: string[]}, argsType] =
+  [ {set: smallest, hashes: []},
+  (acc: {set: SSet, hashes?: string[]}, item: any, largestHasIt: boolean, itemHash, isLast: boolean) => {
+
+    /* Using Mutable for performance gains */
+    if (largestHasIt) {
+      acc.hashes.push(itemHash);
+    }
+
+    if (isLast === true) {
+      return {
+        set: acc.set.removeHashes(acc.hashes),
+      };
+    }
+    return acc;
+  },
   ];
 
-  type reducer = (acc: SSet, item: any, c: boolean) => SSet;
+  const unionReducer: opReducerFn = (acc: IOpReducerFnAcc, item, largestHasIt, itemHash) => ({
+    set: acc.set.mergeHash(itemHash, item),
+  });
+
   const reducers: {
-    union: [SSet, reducer],
-    difference: [SSet, reducer],
-    oppositeDifference: [SSet, reducer],
-    intersection: [SSet, reducer],
+    union: [any, opReducerFn],
+    difference: [any, opReducerFn],
+    oppositeDifference: [any, opReducerFn],
+    intersection: [any, opReducerFn],
   } = {
     /* Difference and oppositeDifference are being calculated respectively as
     largest - smallest and smallest - largest. */
     /* Since order for differences is important,
     swap them if set1 is not largest */
     difference: (set1 === largest) ? lsDifference : slDifference,
-    intersection: [smallest, (acc, item, largestHasIt): SSet => largestHasIt ? acc : acc.remove(item)],
+    intersection: [{set: smallest}, (acc, item, largestHasIt, itemHash) => ({
+      set: largestHasIt ? acc.set : acc.set.removeHash(itemHash),
+    })],
     oppositeDifference: set1 === largest ? slDifference : lsDifference,
-    union: [largest, (acc, item, largestHasIt): SSet => acc.merge(item)],
+    union: [{set: largest}, unionReducer],
   };
 
   return reducers;
 };
 
 type setsOps = 'union' | 'difference' | 'oppositeDifference' | 'intersection';
+interface IOpReducerFnAcc {set: SSet; hashes?: string[]; }
+type opReducerFn = (
+  acc: IOpReducerFnAcc,
+  item: any,
+  largestHasIt: boolean,
+  itemHash: any,
+  isLast: boolean,
+) => SSet | IOpReducerFnAcc;
 type opReducer = [
-  SSet,
-  (acc: SSet, item: any, largestHasIt: boolean) => SSet
+  any,
+  opReducerFn
 ];
 type operationArrayItem = [string, SSet, (acc: SSet, item: any, largestHasIt: boolean) => SSet];
 
@@ -171,9 +208,9 @@ export class SSet {
    */
    /* TODO: Add onAdd plugin listener, protect triggerChanges param from public API */
   public add(value: JSONCapable): SSet {
-    /* Remove unsupported values for JSON */
-    value = JSON.parse(JSON.stringify(value));
 
+    const hash = SSet.hashOf(value);
+    value = updatePlugins('onBeforeAdd', [value], [hash], this.statePropsPlugins).value;
     /* Check whether value is already contained in the set */
     const hashedValue = SSet.hashOf(value);
     if (hashedValue in this.statePropsPlugins.state) {
@@ -193,14 +230,18 @@ export class SSet {
     if (value instanceof SSet) {
       throw new Error('Please use union for merging two sets');
     }
-    /* Remove any unsupported values for JSON */
-    value = JSON.parse(JSON.stringify(value));
 
     const hash = SSet.hashOf(value);
+
+    return this.mergeHash(hash, value);
+
+  }
+
+  public mergeHash(hash, value) {
     const isNewItem = !(hash in this.statePropsPlugins.state);
 
     /* trigger onBeforeAdd if defined */
-    value = updatePlugins('onBeforeAdd', value, hash, this.statePropsPlugins).value;
+    value = updatePlugins('onBeforeAdd', [value], [hash], this.statePropsPlugins).value;
 
     let newInternalState: SSetStatePropsPlugins = {
       plugins: this.statePropsPlugins.plugins,
@@ -218,7 +259,7 @@ export class SSet {
 
     /* trigger onAdd if new item added */
     if (isNewItem) {
-      newInternalState = updatePlugins('onAdd', value, hash, newInternalState);
+      newInternalState = updatePlugins('onAdd', [value], [hash], newInternalState);
     }
 
     return new SSet(newInternalState);
@@ -239,8 +280,6 @@ export class SSet {
    */
   /* TODO: Add onRemove, plugin listener(s) */
   public remove(value: JSONCapable): SSet {
-    /* Remove any unsupported values for JSON */
-    value = JSON.parse(JSON.stringify(value));
 
     const hashedValue = SSet.hashOf(value);
     if (!(hashedValue in this.statePropsPlugins.state)) {
@@ -257,7 +296,43 @@ export class SSet {
     };
 
     /* trigger onRemove */
-    newInternalState = updatePlugins('onRemove', value, hashedValue, newInternalState);
+    newInternalState = updatePlugins('onRemove', [value], [hashedValue], newInternalState);
+
+    return new SSet(newInternalState);
+  }
+
+  /** Remove item given its hash */
+  public removeHash(hashedValue: any): SSet {
+    return this.removeHashes([hashedValue]);
+
+  }
+
+  public removeHashes(hashedValues: any[]): SSet {
+    if (hashedValues.length === 0) {
+      return this;
+    }
+
+    hashedValues.forEach((hashedValue) => {
+      if (!(hashedValue in this.statePropsPlugins.state)) {
+        throw new Error(`Could not remove hash from SSet: hash '${hashedValue}' does not exist in the set`);
+      }
+    });
+
+    let newInternalState: SSetStatePropsPlugins = {
+      plugins: this.statePropsPlugins.plugins,
+      props: {
+        ...this.statePropsPlugins.props,
+        size: this.statePropsPlugins.props.size - hashedValues.length,
+      },
+      state: _.omit(this.statePropsPlugins.state, hashedValues),
+    };
+
+    /* trigger onRemove */
+    newInternalState = updatePlugins('onRemove',
+      hashedValues.map((h) => this.statePropsPlugins.state[h]),
+      hashedValues,
+      newInternalState,
+    );
 
     return new SSet(newInternalState);
   }
@@ -279,11 +354,12 @@ export class SSet {
   Should be the props of el that looks most alike
   For plugins: send before and after, rate of difference */
   public difference(set: SSet): SSet {
+    /* TODO: Fix plugin issue for optimization */
+    const result = this.internalTwoSetsOperations(['difference'], this, set).difference;
+    const probEquals = result.probEquals(this);
     /* Performance improvement: only return new Set
     if difference is not itself */
-    const result = this.internalTwoSetsOperations(['difference'], this, set).difference;
-    /* TODO: Use fastEquals here */
-    if (result.equals(this)) {
+    if (probEquals) {
       return this;
     }
     return result;
@@ -326,13 +402,17 @@ export class SSet {
   /** Filter out undesired items from SSet. Creates new SSet with results
    */
   /* TODO: Add onFilter? plugin listener(s) */
-  public filter(fn: (JSONCapable) => boolean): SSet {
+  public filter(fn: (JSONCapable, hash) => boolean): SSet {
     let newSet: SSet = this;
-    this.forEach((item) => {
-      if (!fn(item)) {
-        newSet = newSet.remove(item);
+    const remove = [];
+    /* Using mutable for performance improvement */
+    this.forEach((item, hash) => {
+      if (!fn(item, hash)) {
+        remove.push(hash);
       }
     });
+
+    newSet = newSet.removeHashes(remove);
     return newSet;
   }
 
@@ -345,9 +425,9 @@ export class SSet {
 
   /** Retrieve a given Plugin's API
    */
-  public $(name: string): any {
+  public $(name: string, args: any[] = []): any {
     const {state, props, plugins} = this.statePropsPlugins;
-    return plugins[name].API(state, props[name]);
+    return plugins[name].API(state, props[name], this, args);
   }
 
   /* Similar methods as above, but related to instance instead of static
@@ -444,9 +524,6 @@ export class SSet {
 
   /** Check whether a SSet contains an item */
   public has(value: JSONCapable): boolean {
-    /* Remove any unsupported values for JSON */
-    value = JSON.parse(JSON.stringify(value));
-
     return SSet.hashOf(value) in this.statePropsPlugins.state;
   }
 
@@ -469,8 +546,11 @@ export class SSet {
   }
 
   /** Loop through SSet items and perform a function on the item if desired */
-  public forEach(fn: (JSONCapable) => void): void {
-    this.getSortedKeysArray().forEach((key) => fn(this.statePropsPlugins.state[key]));
+  public forEach(fn: (JSONCapable, key?, isLast?: boolean) => void): void {
+    const arr = this.getSortedKeysArray();
+    arr.forEach((key, i) => {
+      fn(this.statePropsPlugins.state[key], key, i + 1 === arr.length);
+    });
   }
 
   /* TODO: add cancel loop property to forEach (performance improvement) */
@@ -560,7 +640,11 @@ export class SSet {
 
   /** Check whether current SSet is equal to given SSet */
   public equals(set: SSet): boolean {
-    return this.symmetricDifference(set).isEmpty();
+    return (this === set) || this.symmetricDifference(set).isEmpty();
+  }
+
+  public probEquals(set) {
+    return this === set;
   }
 
   /** This method is automatically used by JSON.stringify when converting to
@@ -620,15 +704,15 @@ export class SSet {
       [name, ...opReducers[name]],
     );
 
-    smallest.forEach((item) => {
-      const largestHasIt = largest.has(item);
-      operationsQueue.forEach((opParams: any[]) =>
-        opParams[1] = opParams[2](opParams[1], item, largestHasIt),
-      );
+    smallest.forEach((item, hash, isLast) => {
+      const largestHasIt = largest.hasHash(hash);
+      operationsQueue.forEach((opParams: any[] ) => {
+        opParams[1] = opParams[2](opParams[1], item, largestHasIt, hash, isLast);
+      });
     });
 
     return operationsQueue.reduce((acc, value: any) => {
-      acc[value[0]] = value[1];
+      acc[value[0]] = value[1].set;
       return acc;
     }, {});
 

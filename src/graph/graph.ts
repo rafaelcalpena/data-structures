@@ -60,7 +60,7 @@ export class Graph {
      */
     add: ((item: any): Graph => {
       const {nodes, edges} = this.internal;
-      if (nodes.has(item)) {
+      if (this.nodes.hasId(item.id)) {
         throw new Error (
           `Could not add Node to Graph: Node already exists`,
         );
@@ -175,6 +175,9 @@ export class Graph {
     /** Check if a given item id is contained in the Graph Nodes */
     hasId : ((id: any) => {
       const {nodes, edges} = this.internal;
+      if (id === undefined) {
+        return false;
+      }
       const maybeNode = nodes.findOne({id});
       return (typeof maybeNode !== 'undefined') ? true : false;
     }).bind(this),
@@ -243,11 +246,36 @@ export class Graph {
      * Return does not contain edges
      */
     getStartingNodes: (() => {
-      return this.nodes.filter((i) => {
-        return this.edges.findOne({
-          to: i.id,
+      const nodesWithoutIncidentEdges = (i, hash, itemMetadata) => {
+        const nodeIdHash = itemMetadata.getOne('id');
+        const itemHash = this.edges.findOneHash({
+          to: nodeIdHash,
         }) === undefined;
+        return itemHash;
+      };
+      return this.nodes.filter(nodesWithoutIncidentEdges);
+    }).bind(this),
+
+    removeEdgesFromNodes: ((graph, nodesGraph: Graph): Graph => {
+      /* Remove levelNodes from graph */
+      const graphWithoutLevelNodes = graph.nodes.difference(nodesGraph);
+
+      /* Remove edges attached to removed nodes */
+      /* TODO: Abstract step into custom method */
+      const nodesCollection = nodesGraph.nodes.getAll();
+      let graphWithoutEdges = graphWithoutLevelNodes;
+      const hashes = [];
+
+      const addToHashesQueue = (item, hash, itemMetadata) => {
+        hashes.push(itemMetadata.getOne('id'));
+      };
+      nodesCollection.forEach(addToHashesQueue);
+
+      graphWithoutEdges = graphWithoutEdges.edges.findAndDifferenceHash({
+        from: hashes,
       });
+
+      return graphWithoutEdges;
     }).bind(this),
 
     /** Sort Nodes topologically.
@@ -261,18 +289,7 @@ export class Graph {
         }
         /* Get Nodes without Incoming Edges - "Starting" nodes */
         const levelNodes = graph.nodes.getStartingNodes();
-        /* Remove levelNodes from graph */
-        const graphWithoutLevelNodes = graph.nodes.difference(levelNodes);
-        /* Remove edges attached to removed nodes */
-        /* TODO: Abstract step into custom method */
-        const nodesCollection = Collection.fromArray(levelNodes.toObject().nodes);
-        let graphWithoutLevelEdges = graphWithoutLevelNodes;
-        nodesCollection.forEach((item) => {
-          graphWithoutLevelEdges = graphWithoutLevelEdges.edges.findAndDifference({
-            from: item.id,
-          });
-        });
-
+        const graphWithoutLevelEdges = this.nodes.removeEdgesFromNodes(graph, levelNodes);
         return step(
           graphWithoutLevelEdges,
           [...arr, levelNodes],
@@ -371,9 +388,25 @@ export class Graph {
       });
     }).bind(this),
 
+    findHash: ((query) => {
+      const {nodes, edges} = this.internal;
+      return new Graph({
+        edges: edges.findHash(query),
+        nodes: Collection.fromArray([]),
+      });
+    }).bind(this),
+
     /** Shortcut method for piping Edges.find() => Edges.difference */
     findAndDifference: ((query) => {
       return this.edges.difference(this.edges.find(query));
+    }).bind(this),
+
+    /** Shortcut method for piping Edges.find() => Edges.difference */
+    findAndDifferenceHash: ((query) => {
+      const z = this.edges.findHash(query);
+      const d = this.edges.difference(z);
+
+      return d;
     }).bind(this),
 
     /** Returns Edges as Collection Type instead of Graph */
@@ -424,9 +457,9 @@ export class Graph {
      */
     add: ((item: any) => {
       const {nodes, edges} = this.internal;
-      if (edges.has(item)) {
+      if (this.edges.hasId(item.id)) {
         throw new Error (
-          `Could not add Edge to Graph: Edge already exists`,
+          `Could not add Edge to Graph: Edge Id already exists`,
         );
       }
       return new Graph({
@@ -475,6 +508,9 @@ export class Graph {
     /** Checks whether id is contained in Graph Edges */
     hasId : ((id: any) => {
       const {nodes, edges} = this.internal;
+      if (id === undefined) {
+        return false;
+      }
       const maybeNode = edges.findOne({id});
       return (typeof maybeNode !== 'undefined') ? true : false;
     }).bind(this),
@@ -499,6 +535,12 @@ export class Graph {
     findOne: ((query) => {
       const {nodes, edges} = this.internal;
       return edges.findOne(query);
+    }).bind(this),
+
+    /** Finds one item in Edges that satifies the query provided */
+    findOneHash: ((query) => {
+      const {nodes, edges} = this.internal;
+      return edges.findOneHash(query);
     }).bind(this),
 
     /** Gets the number of Edges in the Graph */

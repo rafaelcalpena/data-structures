@@ -3,6 +3,18 @@ import {PointerMap} from '../pointer-map/pointer-map';
 
 type triplesType = [string, string, string];
 
+type orderedTriplesArray = any[];
+
+interface IMultiMapRemoveManyQuery {
+  [s: string]: string[];
+}
+
+interface IDefaultIndexRemoveManyQuery {
+  [s: string]: IMultiMapRemoveManyQuery;
+}
+
+type separatedFirstKeys = (i: string) => [string, IMultiMapRemoveManyQuery];
+
 /* TODO: Generalize for n dimensions */
 export class DefaultIndex {
 
@@ -49,7 +61,9 @@ export class DefaultIndex {
   }
 
   public get(propName, valueHash) {
-    return this.internal.get(propName).getOne(valueHash);
+    return (valueHash !== undefined) ?
+      this.internal.get(propName).getOne(valueHash) :
+      this.internal.get(propName);
   }
 
   public from(propName, valueHash?) {
@@ -88,21 +102,63 @@ export class DefaultIndex {
   }
 
   public remove(k1, k2, k3) {
+    return this.removeMany([[k1, k2, k3]]);
+  }
+
+  public orderTriples(items: string[][]): IDefaultIndexRemoveManyQuery {
+    /* Using mutable for performance improvement */
+    const acc = {};
+    items.forEach((item: string[]) => {
+      acc[item[0]] = acc[item[0]] || {};
+      acc[item[0]][item[1]] = acc[item[0]][item[1]] || [];
+      acc[item[0]][item[1]].push(item[2]);
+    });
+    return acc;
+  }
+
+  public removeMany(items: string[][]) {
+
+    /* Separate subKeys by same first key*/
+    const ordered = this.orderTriples(items);
     let outerMap = this.internal;
-    const errorMsg = `Could not remove from DefaultIndex: ` +
-    `path '${[k1, k2, k3].join(', ')}' does not exist`;
-    if (!outerMap.has(k1)) {
-      throw new Error(errorMsg);
-    }
-    const innerMap = outerMap.get(k1);
-    if (!innerMap.has(k2, k3)) {
-      throw new Error(errorMsg);
-    }
-    const newInnerMap = innerMap.remove(k2, k3);
-    outerMap = outerMap.set(k1, newInnerMap);
-    if (newInnerMap.size() === 0) {
-      outerMap = outerMap.remove(k1);
-    }
+    const keys = Object.keys(ordered);
+    const removeKeys = [];
+    const setKeys = {};
+
+    const errorMsg = (k1, k2, k3) => `Could not remove from DefaultIndex: ` +
+          `path '${[k1, k2, k3].join(', ')}' does not exist`;
+
+    const checkIfValid = ([k1, k2, k3]) => {
+
+      if (!outerMap.has(k1)) {
+        throw new Error(errorMsg(k1, k2, k3));
+      }
+      const innerMap = outerMap.get(k1);
+      if (!innerMap.has(k2, k3)) {
+        throw new Error(errorMsg(k1, k2, k3));
+      }
+    };
+
+    items.forEach(checkIfValid);
+
+    const separateFirstKeys: separatedFirstKeys = (i) => [i, ordered[i]];
+    const orderedArray: orderedTriplesArray = keys.map(separateFirstKeys);
+
+    /* Loop through first keys and update them respectively */
+    type removeInnerKeysType = (a: [string, IMultiMapRemoveManyQuery]) => void;
+    const removeInnerKeys: removeInnerKeysType = ([key, inner]) => {
+      let innerMap: MultiMap = outerMap.get(key);
+      innerMap = innerMap.removeMany(inner);
+      if (innerMap.size() === 0) {
+        removeKeys.push(key);
+      } else {
+        setKeys[key] = innerMap;
+      }
+    };
+    orderedArray.forEach(removeInnerKeys);
+
+    outerMap = outerMap.removeMany(removeKeys).setMany(setKeys);
+
     return new DefaultIndex(outerMap);
   }
 }

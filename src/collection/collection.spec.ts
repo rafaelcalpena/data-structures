@@ -1,5 +1,6 @@
 import {Collection} from './collection'
 import { SSet } from '../sset/sset';
+import {StringSet} from '../string-set/string-set';
 
 describe('collection', () => {
   describe('create', () => {
@@ -69,6 +70,43 @@ describe('collection', () => {
       ])).toThrowError(
         `All items within a Collection must be plain objects`
       );
+    })
+
+    describe('filter collection hashes', () => {
+
+      it('should create new collection from filtered hashes', () => {
+
+        let gw = {
+          name: 'George Washington',
+          year: 1732
+        };
+
+        let ja = {
+          name: 'John Adams',
+          year: 1735
+        };
+
+        let tj =  {
+          name: 'Thomas Jefferson',
+          year: 1743
+        };
+
+        let c0 = Collection.fromArray([
+          gw,
+          ja,
+          tj
+        ]);
+
+        let c;
+        expect(() => c = c0.filterHashes(StringSet.fromArray([
+          SSet.hashOf(gw),
+          SSet.hashOf(ja)
+        ]))).not.toThrow();
+      })
+
+      it('should copy metadata from collection', () => {
+
+      })
     })
   })
 
@@ -220,6 +258,7 @@ describe('collection', () => {
       expect(c.size()).toEqual(0)
       expect(() => c = c.add({
         name: 'Luna',
+        id: 'luna',
         lastName: 'Lovegood'
       })).not.toThrow();
       expect(c.size()).toEqual(1)
@@ -231,6 +270,7 @@ describe('collection', () => {
       }))
       expect(() => c = c.remove({
         name: 'Luna',
+        id: 'luna',
         lastName: 'Lovegood'
       })).not.toThrow()
       expect(c.size()).toEqual(0)
@@ -582,6 +622,132 @@ describe('collection', () => {
         type: 'add',
         item: jasmine.objectContaining({notId: 'a', name: 'cde'})
       }))
+    })
+  })
+
+  describe('findHash', () => {
+    it('should find property hash', () => {
+      let c = Collection.fromArray([
+        {a: true},
+        {b: false}
+      ])
+      let r;
+      expect(()=> r = c.findHash({
+        a: SSet.hashOf(true)
+      })).not.toThrow();
+      expect(r.toArray()).toContain(jasmine.objectContaining({a: true}))
+      expect(r.toArray().length).toBe(1);
+
+      expect(()=> r = c.findHash({
+        a: [SSet.hashOf(true)]
+      })).not.toThrow();
+      expect(r.toArray()).toContain(jasmine.objectContaining({a: true}))
+      expect(r.toArray().length).toBe(1);
+
+      expect(()=> r = c.findHash({
+        a: []
+      })).not.toThrow();
+      expect(r.toArray().length).toBe(0);
+
+      expect(()=> r = c.findHash({
+        b: [SSet.hashOf(true)]
+      })).not.toThrow();
+      expect(r.toArray().length).toBe(0);
+
+      expect(()=> r = c.findHash({
+        b: [SSet.hashOf(false)]
+      })).not.toThrow();
+      expect(r.toArray()).toContain(jasmine.objectContaining({b: false}))
+      expect(r.toArray().length).toBe(1);
+      c = Collection.fromArray([
+       {b: true},
+       {b: false}
+     ])
+      expect(()=> r = c.findHash({
+        b: [SSet.hashOf(false), SSet.hashOf(true)]
+      })).not.toThrow();
+      expect(r.toArray()).toContain(jasmine.objectContaining({b: false}))
+      expect(r.toArray()).toContain(jasmine.objectContaining({b: true}))
+      expect(r.toArray().length).toBe(2);
+
+
+      c = Collection.fromArray([
+       {y: 45, z: 54, id: 1}
+     ])
+      expect(()=> r = c.findHash({
+        y: SSet.hashOf(45),
+        z: SSet.hashOf(54)
+      })).not.toThrow();
+      expect(r.toArray()).toContain({y: 45, z: 54, id: 1})
+      expect(r.toArray().length).toBe(1)
+
+      c = Collection.fromArray([
+       {y: 45, z: 54, id: 1}
+     ])
+      expect(()=> r = c.findHash({
+        y: SSet.hashOf(78),
+        z: SSet.hashOf(54)
+      })).not.toThrow();
+      expect(r.toArray().length).toBe(0)
+    })
+  })
+
+  describe('findOneHash', () => {
+    it('should find property hash', () => {
+      let c = Collection.fromArray([
+        {a: true, id: 3, m: 123, n: 456},
+        {b: false, m: 234, n: 789}
+      ])
+      let r;
+      expect(()=> r = c.findOneHash({
+        a: SSet.hashOf(true),
+        m: SSet.hashOf(123)
+      })).not.toThrow();
+      expect(r).toEqual({a: true, id: 3, m: 123, n: 456})
+
+    })
+  })
+
+  describe('findOneHashOrigin', () => {
+    it ('should one out of many query keys', () => {
+      let a = Collection.fromArray([
+        {name: 'Harry', id: 'harry', lastName: 'Potter'},
+        {name: 'Lilian', lastName: 'Potter'},
+        {name: 'James', lastName: 'Potter'}
+      ]);
+      let r;
+
+      expect(() => r = a.findOneHashOrigin({
+        lastName: SSet.hashOf('Potter'),
+        name: SSet.hashOf('Harry')
+      })).not.toThrow()
+
+      expect(r).toEqual(
+        SSet.hashOf({name: 'Harry', lastName: 'Potter', id: 'harry'})
+      )
+
+    })
+  })
+
+  describe('removeHash', () => {
+    it('should remove hash from collection', () => {
+      let c = Collection.fromArray([
+        {name: 'Test', id: 'test'}
+      ]);
+      expect(c.size()).toEqual(1);
+      expect(() => c = c.removeHash(
+        SSet.hashOf({name: 'Test', id: 'test'}))
+      ).not.toThrow();
+      expect(c.isEmpty()).toBeTruthy();
+    })
+  })
+
+  describe('getIndex', () => {
+    it('should return index', () => {
+      let c = Collection.fromArray([
+        {name: 'Test', id: 'test'}
+      ]);
+      expect(c.getIndex()).toBeDefined();
     })
   })
 

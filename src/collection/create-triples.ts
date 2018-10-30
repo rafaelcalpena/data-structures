@@ -11,7 +11,8 @@ export const createTriples = (triples, {hash: itemHash, item}) => {
   /* TODO check whether id is duplicated */
   const keys = Object.keys(item);
   keys.forEach((k) => {
-    triples = [...triples, [k, SSet.hashOf(item[k]), itemHash] ];
+    const valueHash = SSet.hashOf(item[k]);
+    triples = [...triples, [k, valueHash, itemHash] ];
   });
   return triples;
 };
