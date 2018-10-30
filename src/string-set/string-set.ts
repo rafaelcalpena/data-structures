@@ -63,7 +63,7 @@ export class StringSet {
   public remove(item: string): StringSet {
 
     if (!this.internal.state.has(item)) {
-      throw new Error(`Could not remove '${item}' from StringSet: Item does not exist`);
+      throw new Error(`Could not remove from StringSet: item '${item}' does not exist`);
     }
 
     return new StringSet({
