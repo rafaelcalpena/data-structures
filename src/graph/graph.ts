@@ -71,6 +71,12 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Finds one item in Nodes that satifies the query provided */
+    findOne: ((query) => {
+      const {nodes, edges} = this.internal;
+      return nodes.findOne(query);
+    }).bind(this),
+
     /** Removes a Node from the Graph.
      * Will throw an error if Node does not exist in Graph
      */
