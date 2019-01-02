@@ -322,6 +322,11 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Gets the number of Nodes in the Graph */
+    size: (() => {
+      return this.internal.nodes.size();
+    }).bind(this),
+
     /** Iterator for Nodes. Can be used in for ... of loops, for example */
     [Symbol.iterator]: (() => {
       return this.internal.nodes[Symbol.iterator]();
