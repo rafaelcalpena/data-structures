@@ -420,6 +420,12 @@ export class Graph {
       return d;
     }).bind(this),
 
+    /** Iterate on all Edges */
+    forEach: ((fn) => {
+      const {nodes, edges} = this.internal;
+      edges.forEach(fn);
+    }).bind(this),
+
     /** Returns Edges as Collection Type instead of Graph */
     getAll : (() => {
       return this.internal.edges;
