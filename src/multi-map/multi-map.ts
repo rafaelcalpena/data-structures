@@ -1,5 +1,4 @@
-import { PointerMap } from '../pointer-map/pointer-map';
-import { StringSet } from '../string-set/string-set';
+import { PointerMap, StringSet } from '../pointer-map/pointer-map';
 
 interface IStateAndProps {
   state: PointerMap;

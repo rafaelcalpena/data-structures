@@ -1,4 +1,4 @@
-import { StringSet } from './string-set';
+import { StringSet } from '../pointer-map/pointer-map';
 
 describe('StringSet', () => {
   describe('create', () => {
