@@ -318,14 +318,13 @@ export class SSet {
       }
     });
 
-    let newState = _.omit(this.statePropsPlugins.state, hashedValues);
-
+    const newState = _.omit(this.statePropsPlugins.state, hashedValues);
 
     /* performance improvement */
     if (hashedValues.length >= this.size() * 0.5) {
-      let objArray = _.reduce(
+      const objArray = _.reduce(
         newState,
-        (acc, v) => {acc.push(v); return acc}, []
+        (acc, v) => {acc.push(v); return acc; }, [],
       );
       return SSet.addPlugins(this.statePropsPlugins.plugins).fromArray(objArray);
     } else {
