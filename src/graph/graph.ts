@@ -617,5 +617,5 @@ export class Graph {
     return graph2.changesFrom(this);
   }
 
-  public _getSignature = () => '@labshare/data-structures/graph';
+  public getSignature = () => '@labshare/data-structures/graph';
 }
