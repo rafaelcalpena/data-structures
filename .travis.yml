@@ -11,7 +11,7 @@ install:
   - npm i -g lsc nsp codecov
   - npm install
 script:
-  - nsp check
+  - npm audit --audit-level high
   - npm run build
   - npm run lint
   - xvfb-run npm run coverage
