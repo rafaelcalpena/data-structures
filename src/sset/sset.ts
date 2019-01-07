@@ -318,23 +318,37 @@ export class SSet {
       }
     });
 
-    let newInternalState: SSetStatePropsPlugins = {
-      plugins: this.statePropsPlugins.plugins,
-      props: {
-        ...this.statePropsPlugins.props,
-        size: this.statePropsPlugins.props.size - hashedValues.length,
-      },
-      state: _.omit(this.statePropsPlugins.state, hashedValues),
-    };
+    let newState = _.omit(this.statePropsPlugins.state, hashedValues);
 
-    /* trigger onRemove */
-    newInternalState = updatePlugins('onRemove',
-      hashedValues.map((h) => this.statePropsPlugins.state[h]),
-      hashedValues,
-      newInternalState,
-    );
 
-    return new SSet(newInternalState);
+    /* performance improvement */
+    if (hashedValues.length >= this.size() * 0.5) {
+      let objArray = _.reduce(
+        newState,
+        (acc, v) => {acc.push(v); return acc}, []
+      );
+      return SSet.addPlugins(this.statePropsPlugins.plugins).fromArray(objArray);
+    } else {
+
+      let newInternalState: SSetStatePropsPlugins = {
+        plugins: this.statePropsPlugins.plugins,
+        props: {
+          ...this.statePropsPlugins.props,
+          size: this.statePropsPlugins.props.size - hashedValues.length,
+        },
+        state: newState,
+      };
+
+      /* trigger onRemove */
+      newInternalState = updatePlugins('onRemove',
+        hashedValues.map((h) => this.statePropsPlugins.state[h]),
+        hashedValues,
+        newInternalState,
+      );
+
+      return new SSet(newInternalState);
+    }
+
   }
 
   /** Obtain the union between two SSets.
@@ -413,6 +427,7 @@ export class SSet {
     });
 
     newSet = newSet.removeHashes(remove);
+
     return newSet;
   }
 
