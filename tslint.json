@@ -5,6 +5,7 @@
     "rules": {
       "quotemark": [
         "single"
-      ]
+      ],
+      "max-classes-per-file": [true, 2]
     }
 }
