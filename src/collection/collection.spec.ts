@@ -1,6 +1,6 @@
 import {Collection} from './collection'
 import { SSet } from '../sset/sset';
-import {StringSet} from '../string-set/string-set';
+import {StringSet} from '../pointer-map/pointer-map';
 
 describe('collection', () => {
   describe('create', () => {

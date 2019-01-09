@@ -757,6 +757,26 @@ describe('graph', () => {
     })
   })
 
+  describe('nodes findOne', () => {
+    it('should find one node', () => {
+      let g = Graph.fromObject({
+        nodes: [
+          {id: 1, name: 'single node'}
+        ],
+        edges: [
+        ]
+      });
+      expect(g.nodes.size()).toBe(1)
+      let r;
+      expect(() => r = g.nodes.findOne({
+        name: 'single node'
+      })).not.toThrow();
+      expect(r).toEqual(
+        {id: 1, name: 'single node'}
+      )
+    })
+  })
+
   describe('edges findAndDifference', () => {
     it('should find and remove edges', () => {
       let g = Graph.fromObject({
@@ -860,6 +880,26 @@ describe('graph', () => {
         from: 0,
         to: 0
       }]);
+    })
+  })
+
+  describe('edges forEach', () => {
+    it('should iterate on edges', () => {
+      let arr = [
+        {id: 'abc', from: 0, to: 1},
+        {id: 'def', from: 1, to: 2},
+        {id: 'ghi', from: 3, to: 4},
+        {id: 'jkl', from: 4, to: 5}
+      ];
+      let c = Graph.fromObject({
+        nodes: [],
+        edges: arr
+      });
+      c.edges.forEach(item => {
+        let index = arr.findIndex(i => i.id === item.id);
+        arr.splice(arr.indexOf(item), 1);
+      })
+      expect(arr.length).toBe(0);
     })
   })
 
@@ -2029,6 +2069,13 @@ describe('graph', () => {
         labels: ['SURVIVED'],
         id: 'edge'
       })
+    })
+  })
+
+  describe('class signature', () => {
+    it('returns Graph signature', () => {
+      expect(Graph.fromEmpty().getSignature()).toEqual(
+        '@labshare/data-structures/graph');
     })
   })
 })

@@ -71,6 +71,12 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Finds one item in Nodes that satifies the query provided */
+    findOne: ((query) => {
+      const {nodes, edges} = this.internal;
+      return nodes.findOne(query);
+    }).bind(this),
+
     /** Removes a Node from the Graph.
      * Will throw an error if Node does not exist in Graph
      */
@@ -316,6 +322,11 @@ export class Graph {
       });
     }).bind(this),
 
+    /** Gets the number of Nodes in the Graph */
+    size: (() => {
+      return this.internal.nodes.size();
+    }).bind(this),
+
     /** Iterator for Nodes. Can be used in for ... of loops, for example */
     [Symbol.iterator]: (() => {
       return this.internal.nodes[Symbol.iterator]();
@@ -407,6 +418,12 @@ export class Graph {
       const d = this.edges.difference(z);
 
       return d;
+    }).bind(this),
+
+    /** Iterate on all Edges */
+    forEach: ((fn) => {
+      const {nodes, edges} = this.internal;
+      edges.forEach(fn);
     }).bind(this),
 
     /** Returns Edges as Collection Type instead of Graph */
@@ -599,4 +616,6 @@ export class Graph {
   public changesTo(graph2: Graph): IChangeLog {
     return graph2.changesFrom(this);
   }
+
+  public getSignature = () => '@labshare/data-structures/graph';
 }

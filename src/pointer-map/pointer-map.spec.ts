@@ -1,4 +1,4 @@
-import { PointerMap } from "./pointer-map";
+import { PointerMap } from "../index";
 
 describe('PointerMap', () => {
   describe('create', () => {
