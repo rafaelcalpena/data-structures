@@ -1,3 +1,23 @@
+# [3.1.0](https://github.com/LabShare/data-structures/compare/v3.0.0...v3.1.0) (2019-01-11)
+
+
+### Bug Fixes
+
+* allow 2 classes in the same file ([bd3af09](https://github.com/LabShare/data-structures/commit/bd3af09))
+* avoid dependency cycle ([90cb4de](https://github.com/LabShare/data-structures/commit/90cb4de))
+* improve performance for removeHashes ([85c650e](https://github.com/LabShare/data-structures/commit/85c650e))
+* remove nsp ([8f8ac9a](https://github.com/LabShare/data-structures/commit/8f8ac9a))
+* remove underscore from method name ([e0c3bcd](https://github.com/LabShare/data-structures/commit/e0c3bcd))
+* replace nsp check with npm audit ([7fa43c2](https://github.com/LabShare/data-structures/commit/7fa43c2))
+
+
+### Features
+
+* add _getSignature method ([f6b2466](https://github.com/LabShare/data-structures/commit/f6b2466))
+* add edges forEach method ([b493d71](https://github.com/LabShare/data-structures/commit/b493d71))
+* add nodes findOne method ([3b21f5f](https://github.com/LabShare/data-structures/commit/3b21f5f))
+* add nodes size method ([5337934](https://github.com/LabShare/data-structures/commit/5337934))
+
 # [3.0.0](https://github.com/LabShare/data-structures.git/compare/v2.0.0...v3.0.0) (2018-10-30)
 
 

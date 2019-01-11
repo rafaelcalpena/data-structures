@@ -1,7 +1,7 @@
 {
   "name": "@labshare/data-structures",
   "main": "./src/index.ts",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "",
   "contributors": "https://github.com/LabShare/data-structures/graphs/contributors",
   "repository": {
