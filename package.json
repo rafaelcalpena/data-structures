@@ -1,6 +1,6 @@
 {
   "name": "@labshare/data-structures",
-  "main": "./src/index.ts",
+  "main": "./dist/data-structures.js",
   "version": "3.1.0",
   "description": "",
   "contributors": "https://github.com/LabShare/data-structures/graphs/contributors",
@@ -18,10 +18,12 @@
     "test:watch": "npm run test -- --single-run false",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "lint:fix": "npm run lint -- --fix",
-    "build": "tsc --outDir build/",
+    "build": "webpack",
+    "build:watch": "webpack --watch",
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "semantic-release": "semantic-release",
-    "docs": "./node_modules/typedoc/bin/typedoc && touch ./docs/.nojekyll"
+    "docs": "./node_modules/typedoc/bin/typedoc && touch ./docs/.nojekyll",
+    "precommit": "npm run lint && npm run build && git add dist/data-structures.js"
   },
   "dependencies": {
     "lodash": "^4.17.10",
@@ -53,7 +55,10 @@
     "typescript": "^2.7.2",
     "webpack": "4.10.1",
     "typedoc": "^0.12.0",
-    "tslint": "^5.9.1"
+    "tslint": "^5.9.1",
+    "webpack-cli": "^3.2.1",
+    "webpack-node-externals": "^1.7.2",
+    "@ngtools/webpack": "^1.3.3"
   },
   "publishConfig": {
     "access": "public"

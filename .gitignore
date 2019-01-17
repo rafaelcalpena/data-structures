@@ -47,8 +47,5 @@ bower_components
 # Users Environment Variables
 .lock-wscript
 
-# Releases
-dist
-
 # Package Lock for NPM
 package-lock.json
