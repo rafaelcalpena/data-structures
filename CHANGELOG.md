@@ -1,3 +1,10 @@
+## [3.1.1](https://github.com/LabShare/data-structures/compare/v3.1.0...v3.1.1) (2019-01-17)
+
+
+### Bug Fixes
+
+* create build system for data-structures ([39c6ce5](https://github.com/LabShare/data-structures/commit/39c6ce5))
+
 # [3.1.0](https://github.com/LabShare/data-structures/compare/v3.0.0...v3.1.0) (2019-01-11)
 
 
