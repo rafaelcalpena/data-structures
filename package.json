@@ -4,7 +4,9 @@
   "main": "./dist/data-structures.js",
   "version": "3.1.1",
   "description": "",
-  "contributors": ["https://github.com/LabShare/data-structures/graphs/contributors"],
+  "contributors": [
+    "https://github.com/LabShare/data-structures/graphs/contributors"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/LabShare/data-structures.git"
@@ -34,6 +36,13 @@
     "lodash": "^4.17.10"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^3.0.4",
+    "@semantic-release/commit-analyzer": "^6.2.0",
+    "@semantic-release/exec": "^3.3.5",
+    "@semantic-release/git": "^7.0.16",
+    "@semantic-release/github": "^5.4.2",
+    "@semantic-release/npm": "^5.1.13",
+    "@semantic-release/release-notes-generator": "^7.2.1",    
     "@angular/compiler": "^8.2.0",
     "@angular/compiler-cli": "^8.2.0",
     "@angular/core": "^8.2.0",
@@ -71,13 +80,13 @@
   "publishConfig": {
     "access": "public"
   },
-  "release": {
-    "extends": "@labshare/semantic-release-config"
-  },
   "ngPackage": {
     "lib": {
       "entryFile": "src/index.ts"
     },
-    "whitelistedNonPeerDependencies": ["object-hash", "uuid"]
+    "whitelistedNonPeerDependencies": [
+      "object-hash",
+      "uuid"
+    ]
   }
 }

@@ -9,17 +9,13 @@ before_install:
   - 'git config --global url."git@github.com:".insteadOf "https://github.com/"'
 install:
   - npm i -g lsc codecov
-  - npm install
+  - npm ci
 script:
   - npm audit --audit-level high
   - npm run build
   - npm run lint
   - xvfb-run npm run coverage
   - codecov
-cache:
-  directories:
-    - ~/.npm
-    - node_modules
 notifications:
   email: false
 branches:
@@ -35,4 +31,4 @@ jobs:
         provider: script
         skip_cleanup: true
         script:
-          - npm run semantic-release
+          - bash scripts/deploy.sh
