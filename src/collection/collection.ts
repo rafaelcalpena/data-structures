@@ -1,10 +1,13 @@
 import {SSet} from '../sset/sset';
 
-import _ = require("lodash");
-import * as uuid from 'uuid/v4';
+import * as _ from "lodash";
+import * as uuidImported from 'uuid/v4';
 import {DefaultIndex} from '../default-index/default-index';
 import {StringSet} from '../pointer-map/pointer-map';
 import {createTriples} from './create-triples';
+
+/* Needed for AOT */
+const uuid = uuidImported;
 
 const performIndexLookup = (args, props) => {
   return props.index.has(args[0], args[1]) ?

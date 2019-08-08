@@ -1,12 +1,11 @@
-import _ = require('lodash');
-import { PluginDeclarationProperties, SSetStatePropsPlugins } from './sset.d';
+import { IPluginDeclarationProperties, ISSetStatePropsPlugins } from './sset.types';
 
 export const updatePlugins = (
   action: 'onBeforeAdd' | 'onAdd' | 'onRemove',
   items: any[],
   hashes: string[],
-  internalState: SSetStatePropsPlugins,
-): SSetStatePropsPlugins | any => {
+  internalState: ISSetStatePropsPlugins,
+): ISSetStatePropsPlugins | any => {
   const {plugins, state, props} = internalState;
 
   if (action === 'onBeforeAdd') {
@@ -27,7 +26,7 @@ export const updatePlugins = (
       let listener: (
         items: any[],
         hashes: string[],
-        props: PluginDeclarationProperties,
+        props: IPluginDeclarationProperties,
         state: any,
       ) => any = plugins[pluginName][action];
 
@@ -58,7 +57,7 @@ export const updatePlugins = (
     const listener: (
       items: any[],
       hashes: string[],
-      props: PluginDeclarationProperties,
+      props: IPluginDeclarationProperties,
       state: any,
     ) => any = plugins[pluginName][action];
 

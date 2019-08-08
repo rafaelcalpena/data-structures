@@ -1,20 +1,22 @@
-import _ = require('lodash');
+import * as _ from 'lodash';
 import { initializePlugins } from './initialize-plugins';
 import {
+  ISSetChanges,
+  ISSetDiff,
+  ISSetIterator,
+  ISSetPlugins,
+  ISSetStatePropsPlugins,
+  ISSetStatePropsPluginsJSON,
+  ISSetStaticProps,
   JSONCapable,
-  SSetChanges,
-  SSetDiff,
-  SSetIterator,
-  SSetPlugins,
-  SSetStatePropsPlugins,
-  SSetStatePropsPluginsJSON,
-  SSetStaticProps,
-} from './sset.d';
+} from './sset.types';
 import { updatePlugins } from './update-plugins';
 
-import * as objectHash from 'object-hash';
+import * as objectHashImported from 'object-hash';
+/* needed for AOT */
+const objectHash = objectHashImported;
 
-export const SSetStaticMethods: (a?: SSetPlugins) => SSetStaticProps = (curryPlugins) =>  {
+export function SSetStaticMethods(curryPlugins?: ISSetPlugins): ISSetStaticProps {
   return {
     /** Given an array, create a SSet from it */
     fromArray(array: any[], props?: any): SSet {
@@ -48,7 +50,8 @@ export const SSetStaticMethods: (a?: SSetPlugins) => SSetStaticProps = (curryPlu
     hashOf(value: any): any {
       /* Use respectType: false to avoid passing prototype, __proto__ and
       constructor properties. */
-      return objectHash(value, {respectType: false, algorithm: 'sha1'});
+      const result = objectHash(value, {respectType: false, algorithm: 'sha1'});
+      return result;
     },
 
     /** Used for recreating a stringified SSet */
@@ -60,7 +63,7 @@ export const SSetStaticMethods: (a?: SSetPlugins) => SSetStaticProps = (curryPlu
     /** Add a new plugin to the SSet constructor. All sets created with this
      * constructor will contain the provided plugins.
      */
-    addPlugins(plugins: SSetPlugins): SSetStaticProps {
+    addPlugins(plugins: ISSetPlugins): ISSetStaticProps {
       const result = SSetStaticMethods({
         ...curryPlugins,
         ...plugins,
@@ -68,14 +71,14 @@ export const SSetStaticMethods: (a?: SSetPlugins) => SSetStaticProps = (curryPlu
       return result;
     },
 
-    removePlugins(plugins: string[]): SSetStaticProps {
+    removePlugins(plugins: string[]): ISSetStaticProps {
       const result = _.omit({...curryPlugins}, plugins);
       return SSetStaticMethods(
         result,
       );
     },
 
-    filterPlugins(plugins: string[]): SSetStaticProps {
+    filterPlugins(plugins: string[]): ISSetStaticProps {
       return SSetStaticMethods({
         ...curryPlugins,
       }).removePlugins(
@@ -86,10 +89,12 @@ export const SSetStaticMethods: (a?: SSetPlugins) => SSetStaticProps = (curryPlu
       );
     },
 
-    getActivePlugins: () => Object.keys(curryPlugins),
+    getActivePlugins() {
+      return Object.keys(curryPlugins);
+    },
 
   };
-};
+}
 
 type largestAndSmallestSets = (a: SSet, b: SSet) => [SSet, SSet];
 const getLargestAndSmallestSets: largestAndSmallestSets = (set1, set2)  => (
@@ -195,7 +200,7 @@ export class SSet {
    * For bootstrapping a new SSet from scratch, static methods such as
    * fromArray and fromJSON should be the norm.
    */
-  constructor(private statePropsPlugins: SSetStatePropsPlugins) { }
+  constructor(private statePropsPlugins: ISSetStatePropsPlugins) { }
 
   /* Mutation Methods below should be "reduced" into add and remove calls
    * Use internal hashes for quick lookup instead of has() method
@@ -243,7 +248,7 @@ export class SSet {
     /* trigger onBeforeAdd if defined */
     value = updatePlugins('onBeforeAdd', [value], [hash], this.statePropsPlugins).value;
 
-    let newInternalState: SSetStatePropsPlugins = {
+    let newInternalState: ISSetStatePropsPlugins = {
       plugins: this.statePropsPlugins.plugins,
       props: {
         ...this.statePropsPlugins.props,
@@ -286,7 +291,7 @@ export class SSet {
       throw new Error(`There is no value ${value} in the set.`);
     }
 
-    let newInternalState: SSetStatePropsPlugins = {
+    let newInternalState: ISSetStatePropsPlugins = {
       plugins: this.statePropsPlugins.plugins,
       props: {
         ...this.statePropsPlugins.props,
@@ -329,7 +334,7 @@ export class SSet {
       return SSet.addPlugins(this.statePropsPlugins.plugins).fromArray(objArray);
     } else {
 
-      let newInternalState: SSetStatePropsPlugins = {
+      let newInternalState: ISSetStatePropsPlugins = {
         plugins: this.statePropsPlugins.plugins,
         props: {
           ...this.statePropsPlugins.props,
@@ -446,7 +451,7 @@ export class SSet {
 
   /* Similar methods as above, but related to instance instead of static
   constructor */
-  public addPlugins(plugins: SSetPlugins) {
+  public addPlugins(plugins: ISSetPlugins) {
     /* Append to plugins property and call onInit method */
     /* TODO: abstract/combine with static method. Also use SSet if possible */
     const {plugins: currentPlugins} = this.statePropsPlugins;
@@ -547,7 +552,7 @@ export class SSet {
   }
 
   /** Iterate over SSet using for ... of loops */
-  public [Symbol.iterator](): SSetIterator {
+  public [Symbol.iterator](): ISSetIterator {
     return {
       items: this.toArray(),
       next: function next() {
@@ -626,7 +631,7 @@ export class SSet {
 
   /** Get necessary changes to turn current SSet into given SSet.
    */
-  public changesTo(set: SSet): SSetDiff {
+  public changesTo(set: SSet): ISSetDiff {
     return {
       changes: {
         difference: this.difference(set),
@@ -638,17 +643,17 @@ export class SSet {
   }
 
   /** Get necessary changes to turn given SSet into current SSet. */
-  public changesFrom(set: SSet): SSetDiff {
+  public changesFrom(set: SSet): ISSetDiff {
     return set.changesTo(this);
   }
 
   /** Apply given changes to current SSet */
-  public applyChanges(changes: SSetChanges): SSet {
+  public applyChanges(changes: ISSetChanges): SSet {
     return this.union(changes.union).difference(changes.difference);
   }
 
   /** Revert given changes from current SSet */
-  public revertChanges(changes: SSetChanges): SSet {
+  public revertChanges(changes: ISSetChanges): SSet {
     return this.union(changes.difference).difference(changes.union);
   }
 
@@ -665,7 +670,7 @@ export class SSet {
    * JSON data
    */
   /* TODO: Add toJSON listener for plugins */
-  public toJSON(): SSetStatePropsPluginsJSON {
+  public toJSON(): ISSetStatePropsPluginsJSON {
     /* We only send the inner content of statePropsPlugins. Also, for state property,
     the keys are ignored and reconstructed later on the other environment */
     return {

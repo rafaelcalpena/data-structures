@@ -1,5 +1,5 @@
 /* TODO: Maybe add array support? */
-import _ = require('lodash');
+import * as _ from 'lodash';
 import {MultiMap} from '../multi-map/multi-map';
 import {PointerMap} from '../pointer-map/pointer-map';
 import {SSet} from '../sset/sset';

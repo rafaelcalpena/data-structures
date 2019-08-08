@@ -1,4 +1,4 @@
-import _ = require('lodash');
+import * as _ from 'lodash';
 
 interface IStringSetInternal {
   state: PointerMap;
@@ -130,12 +130,13 @@ export class PointerMap {
   }
 
   public static keyInEvery(key, pointerMaps) {
-    return pointerMaps.reduce((acc, pointerMap) => {
+    const result = pointerMaps.reduce((acc, pointerMap) => {
       if (acc === false) {
         return false;
       }
       return pointerMap.has(key);
     }, true);
+    return result;
   }
 
   public static fromPairs(pairs: pairsArray) {
