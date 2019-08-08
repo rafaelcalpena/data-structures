@@ -1,9 +1,10 @@
 {
+  "$schema": "./node_modules/ng-packagr/package.schema.json",
   "name": "@labshare/data-structures",
   "main": "./dist/data-structures.js",
   "version": "3.1.1",
   "description": "",
-  "contributors": "https://github.com/LabShare/data-structures/graphs/contributors",
+  "contributors": ["https://github.com/LabShare/data-structures/graphs/contributors"],
   "repository": {
     "type": "git",
     "url": "https://github.com/LabShare/data-structures.git"
@@ -18,22 +19,28 @@
     "test:watch": "npm run test -- --single-run false",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "lint:fix": "npm run lint -- --fix",
-    "build": "webpack",
+    "build": "ng-packagr -p package.json",
     "build:watch": "webpack --watch",
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "semantic-release": "semantic-release",
     "docs": "./node_modules/typedoc/bin/typedoc && touch ./docs/.nojekyll",
-    "precommit": "npm run lint && npm run build && git add dist/data-structures.js"
+    "precommit": "npm run lint && npm run build"
   },
   "dependencies": {
-    "lodash": "^4.17.10",
     "object-hash": "^1.3.0",
     "uuid": "^3.3.2"
   },
+  "peerDependencies": {
+    "lodash": "^4.17.10"
+  },
   "devDependencies": {
+    "@angular/compiler": "^8.2.0",
+    "@angular/compiler-cli": "^8.2.0",
+    "@angular/core": "^8.2.0",
     "@commitlint/cli": "^6.2.0",
     "@commitlint/config-conventional": "^6.1.3",
     "@labshare/semantic-release-config": "^1.0.0",
+    "@ngtools/webpack": "^1.3.3",
     "@types/jasmine": "^2.5.54",
     "@types/lodash": "^4.14.109",
     "hard-source-webpack-plugin": "^0.10.1",
@@ -49,21 +56,28 @@
     "karma-sourcemap-loader": "^0.3.7",
     "karma-typescript": "^3.0.8",
     "karma-webpack": "^4.0.0-beta.0",
+    "ng-packagr": "^5.4.3",
     "null-loader": "^0.1.1",
     "semantic-release": "^15.5.0",
     "ts-loader": "^4.3.0",
-    "typescript": "^2.7.2",
-    "webpack": "4.10.1",
-    "typedoc": "^0.12.0",
     "tslint": "^5.9.1",
+    "typedoc": "^0.12.0",
+    "typescript": "^3.5.3",
+    "webpack": "4.10.1",
     "webpack-cli": "^3.2.1",
     "webpack-node-externals": "^1.7.2",
-    "@ngtools/webpack": "^1.3.3"
+    "lodash": "^4.17.10"
   },
   "publishConfig": {
     "access": "public"
   },
   "release": {
     "extends": "@labshare/semantic-release-config"
+  },
+  "ngPackage": {
+    "lib": {
+      "entryFile": "src/index.ts"
+    },
+    "whitelistedNonPeerDependencies": ["object-hash", "uuid"]
   }
 }
