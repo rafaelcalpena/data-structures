@@ -2,4 +2,6 @@
 
 # Data Structures
 
+A Collection of Immutable Data Structures that can be used on the Client-Side.
+
 [Documentation](https://labshare.github.io/data-structures)
